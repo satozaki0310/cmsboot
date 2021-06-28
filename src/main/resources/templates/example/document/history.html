@@ -27,75 +27,29 @@
 
         <div class="row mb-3">
             <div class="form-check-inline">
-                <input id="draft" name="draft" type="checkbox" checked="checked">
-                <label for="draft">下書きを含む</label>
+                <input id="show" name="draft" type="checkbox">
+                <label for="show">全件表示</label>
             </div>
-            <button class="btn btn-button" id="reverse">並べ替え</button>
         </div>
 
-        <table id="list" class="table-sm table-striped nowrap">
+        <table id="history" class="table-sm table-striped nowrap">
             <thead>
             <tr class="filter">
                 <th class="text-center px-2" data-filter="disable"></th><!-- 隠しフィールド -->
-                <th data-filter="disable"></th><!-- # -->
-                <th data-filter="disable"></th><!-- 操作 -->
-                <th data-filter="disable"><!-- ステータス -->
-                    <select id="col_filter_3" data-column="3" class="dataTables_column_filter form-control">
-                        <option value="">&nbsp;</option>
-                        <th:block th:each="obj : ${@CL_STATUS.asMap()}">
-                            <option th:value="${obj.key}">[[${obj.value}]]</option>
-                        </th:block>
-                    </select>
-                </th>
-                <th></th><!-- 区分1 -->
-                <th></th><!-- 区分2 -->
-                <th></th><!-- 区分3 -->
-                <th></th><!-- 区分4 -->
-                <th></th><!-- 区分5 -->
-                <th></th><!-- 区分6 -->
-                <th></th><!-- タイトル -->
-                <th data-filter="disable"><!-- 利用シーン -->
-                    <select id="col_filter_11" data-column="11" class="dataTables_column_filter form-control">
-                        <option value="">&nbsp;</option>
-                        <th:block th:each="obj : ${@CL_DOC_STAGE.asMap()}">
-                            <option th:value="${obj.key}">[[${obj.value}]]</option>
-                        </th:block>
-                    </select>
-                </th>
-                <th></th><!-- 想定読者 -->
-                <th></th><!-- 概要 -->
-                <th></th><!-- 文書 -->
-                <th></th><!-- 管理部門 -->
-                <th></th><!-- 管理担当者 -->
-                <th></th><!-- 制定日 -->
-                <th></th><!-- 最終改定日 -->
-                <th></th><!-- 実施日 -->
-                <th></th><!-- 制定箇所 -->
-                <th></th><!-- 最終更新日 -->
+                <th></th><!-- リビジョンID -->
+                <th></th><!-- Ver -->
+                <th></th><!-- 変更理由 -->
+                <th></th><!-- 更新者 -->
+                <th></th><!-- 更新日 -->
+
             </tr>
             <tr class="title">
                 <th class="text-center px-0"></th>
-                <th class="text-center">#</th>
-                <th class="text-center">操作</th>
-                <th class="text-center">ステータス</th>
-                <th class="text-center">区分1</th>
-                <th class="text-center">区分2</th>
-                <th class="text-center">区分3</th>
-                <th class="text-center">区分4</th>
-                <th class="text-center">区分5</th>
-                <th class="text-center">区分6</th>
-                <th class="text-center">タイトル</th>
-                <th class="text-center">利用シーン</th>
-                <th class="text-center">想定読者</th>
-                <th class="text-center">概要</th>
-                <th class="text-center">ファイル</th>
-                <th class="text-center">管理部門</th>
-                <th class="text-center">管理担当者</th>
-                <th class="text-center">制定日</th>
-                <th class="text-center">最終改定日</th>
-                <th class="text-center">実施日</th>
-                <th class="text-center">制定箇所</th>
-                <th class="text-center">最終更新日時</th>
+                <th class="text-center">リビジョンID</th>
+                <th class="text-center">Ver</th>
+                <th class="text-center">変更理由</th>
+                <th class="text-center">更新者</th>
+                <th class="text-center">更新日</th>
             </tr>
             </thead>
             <tbody></tbody>
@@ -130,113 +84,34 @@ var pagechange = false;
         var table = $('#history').DataTable({
 
           'ajax': {
-            'url': 'list/json',
+            'url': 'history/json',
             'data': myflatten
           },
 
           //スクロールバー表示
           scrollX: true,
 
-          // fixedColumns: {
-          //   leftColumns: 3
-          // },
-
-          // select: 'multi',
-
           // 一覧に表示する項目とJSONの項目にマッピング
           'columns': [
             {
-              data: 'id',
-              className: 'text-center',
-              orderable: false,
-              searchable: false,
-              checkboxes: {
-               'selectRow': false
-              }
-            },
-            {
-              data: 'id',
-              searchable: true,
-            },
-            {
-              data: 'operations',
-              orderable: false,
-              searchable: false,
-            },
-            {
-              data: 'statusLabel',
+              data: 'ridLabel',
               render: $.fn.dataTable.render.text(),
             },
             {
-              data: 'docCategoryVariable.value1',
+              data: 'version',
               render: $.fn.dataTable.render.text(),
             },
             {
-              data: 'docCategoryVariable.value2',
+              data: 'reasonForChane',
               render: $.fn.dataTable.render.text(),
             },
             {
-              data: 'docCategoryVariable.value3',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'docCategoryVariable.value4',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'docCategoryVariable.value5',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'docCategoryVariable.value6',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'title',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'useStageLabel',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'intendedReader',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'summary',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'filesLabel',
-            },
-            {
-              data: 'chargeDepartment',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'chargePerson',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'enactmentDate',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'lastRevisedDate',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'implementationDate',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'enactmentDepartment',
+              data: 'lastModifiedByLabel',
               render: $.fn.dataTable.render.text(),
             },
             {
               data: 'lastModifiedDate',
-              className: 'text-center',
+              render: $.fn.dataTable.render.text(),
             },
           ],
 
@@ -246,7 +121,7 @@ var pagechange = false;
           ],
 
           // ボタンの表示
-          'buttons': ['bulkdelete', 'bulkinvalid', 'bulkvalid','colvis', 'stateClear', 'csvdownload', 'tsvdownload', 'exceldownload', 'upload', 'createnew'],
+          'buttons': ['bulkdelete', 'bulkinvalid', 'bulkvalid','colvis', 'stateClear'],
 
           // データロード後処理
           'initComplete': function (settings, json) {
@@ -274,8 +149,8 @@ var pagechange = false;
           }
         } );
 
-        // 下書きチェックボックス押下時の操作
-        $('#draft').change().on('change', function (e, s) {
+        // 全件表示チェックボックス押下時の操作
+        $('#show').change().on('change', function (e, s) {
           localStorage.dataTables_Draft = e.target.checked;
           table.draw();
           // fnColumns(table);
@@ -283,27 +158,20 @@ var pagechange = false;
 
         // 画面表示時の下書きチェックボックスの復元
         if (localStorage.dataTables_Draft == 'false') {
-          $('#draft')[0].checked = false;
+          $('#show')[0].checked = false;
           table.draw();
-        } else if (localStorage.dataTables_Draft != 'false' && $('#draft')[0].checked == false) {
-          $('#draft')[0].checked = true;
+        } else if (localStorage.dataTables_Draft != 'false' && $('#show')[0].checked == false) {
+          $('#show')[0].checked = true;
           table.draw();
         }
-
-        // 列の並び替えと表示／非表示を操作するテスト
-        $('#reverse').click( function (e) {
-            table.columns( [10, 11] ).visible( false );
-            table.colReorder.order( [0, 1, 2, 3, 5, 6, 7, 8, 4, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21], true );
-        });
-
       });
 
   function myflatten(params, settings) {
     params = flatten(params, settings);
-    if ($('#draft')[0] == undefined) {
-        params.draft = true;
+    if ($('#show')[0] == undefined) {
+        params.show = true;
     } else {
-        params.draft = $('#draft')[0].checked
+        params.show = $('#show')[0].checked
     }
     return params;
   }

@@ -32,19 +32,34 @@ public class DocumentHistoryBean {
         return DT_RowAttr;
     }
 
-
+    /**
+     * リビジョンID
+     */
     private Long rid;
 
-    //リンク用
+    /**
+     * リンク用リビジョンID
+     */
     private String ridLabel;
 
+    /**
+     * ドキュメントVer
+     */
     private Long version;
 
+    /**
+     * 変更理由
+     */
     private String reasonForChange;
 
-    //ユーザID
+    /**
+     * 最終更新者ID
+     */
     private String lastModifiedBy;
 
+    /**
+     * 最終更新日
+     */
     @JsonFormat(pattern = "yyyy/MM/dd")
     private LocalDateTime lastModifiedDate;
 

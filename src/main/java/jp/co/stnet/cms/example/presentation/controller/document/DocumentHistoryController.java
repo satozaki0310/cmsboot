@@ -2,6 +2,7 @@ package jp.co.stnet.cms.example.presentation.controller.document;
 
 import com.github.dozermapper.core.Mapper;
 import jp.co.stnet.cms.common.datatables.DataTablesInput;
+import jp.co.stnet.cms.common.datatables.DataTablesInputHistory;
 import jp.co.stnet.cms.common.datatables.DataTablesOutput;
 import jp.co.stnet.cms.common.datatables.OperationsUtil;
 import jp.co.stnet.cms.example.application.service.document.DocumentHistoryService;
@@ -70,7 +71,7 @@ public class DocumentHistoryController {
      */
     @ResponseBody
     @GetMapping(value = "/history/json/{id}")
-    public DataTablesOutput<DocumentHistoryBean> listJson(@Validated DataTablesInput input, @PathVariable("id") Long id) {
+    public DataTablesOutput<DocumentHistoryBean> listJson(@Validated DataTablesInputHistory input, @PathVariable("id") Long id) {
         List<DocumentHistoryBean> list = new ArrayList<>();
 
         //
@@ -78,16 +79,19 @@ public class DocumentHistoryController {
 
         //Helperクラスから返ってくる公開区分
         Set<String> publicScope = null;
+        List<DocumentRevision> documentRevisionList;
 
-        List<DocumentRevision> documentRevisionList = documentHistoryService.search(id,true,publicScope);
+        //全件表示のチェックボックスによって呼び出すメソッドを変更
+        if(input.getHistory()) {
+            documentRevisionList = documentHistoryService.search(id, true, publicScope);
+        } else {
+            documentRevisionList = documentHistoryService.search(id, false, publicScope);
+        }
         for(DocumentRevision documentRevision : documentRevisionList) {
             DocumentHistoryBean documentHistoryBean = beanMapper.map(documentRevision, DocumentHistoryBean.class);
 
             //変換する
             documentHistoryBean.setLastModifiedByLabel("satozaki");
-
-            //リビジョンIDにリンクをつける
-            // <a href = "example/document/{id}?version=2"> </a>
 
             documentHistoryBean.setRidLabel("<a href=\"" + op.getViewUrl(id.toString()) + "?version=" + documentRevision.getVersion() + "\" class=\"btn btn-button btn-sm\" style=\"white-space: nowrap\">" + documentRevision.getRid().toString() + "</a>");
 
