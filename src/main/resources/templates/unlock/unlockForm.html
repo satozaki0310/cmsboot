@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html th:replace="~{/layout/template :: layout(~{::title},~{::body})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- ページタイトルを記入 -->
+    <title>ロック解除</title>
+</head>
+<body>
+
+<section class="content-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-18 mb-3">
+                <!-- ページタイトルを記入 -->
+                <h4>ロック解除</h4>
+            </div>
+            <div class="col-18">
+                <!-- ページタイトル右の余白 -->
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="container">
+        <div th:replace="~{/fragments/message-panel :: message-panel}"></div>
+        <!-- ここより下にメインコンテンツを記入 -->
+        <form method="POST" th:action="@{/unlock}" th:object="${unlockForm}">
+
+            <div class="row">
+                <div class="col-8">
+                    <label class="mt-3" for="username">ユーザ名</label>
+                    <input class="form-control" id="username" th:errorclass="error-input" th:field="*{username}"/>
+                    <span class="invalid-feedback whitespace-nowrap" th:errors="*{username}"></span>
+                </div>
+            </div>
+            <div>
+                <br>
+                <a class="btn-button" th:href="@{/}">ホームに戻る</a>
+                <input id="submit" class="btn-button" type="submit" value="解除"/>
+            </div>
+        </form>
+        <!-- ここより上にメインコンテンツを記入 -->
+    </div>
+</section>
+
+</body>
+</html>

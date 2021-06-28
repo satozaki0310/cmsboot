@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html th:replace="~{/layout/template :: layout(~{::title},~{::body})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- ページタイトルを記入 -->
+    <title>SimpleEntity</title>
+</head>
+<body>
+
+<section class="content-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-18 mb-3">
+                <!-- ページタイトルを記入 -->
+                <h4>SimpleEntity</h4>
+            </div>
+            <div class="col-18">
+                <!-- ページタイトル右の余白 -->
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="container">
+        <div th:replace="~{/fragments/message-panel :: message-panel}"></div>
+        <!-- ここより下にメインコンテンツを記入 -->
+
+        <form autocomplete="off" enctype="multipart/form-data" method="post" th:action
+              th:object="${simpleEntityForm}" th:with="id= ${simpleEntity != null} ? ${simpleEntity.id} : 0">
+
+            <!-- EnterキーによるPOSTを無効化 -->
+            <input disabled style="display:none" type="submit"/>
+
+            <!-- 隠しフィールド -->
+            <input th:field="*{id}" type="hidden"/>
+            <input th:field="*{version}" type="hidden"/>
+
+            <!-- button -->
+            <div th:replace="~{/fragments/button-area :: m(${id})}"></div>
+            <hr>
+
+            <!-- Input -->
+            <div class="row">
+                <div class="col-18">
+
+                    <!-- TODO 式を含むフォールドの表示方法の部品化-->
+                    <div th:replace="~{/fragments/label::m('status', 'ステータス')}"></div>
+                    <div class="form-control form-control__view" th:if="${fieldState.status__view}">
+                        [[${simpleEntity != null} ? ${@CL_STATUS.asMap()[simpleEntity.status]}]]
+                    </div>
+
+                    <div th:replace="~{/fragments/field::input('text01', 'テキストフィールド', 'simpleEntity.text01', 'テキストを入力して下さい')}"></div>
+
+                    <div th:replace="~{/fragments/field::input-integer('text02', 'テキストフィールド(数値・整数)', 'simpleEntity.text02', 'テキストを入力して下さい')}"></div>
+
+                    <div th:replace="~{/fragments/field::input-decimal('text03', 'テキストフィールド(数値・小数あり)', 'simpleEntity.text03', 'テキストを入力して下さい')}"></div>
+
+                    <div th:replace="~{/fragments/field::input('text04', 'テキストフィールド(真偽値)', 'simpleEntity.text04', 'テキストを入力して下さい')}"></div>
+
+                    <div th:replace="~{/fragments/field::input('text05', 'テキストフィールド(複数の値)', 'simpleEntityBean.text05Label', 'テキストを入力して下さい')}"></div>
+
+                    <div th:replace="~{/fragments/field::radio('radio01', 'ラジオボタン(真偽値)', 'simpleEntity.radio01', 'テキストを入力して下さい', '@CL_YESNO.asMap()')}"></div>
+
+                    <div th:replace="~{/fragments/field::radio('radio02', 'ラジオボタン(文字列)', 'simpleEntity.radio02', 'テキストを入力して下さい', '@CL_STATUS.asMap()')}"></div>
+
+                    <div th:replace="~{/fragments/field::checkbox('checkbox01', 'チェックボックス(文字列)', 'simpleEntity.checkbox01', 'テキストを入力して下さい', '@CL_EXAMPLE_AGREEMENT.asMap()')}"></div>
+
+                    <div th:replace="~{/fragments/field::checkbox('checkbox02', 'チェックボックス(複数の値)', 'simpleEntity.checkbox02', 'テキストを入力して下さい', '@CL_STATUS.asMap()')}"></div>
+
+                    <div th:replace="~{/fragments/field::textarea('textarea01', 'テキストエリア', 'simpleEntity.textarea01', 'テキストを入力して下さい', '4')}"></div>
+
+                    <div th:replace="~{/fragments/field::date('date01', '日付', 'simpleEntity.date01', 'テキストを入力して下さい')}"></div>
+
+                    <div th:replace="~{/fragments/field::datetime('datetime01', '日付時刻', 'simpleEntity.datetime01', 'テキストを入力して下さい')}"></div>
+
+                    <div th:replace="~{/fragments/field::select('select01', 'select', 'simpleEntity.select01', '', '@CL_STATUS.asMap()')}"></div>
+
+                    <div th:replace="~{/fragments/field::select-multi('select02', 'select(Multi)', 'simpleEntity.select02', '', '@CL_STATUS.asMap()')}"></div>
+
+                    <div th:replace="~{/fragments/field::select2('select03', 'select2', 'simpleEntity.select03', '', '@CL_STATUS.asMap()')}"></div>
+
+                    <div th:replace="~{/fragments/field::select2-multi('select04', 'select2-multi', 'simpleEntity.select04', '', '@CL_STATUS.asMap()')}"></div>
+
+                    <div th:replace="~{/fragments/field::input-combobox('combobox01', 'コンボボックス', 'simpleEntity.combobox01', 'テキストを入力して下さい', '@CL_STATUS.asMap()')}"></div>
+
+                    <div th:replace="~{/fragments/field::select2-tags('combobox02', 'コンボボックス(select2-tags)', 'simpleEntity.combobox02', 'テキストを入力して下さい', '@CL_STATUS.asMap()')}"></div>
+
+                    <div th:replace="~{/fragments/field::select2-tags-multi('combobox03', 'コンボボックス(select2-tags-multi)', 'simpleEntity.combobox03', 'テキストを入力して下さい', '@CL_STATUS.asMap()')}"></div>
+
+                    <div th:replace="~{/fragments/field::file('attachedFile01', '画像 *', 'simpleEntity.attachedFile01Managed', 'テキストを入力して下さい', 'simpleentity', '')}"></div>
+
+                </div>
+
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-36">
+                    <table class="table-sm" id="lineItemTable">
+                        <thead>
+                        <tr>
+                            <td class="row">
+                                <div class="col-18">商品名</div>
+                                <div class="col-6">単価</div>
+                                <div class="col-9">数量</div>
+                                <div class="col-3 text-center">削除</div>
+                            </td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item, status : *{lineItems}">
+                            <td class="row">
+                                <div class="col-18">
+                                    <input th:field="*{lineItems[__${status.index}__].itemName}" class="form-control" />
+                                </div>
+                                <div class="col-6">
+                                    <input th:field="*{lineItems[__${status.index}__].unitPrise}" class="form-control" />
+                                </div>
+                                <div class="col-9">
+                                    <input th:field="*{lineItems[__${status.index}__].itemNumber}" class="form-control" />
+                                </div>
+                                <div class="col-3 text-center">
+                                    <button class="btn-button" onclick="lineDelete(this)" type="button">削除</button>
+                                </div>
+
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="row">
+                        <div class="col-36">
+                            <button class="btn-button" formaction="#addLinebutton" id="addLinebutton"
+                                    name="addlineitem">行追加(POST)
+                            </button>
+                            <button class="btn-button" onclick="addLine('lineItemTable')" type="button">
+                                行追加(JavaScript)
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <br>
+            <hr>
+            <div th:replace="~{/fragments/button-area :: m(${id})}"></div>
+
+        </form>
+        <!-- ここより上にメインコンテンツを記入 -->
+    </div>
+</section>
+
+<script>
+  function lineDelete(e) {
+
+    let table = e.closest('table')
+    if (table.rows.length == 2) {
+      alert('全ての行は削除できません。');
+      return false;
+    }
+    let tr = e.closest('tr').remove();
+  }
+
+  function addLine(table_id) {
+    let table = document.getElementById(table_id);
+    let newRowIdx = table.rows.length - 1;
+    let firstRow = table.rows[1];
+    let newRow = firstRow.cloneNode(true);
+    let replaceRowHTML = newRow.innerHTML.replace(/lineItems\[0\]/g, 'lineItems[' + newRowIdx + ']');
+    replaceRowHTML = replaceRowHTML.replace(/lineItems0/g, 'lineItems' + newRowIdx);
+    replaceRowHTML = replaceRowHTML.replace(/value=".*"/g, '');
+    let row = table.insertRow(-1);
+    row.innerHTML = replaceRowHTML;
+  }
+</script>
+
+
+
+</body>
+</html>
