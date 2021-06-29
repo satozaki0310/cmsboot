@@ -1,14 +1,17 @@
 package jp.co.stnet.cms.example.presentation.controller.document;
 
+import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import jp.co.stnet.cms.base.domain.model.common.Status;
 import jp.co.stnet.cms.common.constant.Constants;
 import jp.co.stnet.cms.common.util.StateMap;
 import jp.co.stnet.cms.example.domain.model.document.Document;
 import lombok.NonNull;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.validation.groups.Default;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -153,4 +156,28 @@ public class DocumentHelper {
         return fieldState;
     }
 
+    /**
+     * ユーザIDからユーザ名を返すメソッド
+     * @param userId ユーザID
+     * @return ユーザ名
+     */
+    String getUserName(String userId) {
+        return null;
+    }
+
+    /**
+     * ロールから公開区分のSetを返すメソッド
+     * @param loggedInUser ユーザ情報
+     * @return 公開区分
+     */
+    Set<String> getPublicScope(LoggedInUser loggedInUser) {
+        Set<String> setScope = new HashSet<>();
+        if (loggedInUser.getAuthorities().contains(new SimpleGrantedAuthority("DOC_VIEW_ALL"))){
+            setScope.add("10");
+            setScope.add("20");
+            setScope.add("99");
+        }
+
+        return setScope;
+    }
 }

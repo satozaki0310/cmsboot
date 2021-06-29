@@ -3,11 +3,15 @@ package jp.co.stnet.cms.example.application.repository.document;
 import jp.co.stnet.cms.base.application.repository.NodeRevRepository;
 import jp.co.stnet.cms.example.domain.model.document.DocumentRevision;
 import jp.co.stnet.cms.example.domain.model.person.Person;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Set;
+
 
 public interface DocumentRevisionRepository extends NodeRevRepository<DocumentRevision, Long> {
 
@@ -15,20 +19,22 @@ public interface DocumentRevisionRepository extends NodeRevRepository<DocumentRe
     DocumentRevision findByIdLatestRev(@Param("id") Long id);
 
     /**
-     * ドキュメントID、変更履歴チェックの有無、公開区分で検索する
-     * @param id
-     * @param saveRevision
-     * @param publicScope
-     * @return DocumentRevision型のリスト
-     */
-    List<DocumentRevision> findByIdAndSaveRevisionAndPublicScope(Long id, boolean saveRevision, Set<String> publicScope);
-
-    /**
-     * ドキュメントID、公開区分で検索する
+     * saveRevisionがtrueの変更履歴のみを取得する
+     *
      * @param id ドキュメントID
+     * @param saveRevision 変更履歴のチェック有無
      * @param publicScope 公開区分
      * @return DocumentRevision型のリスト
      */
-    List<DocumentRevision> findByIdAndPublicScope(Long id, Set<String> publicScope);
+    Page<DocumentRevision> findByIdAndSaveRevisionAndPublicScopeIn(Long id, boolean saveRevision, Set<String> publicScope, Pageable pageable);
+
+    /**
+     * すべての変更履歴を取得する
+     *
+     * @param id ドキュメントID ドキュメントID
+     * @param publicScope 公開区分
+     * @return DocumentRevision型のリスト
+     */
+    Page<DocumentRevision> findByIdAndPublicScopeIn(Long id, Set<String> publicScope, Pageable pageable);
 
 }

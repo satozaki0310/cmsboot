@@ -1,6 +1,7 @@
 package jp.co.stnet.cms.example.presentation.controller.document;
 
 import com.github.dozermapper.core.Mapper;
+import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import jp.co.stnet.cms.common.datatables.DataTablesInput;
 import jp.co.stnet.cms.common.datatables.DataTablesInputHistory;
 import jp.co.stnet.cms.common.datatables.DataTablesOutput;
@@ -40,65 +41,76 @@ public class DocumentHistoryController {
     DocumentHistoryService documentHistoryService;
 
     @Autowired
-    @Named("CL_DOC_STAGE")
-    CodeList useStageCodeList;
+    DocumentHelper helper;
 
     /**
      * 一覧画面の表示
+     * DataTablesのAjaxが表示後に起動
+     *
+     * @param model モデル
+     * @return Viewのパス
      */
-    @GetMapping(value = "history")
-    public String list(Model model) {
-        return BASE_PATH + "history";
-    }
-
-    /**
-     * 全件表示の切り替え
-     * datatablesの表示件数を全て表示するに変更する
-     * 全件表示の状態でもう一度押すと10件表示に変更
-     */
-    @GetMapping(value = "history/show")
-    public String show() {
-        return null;
+    @GetMapping(value = "history/{id}")
+    public String list(Model model,@PathVariable("id") Long id) {
+        model.addAttribute("id",id);
+        return BASE_PATH + "/history";
     }
 
     /**
      * DataTables用のJSONの作成
-     * 検索入力項目に入力された値を用いてJSONの作成を行う
-     * 検索する項目: リビジョンID、Ver、変更理由、更新者、更新日時
-     * Ver項目は対象ドキュメントのVerに対応したリンク
+     * チェックボックスの有無によって、ドキュメントリビジョンDBから以下の項目を取得し、必要な項目を変換する
+     * 検索時にはドキュメントID、チェックボックスの有無、公開区分のデータを用いる
+     * 取得項目: リビジョンID、Ver、変更理由、最終更新者ID、最終更新日
+     * Ver: 対象ドキュメントのリンクに変換する
+     * 最終更新者: 最終更新IDから変換する
+     * 取得したデータ、変換したデータをJSON形式にして返す
+     *
      * @param input DataTablesから要求
+     * @param loggedInUser ユーザ情報
+     * @param id ドキュメントID
      * @return JSON
      */
     @ResponseBody
     @GetMapping(value = "/history/json/{id}")
-    public DataTablesOutput<DocumentHistoryBean> listJson(@Validated DataTablesInputHistory input, @PathVariable("id") Long id) {
+    public DataTablesOutput<DocumentHistoryBean> listJson(DataTablesInputHistory input,
+                                                          @AuthenticationPrincipal LoggedInUser loggedInUser,
+                                                          @PathVariable("id") Long id) {
         List<DocumentHistoryBean> list = new ArrayList<>();
 
-        //
         OperationsUtil op = new OperationsUtil(null);
 
-        //Helperクラスから返ってくる公開区分
-        Set<String> publicScope = null;
-        List<DocumentRevision> documentRevisionList;
+        //Helperから返ってくる公開区分をセットする
+        Set<String> publicScope = helper.getPublicScope(loggedInUser);
+        Page<DocumentRevision> documentRevisionLPages;
 
         //全件表示のチェックボックスによって呼び出すメソッドを変更
         if(input.getHistory()) {
-            documentRevisionList = documentHistoryService.search(id, true, publicScope);
+            documentRevisionLPages = documentHistoryService.search(id, true, publicScope);
         } else {
-            documentRevisionList = documentHistoryService.search(id, false, publicScope);
+            documentRevisionLPages = documentHistoryService.search(id, false, publicScope);
         }
-        for(DocumentRevision documentRevision : documentRevisionList) {
+
+        //BeanにdocumentRevisionListと不足しているデータ(リンク、最終更新者名)を格納する
+        for(DocumentRevision documentRevision : documentRevisionLPages.getContent()) {
+            //documentRevisionの値を格納
             DocumentHistoryBean documentHistoryBean = beanMapper.map(documentRevision, DocumentHistoryBean.class);
 
-            //変換する
-            documentHistoryBean.setLastModifiedByLabel("satozaki");
+            //最終更新者IDを最終更新者名に変換したものを格納
+            documentHistoryBean.setLastModifiedByLabel(helper.getUserName(loggedInUser.getAccount().getId()));
 
+            //Ver項目をリンクにしたものを格納
             documentHistoryBean.setRidLabel("<a href=\"" + op.getViewUrl(id.toString()) + "?version=" + documentRevision.getVersion() + "\" class=\"btn btn-button btn-sm\" style=\"white-space: nowrap\">" + documentRevision.getRid().toString() + "</a>");
 
+            //リストに必要項目を追加する
             list.add(documentHistoryBean);
         }
+
+        //JSONを返す
         DataTablesOutput<DocumentHistoryBean> output = new DataTablesOutput<>();
         output.setData(list);
+        output.setDraw(input.getDraw());
+        output.setRecordsTotal(0);
+        output.setRecordsFiltered(documentRevisionLPages.getTotalElements());
         return output;
     }
 

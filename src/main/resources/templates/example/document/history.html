@@ -7,49 +7,55 @@
 <body>
 <div th:replace="~{/fragments/include-datatables :: include-datatables}"></div>
 <section class="content-header">
-    <div class="container-fluid">
-        <div class="row px-5">
+    <div class="container">
+        <div class="row">
             <div class="col-18 mb-3">
                 <!-- ページタイトルを記入 -->
                 <h4>Document History</h4>
             </div>
-            <div class="col-18 text-right">
+            <div class="col-18 text-right nav-tabs-wrapper">
                 <!-- ページタイトル右の余白 -->
+                <ul class="nav nav-tabs justify-content-end">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/example/document/history}">ドキュメント詳細</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">変更履歴</a>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
 </section>
 
 <section class="content">
-    <div class="container-fluid"><!-- -fluidを外すと横幅が狭くなる-->
+    <div class="container"><!-- -fluidを外すと横幅が狭くなる-->
         <div th:replace="~{/fragments/message-panel :: message-panel}"></div>
         <!-- ここより下にメインコンテンツを記入 -->
 
         <div class="row mb-3">
             <div class="form-check-inline">
-                <input id="show" name="draft" type="checkbox">
-                <label for="show">全件表示</label>
+                <input id="showAll" name="showAll" type="checkbox">
+                <label for="showAll">全件表示</label>
             </div>
         </div>
 
         <table id="history" class="table-sm table-striped nowrap">
             <thead>
             <tr class="filter">
-                <th class="text-center px-2" data-filter="disable"></th><!-- 隠しフィールド -->
                 <th></th><!-- リビジョンID -->
                 <th></th><!-- Ver -->
                 <th></th><!-- 変更理由 -->
-                <th></th><!-- 更新者 -->
-                <th></th><!-- 更新日 -->
+                <th></th><!-- 最終更新者 -->
+                <th></th><!-- 最終更新日 -->
 
             </tr>
             <tr class="title">
-                <th class="text-center px-0"></th>
                 <th class="text-center">リビジョンID</th>
                 <th class="text-center">Ver</th>
                 <th class="text-center">変更理由</th>
-                <th class="text-center">更新者</th>
-                <th class="text-center">更新日</th>
+                <th class="text-center">最終更新者</th>
+                <th class="text-center">最終更新日</th>
             </tr>
             </thead>
             <tbody></tbody>
@@ -84,25 +90,27 @@ var pagechange = false;
         var table = $('#history').DataTable({
 
           'ajax': {
-            'url': 'history/json',
+            'url': 'json/[[${id}]]?history=true',
             'data': myflatten
           },
 
+        'serverSide': false,
+
           //スクロールバー表示
-          scrollX: true,
+          // scrollX: true,
 
           // 一覧に表示する項目とJSONの項目にマッピング
+          // リビジョンID、Version、変更理由、最終更新者、最終更新日
           'columns': [
             {
               data: 'ridLabel',
-              render: $.fn.dataTable.render.text(),
             },
             {
               data: 'version',
               render: $.fn.dataTable.render.text(),
             },
             {
-              data: 'reasonForChane',
+              data: 'reasonForChange',
               render: $.fn.dataTable.render.text(),
             },
             {
@@ -117,11 +125,10 @@ var pagechange = false;
 
           // 初期ソート
           'order': [
-            [1, 'asc']
+            [1, 'desc']
           ],
 
-          // ボタンの表示
-          'buttons': ['bulkdelete', 'bulkinvalid', 'bulkvalid','colvis', 'stateClear'],
+          'buttons': ['colvis', 'stateClear'],
 
           // データロード後処理
           'initComplete': function (settings, json) {
@@ -150,30 +157,31 @@ var pagechange = false;
         } );
 
         // 全件表示チェックボックス押下時の操作
-        $('#show').change().on('change', function (e, s) {
-          localStorage.dataTables_Draft = e.target.checked;
+        $('#showAll').change().on('change', function (e, s) {
+          //要検討
+          localStorage.dataTables_showAll = e.target.checked;
           table.draw();
           // fnColumns(table);
         });
 
         // 画面表示時の下書きチェックボックスの復元
-        if (localStorage.dataTables_Draft == 'false') {
-          $('#show')[0].checked = false;
+        if (localStorage.dataTables_showAll == 'false') {
+          $('#showAll')[0].checked = false;
           table.draw();
-        } else if (localStorage.dataTables_Draft != 'false' && $('#show')[0].checked == false) {
-          $('#show')[0].checked = true;
+        } else if (localStorage.dataTables_showAll != 'false' && $('#showAll')[0].checked == false) {
+          $('#showAll')[0].checked = true;
           table.draw();
         }
       });
 
   function myflatten(params, settings) {
-    params = flatten(params, settings);
-    if ($('#show')[0] == undefined) {
-        params.show = true;
-    } else {
-        params.show = $('#show')[0].checked
-    }
-    return params;
+//    params = flatten(params, settings);
+//    if ($('#showAll')[0] == undefined) {
+//        params.history = true;
+//    } else {
+//        params.history = $('#showAll')[0].checked
+//    }
+//    return params;
   }
 
 </script>
