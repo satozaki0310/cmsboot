@@ -16,8 +16,9 @@
             <div class="col-18 text-right nav-tabs-wrapper">
                 <!-- ページタイトル右の余白 -->
                 <ul class="nav nav-tabs justify-content-end">
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/example/document/history}">ドキュメント詳細</a>
+                    <li class="nav-item" th:object="${list}">
+                        <a class="nav-link" th:href="@{/example/document/1/last}">ドキュメント詳細</a>
+<!--                        <a class="nav-link" th:href="@{'/example/document/' + ${list.id}} + '/last'">ドキュメント詳細</a>-->
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="#">変更履歴</a>
@@ -40,22 +41,22 @@
             </div>
         </div>
 
-        <table id="history" class="table-sm table-striped nowrap">
+        <table id="history" class="table-sm table-striped nowrap table-bordered table-hover">
             <thead>
             <tr class="filter">
-                <th></th><!-- リビジョンID -->
-                <th></th><!-- Ver -->
+                <th class="text-center"></th><!-- リビジョンID -->
+                <th class="text-center"></th><!-- Ver -->
                 <th></th><!-- 変更理由 -->
-                <th></th><!-- 最終更新者 -->
-                <th></th><!-- 最終更新日 -->
+                <th class="text-center"></th><!-- 最終更新者 -->
+                <th class="text-right"></th><!-- 最終更新日 -->
 
             </tr>
             <tr class="title">
-                <th class="text-center">リビジョンID</th>
-                <th class="text-center">Ver</th>
+                <th class="text-center">RID</th>
+                <th class="text-center">ver</th>
                 <th class="text-center">変更理由</th>
-                <th class="text-center">最終更新者</th>
-                <th class="text-center">最終更新日</th>
+                <th class="text-center">更新者</th>
+                <th class="text-center">更新日</th>
             </tr>
             </thead>
             <tbody></tbody>
@@ -104,10 +105,14 @@ var pagechange = false;
           'columns': [
             {
               data: 'ridLabel',
+              className:'text-center',
+              width: '40px',
             },
             {
               data: 'version',
               render: $.fn.dataTable.render.text(),
+              className : 'text-center',
+              width: '40px',
             },
             {
               data: 'reasonForChange',
@@ -116,10 +121,14 @@ var pagechange = false;
             {
               data: 'lastModifiedByLabel',
               render: $.fn.dataTable.render.text(),
+              className:'text-center',
+              width: '80px',
             },
             {
               data: 'lastModifiedDate',
               render: $.fn.dataTable.render.text(),
+              className:'text-center',
+              width: '80px',
             },
           ],
 

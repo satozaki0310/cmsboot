@@ -1,7 +1,9 @@
 package jp.co.stnet.cms.example.application.service.document;
 
+import jp.co.stnet.cms.base.domain.model.authentication.Account;
 import jp.co.stnet.cms.example.application.repository.document.DocumentRevisionRepository;
 import jp.co.stnet.cms.example.domain.model.document.DocumentRevision;
+import jp.co.stnet.cms.example.domain.model.person.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,10 +31,15 @@ public class DocumentHistoryServiceImpl implements DocumentHistoryService {
     public Page<DocumentRevision> search(Long id, boolean saveRevisionOnly, Set<String> publicScope) {
 //        Page<DocumentRevision> list = new ArrayList<>();
         if (saveRevisionOnly) {
-            return documentRevisionRepository.findByIdAndSaveRevisionAndPublicScopeIn(id, false, publicScope, PageRequest.of(0, 20));
+            return documentRevisionRepository.findByIdAndSaveRevisionAndPublicScopeIn(id, true, publicScope, PageRequest.of(0, 20));
         } else {
             return documentRevisionRepository.findByIdAndPublicScopeIn(id, publicScope, PageRequest.of(0, 20));
         }
 //        return list;
+    }
+
+    @Override
+    public Account nameSearch(String id) {
+        return documentRevisionRepository.findPerson(id);
     }
 }

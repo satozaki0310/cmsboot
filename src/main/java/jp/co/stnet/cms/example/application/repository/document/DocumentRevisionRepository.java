@@ -1,10 +1,15 @@
 package jp.co.stnet.cms.example.application.repository.document;
 
 import jp.co.stnet.cms.base.application.repository.NodeRevRepository;
+import jp.co.stnet.cms.base.domain.model.authentication.Account;
+import jp.co.stnet.cms.example.domain.model.document.Document;
 import jp.co.stnet.cms.example.domain.model.document.DocumentRevision;
 import jp.co.stnet.cms.example.domain.model.person.Person;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 
-public interface DocumentRevisionRepository extends NodeRevRepository<DocumentRevision, Long> {
+public interface DocumentRevisionRepository extends NodeRevRepository<DocumentRevision, Long>{
 
     @Query("SELECT c FROM DocumentRevision c INNER JOIN DocumentMaxRev m ON m.rid = c.rid AND c.revType < 2 WHERE m.id = :id")
     DocumentRevision findByIdLatestRev(@Param("id") Long id);
@@ -36,5 +41,13 @@ public interface DocumentRevisionRepository extends NodeRevRepository<DocumentRe
      * @return DocumentRevision型のリスト
      */
     Page<DocumentRevision> findByIdAndPublicScopeIn(Long id, Set<String> publicScope, Pageable pageable);
+
+    @Query("SELECT c FROM Account c WHERE username = :id")
+    Account findPerson(@Param("id") String id);
+
+    DocumentRevision findTopByIdAndPublicScopeInOrderByVersionDesc(Long id, Set<String> publicScope);
+
+    Document findByIdAndPublicScopeIn(Long id, Set<String> publicScope);
+
 
 }
