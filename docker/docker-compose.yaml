@@ -1,15 +1,17 @@
 version: '3'
 services:
   db:
-    build: .
+    image: mariadb:10.5
+    restart: always
     ports:
-      - 5432:5432
+      - 3306:3306
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      MARIADB_ROOT_PASSWORD: rootroot
+      MARIADB_DATABASE: cmsboot
+      MARIADB_USER: cmsuser
+      MARIADB_PASSWORD: cmspassword
     volumes:
-      - database:/var/lib/postgresql/data
-      - ./initdb:/docker-entrypoint-initdb.d
+      - cmsboot-mariadb-data:/var/lib/mysql
+
 volumes:
-  database:
-    driver: local
+  cmsboot-mariadb-data:

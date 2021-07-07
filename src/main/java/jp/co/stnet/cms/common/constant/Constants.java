@@ -14,6 +14,7 @@ public final class Constants {
         public static final String DELETE = "delete";
         public static final String INVALID = "invalid";
         public static final String VALID = "valid";
+        public static final String SAVE = "save";
         public static final String SAVE_DRAFT = "saveDraft";
         public static final String CANCEL_DRAFT = "cancelDraft";
         public static final String LIST = "list";
@@ -62,6 +63,7 @@ public final class Constants {
         public static final String DELETE_APIKEY = "deleteApiKey";
         public static final String SAVE_APIKEY = "saveApiKey";
         public static final String SWITCH_USER = "switchUser";
+        public static final String ADD_ITEM = "addItem";
     }
 
     /**
@@ -92,6 +94,8 @@ public final class Constants {
     public static final class JOBID {
         public static final String IMPORT_VARIABLE = "importVariable";
         public static final String IMPORT_ACCOUNT = "importAccount";
+        public static final String IMPORT_DOCUMENT = "importDocument";
+
     }
 
 

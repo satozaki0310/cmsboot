@@ -7,7 +7,6 @@ import jp.co.stnet.cms.base.domain.model.common.YesNo;
 import jp.co.stnet.cms.base.domain.model.filemanage.FileStatus;
 import jp.co.stnet.cms.base.domain.model.filemanage.FileType;
 import jp.co.stnet.cms.base.domain.model.variable.VariableType;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -73,7 +72,7 @@ public class CodeListConfig {
     @Bean("CL_SAMPLE")
     public JdbcCodeList sample() {
         JdbcCodeList jdbcCodeList = getJdbcCodeListBase();
-        jdbcCodeList.setQuerySql("SELECT CODE, VALUE1 || case when STATUS = '2' then '(無効)' else '' end as VALUE1 FROM VARIABLE WHERE TYPE = 'SAMPLE_CODELIST' ORDER BY STATUS, CODE");
+        jdbcCodeList.setQuerySql("SELECT CODE, CONCAT(VALUE1, case when STATUS = '2' then '(無効)' else '' end) as VALUE1 FROM VARIABLE WHERE TYPE = 'SAMPLE_CODELIST' ORDER BY STATUS, CODE");
         jdbcCodeList.setValueColumn("CODE");
         jdbcCodeList.setLabelColumn("VALUE1");
         return  jdbcCodeList;
@@ -82,7 +81,7 @@ public class CodeListConfig {
     @Bean("CL_EMPLOYEE")
     public JdbcCodeList docEmployee() {
         JdbcCodeList jdbcCodeList = getJdbcCodeListBase();
-        jdbcCodeList.setQuerySql("SELECT CODE, VALUE1 || case when STATUS = '2' then '(退職)' else '' end as VALUE1 FROM VARIABLE WHERE TYPE = 'EMPLOYEE' ORDER BY STATUS, VALINT1, CODE");
+        jdbcCodeList.setQuerySql("SELECT CODE, CONCAT(VALUE1, case when STATUS = '2' then '(退職)' else '' end) as VALUE1 FROM VARIABLE WHERE TYPE = 'EMPLOYEE' ORDER BY STATUS, VALINT1, CODE");
         jdbcCodeList.setValueColumn("CODE");
         jdbcCodeList.setLabelColumn("VALUE1");
         return  jdbcCodeList;
@@ -91,7 +90,7 @@ public class CodeListConfig {
     @Bean("CL_DEPARTMENT")
     public JdbcCodeList docDepartmetn() {
         JdbcCodeList jdbcCodeList = getJdbcCodeListBase();
-        jdbcCodeList.setQuerySql("SELECT CODE, VALUE1 || case when STATUS = '2' then '(無効)' else '' end as VALUE1 FROM VARIABLE WHERE TYPE = 'DOC_DEPARTMENT' ORDER BY STATUS, VALINT1, CODE");
+        jdbcCodeList.setQuerySql("SELECT CODE, CONCAT(VALUE1, case when STATUS = '2' then '(無効)' else '' end) as VALUE1 FROM VARIABLE WHERE TYPE = 'DOC_DEPARTMENT' ORDER BY STATUS, VALINT1, CODE");
         jdbcCodeList.setValueColumn("CODE");
         jdbcCodeList.setLabelColumn("VALUE1");
         return  jdbcCodeList;

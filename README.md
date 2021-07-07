@@ -1,5 +1,5 @@
 
-## 初期設定1
+## 初期設定
 ### 前提条件
  - docker
  - docker-compose

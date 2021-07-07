@@ -3,7 +3,6 @@ package jp.co.stnet.cms.common.util;
 
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -12,6 +11,8 @@ import java.util.*;
  * Apache Commons BeanUtils の拡張
  */
 public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
+
+    private static final String SEPARATOR = "_";
 
     private static final Set<String> PRIMITIVE = Set.of(
             "java.lang.String",
@@ -50,7 +51,7 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
 
         String prefix = "";
         if (parentClassName != null && !parentClassName.isEmpty()) {
-            prefix = parentClassName + "-";
+            prefix = parentClassName + SEPARATOR;
         }
 
         Method[] methods = clazz.getMethods();
@@ -132,7 +133,7 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
 
         String prefix = "";
         if (parentClassName != null && !parentClassName.isEmpty()) {
-            prefix = parentClassName + "-";
+            prefix = parentClassName + SEPARATOR;
         }
 
         Map<String, String> fields = getFields(clazz, parentClassName);

@@ -7,7 +7,7 @@ import lombok.ToString;
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class DataTablesInputHistory extends DataTablesInput{
+public class DataTablesInputHistory extends DataTablesInput {
     /**
      * 全件表示を含むフラグ
      */

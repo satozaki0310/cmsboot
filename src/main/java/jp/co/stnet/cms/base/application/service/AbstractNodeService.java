@@ -4,8 +4,8 @@ import com.github.dozermapper.core.Mapper;
 import jp.co.stnet.cms.base.domain.model.AbstractEntity;
 import jp.co.stnet.cms.base.domain.model.StatusInterface;
 import jp.co.stnet.cms.base.domain.model.common.Status;
-import jp.co.stnet.cms.common.datatables.DataTablesInput;
 import jp.co.stnet.cms.common.datatables.Column;
+import jp.co.stnet.cms.common.datatables.DataTablesInput;
 import jp.co.stnet.cms.common.datatables.Order;
 import jp.co.stnet.cms.common.exception.IllegalStateBusinessException;
 import jp.co.stnet.cms.common.exception.NoChangeBusinessException;
@@ -308,8 +308,10 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
         // OrderBY句
         if (!count) {
+            sql.append(" group by c ");
             sql.append(getOrderClause(input));
         }
+
 
         return sql.toString();
     }
@@ -325,7 +327,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
         StringBuilder sql = new StringBuilder();
         // SELECT句
         if (!count) {
-            sql.append("SELECT distinct c");
+            sql.append("SELECT c");
         } else {
             sql.append("SELECT count(distinct c)");
         }
@@ -440,14 +442,16 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
                 sql.append(convertedColumnName);
                 sql.append(", '%Y/%m/%d %h:%i:%s') LIKE :globalSearch ESCAPE '~'");
             } else if (isNumber(convertedColumnName)) {
-                sql.append("function('to_char', c.");
+                sql.append("function('CONVERT', c.");
                 sql.append(convertedColumnName);
-                sql.append(", 'FM999999999') LIKE :globalSearch ESCAPE '~'");
+                sql.append(", CHAR) LIKE :globalSearch ESCAPE '~'");
             } else if (isCollection(convertedColumnName)) {
                 sql.append(convertedColumnName);
                 sql.append(" LIKE :globalSearch ESCAPE '~'");
             } else if (isBoolean(convertedColumnName)) {
-
+                sql.append("function('CONVERT', c.");
+                sql.append(convertedColumnName);
+                sql.append(", CHAR) LIKE :globalSearch ESCAPE '~'");
             } else if (isRelation(originalColumnName)) {
                 sql.append("c." + originalColumnName);
                 sql.append(" LIKE :globalSearch ESCAPE '~'");
@@ -502,9 +506,9 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
                 sql.append(replacedColumnName);
                 sql.append(" ESCAPE '~'");
             } else if (isNumber(convertedColumnName)) {
-                sql.append("function('to_char', c.");
+                sql.append("function('CONVERT', c.");
                 sql.append(convertedColumnName);
-                sql.append(", 'FM999999999') LIKE :");
+                sql.append(", CHAR) LIKE :");
                 sql.append(replacedColumnName);
                 sql.append(" ESCAPE '~'");
             } else if (isCollection(convertedColumnName)) {
@@ -518,11 +522,11 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
                 sql.append(replacedColumnName);
                 sql.append(" ESCAPE '~'");
             } else if (isBoolean(convertedColumnName)) {
-                sql.append("c.");
+                sql.append("function('FORMAT', c.");
                 sql.append(convertedColumnName);
-                sql.append(" = :");
+                sql.append(", 0) LIKE :");
                 sql.append(replacedColumnName);
-//                sql.append(" ESCAPE '~'");
+                sql.append(" ESCAPE '~'");
             } else {
                 sql.append("c.");
                 sql.append(convertedColumnName);
