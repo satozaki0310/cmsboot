@@ -28,6 +28,7 @@ public class DocumentForm implements Serializable {
     /**
      * タイトル
      */
+    @NotNull
     private String title;
 
     /**
@@ -46,34 +47,54 @@ public class DocumentForm implements Serializable {
     private String documentNumber;
 
     /**
-     * 管理部門
+     * 版数
      */
-    private String chargeDepartment;
+    private String versionNumber;
 
     /**
-     * 管理担当者
+     * 作成部門
      */
-    private String chargePerson;
+    private String departmentForCreation;
 
     /**
-     * 制定日
+     * 作成担当者
      */
-    private LocalDate enactmentDate;
+    private String chargePersonForCreation;
 
     /**
-     * 最終改定日
+     * 作成責任者
+     */
+    private String responsiblePersonForCreation;
+
+    /**
+     * 発行部門
+     */
+    private String departmentForPublish;
+
+    /**
+     * 発行責任者
+     */
+    private String responsiblePersonForPublish;
+
+    /**
+     * 発行日
+     */
+    private LocalDate publishedDate;
+
+    /**
+     * 改定日
      */
     private LocalDate lastRevisedDate;
 
     /**
-     * 実施日
+     * 廃止日
      */
-    private LocalDate implementationDate;
+    private LocalDate invalidationDate;
 
     /**
-     * 制定箇所
+     * 周知日
      */
-    private String enactmentDepartment;
+    private LocalDate announceDate;
 
     /**
      * 変更理由
@@ -107,9 +128,9 @@ public class DocumentForm implements Serializable {
     private String intendedReader;
 
     /**
-     * 概要
+     * 備考
      */
-    private String summary;
+    private String remark;
 
     /**
      * 変更履歴を残す

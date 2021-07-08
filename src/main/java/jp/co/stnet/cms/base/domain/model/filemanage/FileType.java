@@ -9,6 +9,7 @@ import org.terasoluna.gfw.common.codelist.EnumCodeList;
  * ファイルタイプ.
  * <p>
  * 保存可能なファイルの拡張子、サイズを指定する。
+ *
  */
 @AllArgsConstructor
 @Getter

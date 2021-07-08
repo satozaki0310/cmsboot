@@ -10,17 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.util.Set;
 
 import static jp.co.stnet.cms.sales.presentation.controller.document.DocumentConstant.BASE_PATH;
 
 @Controller
 @RequestMapping(BASE_PATH)
+@SessionAttributes(value = {"op"})
 public class DocumentLatestController {
 
     @Autowired
@@ -32,12 +31,17 @@ public class DocumentLatestController {
     @Autowired
     DocumentHelper helper;
 
+    @Autowired
+    HttpSession session;
+
     @ModelAttribute
     DocumentForm setUp() {
         return new DocumentForm();
     }
 
     /**
+     * 検索画面、全文検索、管理画面から遷移した際にはセッションに値を入れる
+     *
      * @param model
      * @param loggedInUser
      * @param id
@@ -45,18 +49,31 @@ public class DocumentLatestController {
      */
     @GetMapping(value = "{id}/last")
     public String viewLast(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser,
-                           @PathVariable("id") Long id) {
+                           @PathVariable("id") Long id, @RequestHeader(value = "referer", required = false) final String referer) {
 
         //公開区分を格納
         Set<String> publicScope = helper.getPublicScope(loggedInUser);
-
 
         Document document = documentRevisionService.findLatest(id, publicScope);
 
         model.addAttribute("document", document);
         model.addAttribute("buttonState", helper.getButtonStateMap(Constants.OPERATION.VIEW, document, null).asMap());
         model.addAttribute("fieldState", helper.getFiledStateMap(Constants.OPERATION.VIEW, document, null).asMap());
-        model.addAttribute("op", new OperationsUtil(BASE_PATH));
+
+        OperationsUtil op = new OperationsUtil(BASE_PATH);
+        //System.out.println(referer);
+        if (helper.isReferer(referer)) {
+
+            op.setURL_LIST(referer);
+            session.setAttribute("op", op);
+        } else {
+            //なかったときにセッションの中身を見る
+
+            //セッションから情報がとれなかったときは検索一覧にとばす
+
+        }
+        model.addAttribute("op", op);
+
         return BASE_PATH + "/form";
     }
 }

@@ -47,13 +47,28 @@
                         </th:block>
                     </select>
                 </th>
+                <th></th><!-- 管理番号 -->
+                <th></th><!-- タイトル -->
+                <th></th><!-- 版数 -->
                 <th></th><!-- 区分1 -->
                 <th></th><!-- 区分2 -->
-                <th></th><!-- 区分3 -->
-                <th></th><!-- サービス1 -->
-                <th></th><!-- サービス2 -->
-                <th></th><!-- サービス3 -->
-                <th></th><!-- タイトル -->
+                <!--                <th></th>&lt;!&ndash; 区分3 &ndash;&gt;-->
+                <th></th><!-- 事業 -->
+                <th></th><!-- サービス種別 -->
+                <th></th><!-- サービス -->
+                <th></th><!-- 発行日 -->
+                <th></th><!-- 改訂日 -->
+                <th></th><!-- 廃止日 -->
+                <th></th><!-- 周知日 -->
+                <th></th><!-- 作成担当者 -->
+                <th></th><!-- 作成責任者 -->
+                <th></th><!-- 発行責任者 -->
+                <th></th><!-- 作成部門 -->
+                <th></th><!-- 発行部門 -->
+                <th></th><!-- 備考 -->
+                <th></th><!-- 変更理由 -->
+                <th></th><!-- 文書種類 -->
+                <th></th><!-- ファイル -->
                 <th data-filter="disable"><!-- 活用シーン -->
                     <select class="dataTables_column_filter form-control" data-column="11" id="col_filter_11">
                         <option value="">&nbsp;</option>
@@ -62,52 +77,42 @@
                         </th:block>
                     </select>
                 </th>
-                <th></th><!-- 想定読者 -->
-                <th></th><!-- 概要 -->
-                <th></th><!-- 文書種類 -->
-                <th></th><!-- ファイル -->
-                <th></th><!-- 管理番号 -->
-                <th></th><!-- 管理部門 -->
-                <th></th><!-- 管理担当者 -->
-                <th></th><!-- 制定日 -->
-                <th></th><!-- 最終改定日 -->
-                <th></th><!-- 実施日 -->
-                <th></th><!-- 制定箇所 -->
+                <th></th><!-- 公開区分 -->
+                <th></th><!-- 顧客公開 -->
                 <th></th><!-- 最終更新者 -->
                 <th></th><!-- 最終更新日 -->
-                <th></th><!-- 公開区分 -->
-                <th></th><!-- 変更理由 -->
-                <th></th><!-- 顧客公開 -->
             </tr>
             <tr class="title">
                 <!--                <th class="text-center px-0"></th>-->
                 <th class="text-center">#</th>
                 <th class="text-center">操作</th>
                 <th class="text-center">ステータス</th>
+                <th class="text-center">文書番号</th>
+                <th class="text-center">タイトル</th>
+                <th class="text-center">版数</th>
                 <th class="text-center">区分1</th>
                 <th class="text-center">区分2</th>
-                <th class="text-center">区分3</th>
-                <th class="text-center">サービス1</th>
-                <th class="text-center">サービス2</th>
-                <th class="text-center">サービス3</th>
-                <th class="text-center">タイトル</th>
-                <th class="text-center">活用シーン</th>
-                <th class="text-center">想定読者</th>
-                <th class="text-center">概要</th>
+                <th class="text-center">事業</th>
+                <th class="text-center">サービス種別</th>
+                <th class="text-center">サービス</th>
+                <th class="text-center">発行日</th>
+                <th class="text-center">改訂日</th>
+                <th class="text-center">廃止日</th>
+                <th class="text-center">周知日</th>
+                <th class="text-center">作成担当者</th>
+                <th class="text-center">作成責任者</th>
+                <th class="text-center">発行責任者</th>
+                <th class="text-center">作成部門</th>
+                <th class="text-center">発行部門</th>
+                <th class="text-center">備考</th>
+                <th class="text-center">変更理由</th>
                 <th class="text-center">文書種類</th>
                 <th class="text-center">ファイル</th>
-                <th class="text-center">管理番号</th>
-                <th class="text-center">管理部門</th>
-                <th class="text-center">管理担当者</th>
-                <th class="text-center">制定日</th>
-                <th class="text-center">最終改定日</th>
-                <th class="text-center">実施日</th>
-                <th class="text-center">制定箇所</th>
+                <th class="text-center">活用シーン</th>
+                <th class="text-center">公開区分</th>
+                <th class="text-center">顧客公開</th>
                 <th class="text-center">最終更新日時</th>
                 <th class="text-center">最終更新者</th>
-                <th class="text-center">公開区分</th>
-                <th class="text-center">変更理由</th>
-                <th class="text-center">顧客公開</th>
             </tr>
             </thead>
             <tbody></tbody>
@@ -154,6 +159,8 @@ var pagechange = false;
 
           // select: 'multi',
 
+          checkboxes: false,
+
           // 一覧に表示する項目とJSONの項目にマッピング
           'columns': [
 <!--            {-->
@@ -179,15 +186,23 @@ var pagechange = false;
               render: $.fn.dataTable.render.text(),
             },
             {
+              data: 'documentNumber',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'title',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'versionNumber',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
               data: 'docCategoryVariable.value1',
               render: $.fn.dataTable.render.text(),
             },
             {
               data: 'docCategoryVariable.value2',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'docCategoryVariable.value3',
               render: $.fn.dataTable.render.text(),
             },
             {
@@ -203,19 +218,47 @@ var pagechange = false;
               render: $.fn.dataTable.render.text(),
             },
             {
-              data: 'title',
+              data: 'publishedDate',
               render: $.fn.dataTable.render.text(),
             },
             {
-              data: 'useStageLabel',
+              data: 'lastRevisedDate',
               render: $.fn.dataTable.render.text(),
             },
             {
-              data: 'intendedReader',
+              data: 'invalidationDate',
               render: $.fn.dataTable.render.text(),
             },
             {
-              data: 'summary',
+              data: 'announceDate',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'chargePersonForCreation',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'responsiblePersonForCreation',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'responsiblePersonForPublish',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'departmentForCreation',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'departmentForPublish',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'remark',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'reasonForChange',
               render: $.fn.dataTable.render.text(),
             },
             {
@@ -225,31 +268,15 @@ var pagechange = false;
               data: 'filesLabel',
             },
             {
-              data: 'documentNumber',
+              data: 'useStageLabel',
               render: $.fn.dataTable.render.text(),
             },
             {
-              data: 'chargeDepartment',
+              data: 'publicScopeLabel',
               render: $.fn.dataTable.render.text(),
             },
             {
-              data: 'chargePerson',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'enactmentDate',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'lastRevisedDate',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'implementationDate',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'enactmentDepartment',
+              data: 'customerPublicLabel',
               render: $.fn.dataTable.render.text(),
             },
             {
@@ -258,18 +285,6 @@ var pagechange = false;
             },
             {
               data: 'lastModifiedBy',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'publicScopeLabel',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'reasonForChange',
-              render: $.fn.dataTable.render.text(),
-            },
-            {
-              data: 'customerPublicLabel',
               render: $.fn.dataTable.render.text(),
             },
           ],
@@ -310,20 +325,20 @@ var pagechange = false;
         } );
 
         // 下書きチェックボックス押下時の操作
-        $('#draft').change().on('change', function (e, s) {
-          localStorage.dataTables_Draft = e.target.checked;
-          table.draw();
-          // fnColumns(table);
-        });
+<!--        $('#draft').change().on('change', function (e, s) {-->
+<!--          localStorage.dataTables_Draft = e.target.checked;-->
+<!--          table.draw();-->
+<!--          // fnColumns(table);-->
+<!--        });-->
 
         // 画面表示時の下書きチェックボックスの復元
-        if (localStorage.dataTables_Draft == 'false') {
-          $('#draft')[0].checked = false;
-          table.draw();
-        } else if (localStorage.dataTables_Draft != 'false' && $('#draft')[0].checked == false) {
-          $('#draft')[0].checked = true;
-          table.draw();
-        }
+<!--        if (localStorage.dataTables_Draft == 'false') {-->
+<!--          $('#draft')[0].checked = false;-->
+<!--          table.draw();-->
+<!--        } else if (localStorage.dataTables_Draft != 'false' && $('#draft')[0].checked == false) {-->
+<!--          $('#draft')[0].checked = true;-->
+<!--          table.draw();-->
+<!--        }-->
 
         // 列の並び替えと表示／非表示を操作するテスト
         $('#reverse').click( function (e) {
@@ -342,7 +357,6 @@ var pagechange = false;
     }
     return params;
   }
-
 
 </script>
 

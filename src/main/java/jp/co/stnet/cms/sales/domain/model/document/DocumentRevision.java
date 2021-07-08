@@ -56,42 +56,63 @@ public class DocumentRevision extends AbstractRevisionEntity implements Serializ
     private String publicScope;
 
     /**
-     * 管理部門
-     */
-    private String chargeDepartment;
-
-    /**
-     * 管理担当者
-     */
-    private String chargePerson;
-
-    /**
      * ドキュメント管理番号
      */
     private String documentNumber;
 
     /**
-     * 制定日
+     * 版数
      */
-    @JsonFormat(pattern = "yyyy/MM/dd")
-    private LocalDate enactmentDate;
+    private String versionNumber;
 
     /**
-     * 最終改定日
+     * 作成部門
+     */
+    private String departmentForCreation;
+
+    /**
+     * 作成担当者
+     */
+    private String chargePersonForCreation;
+
+    /**
+     * 作成責任者
+     */
+    private String responsiblePersonForCreation;
+
+    /**
+     * 発行部門
+     */
+    private String departmentForPublish;
+
+    /**
+     * 発行責任者
+     */
+    private String responsiblePersonForPublish;
+
+    /**
+     * 発行日
+     */
+    @JsonFormat(pattern = "yyyy/MM/dd")
+    private LocalDate publishedDate;
+
+    /**
+     * 改定日
      */
     @JsonFormat(pattern = "yyyy/MM/dd")
     private LocalDate lastRevisedDate;
 
     /**
-     * 実施日
+     * 廃止日
      */
     @JsonFormat(pattern = "yyyy/MM/dd")
-    private LocalDate implementationDate;
+    private LocalDate invalidationDate;
 
     /**
-     * 制定箇所
+     * 周知日
      */
-    private String enactmentDepartment;
+    @JsonFormat(pattern = "yyyy/MM/dd")
+    private LocalDate announceDate;
 
     /**
      * 変更理由
@@ -150,9 +171,9 @@ public class DocumentRevision extends AbstractRevisionEntity implements Serializ
     private String intendedReader;
 
     /**
-     * 概要
+     * 備考
      */
-    private String summary;
+    private String remark;
 
     /**
      * 顧客公開区分

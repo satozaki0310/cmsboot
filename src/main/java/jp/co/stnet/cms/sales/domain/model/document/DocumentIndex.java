@@ -101,49 +101,71 @@ public class DocumentIndex implements Serializable, StatusInterface {
     private String publicScope;
 
     /**
-     * 管理部門
-     */
-    @KeywordField(aggregable = Aggregable.YES)
-    private String chargeDepartment;
-
-    /**
-     * 管理担当者
-     */
-    @KeywordField(aggregable = Aggregable.YES)
-    private String chargePerson;
-
-    /**
      * ドキュメント管理番号
      */
     @KeywordField
     private String documentNumber;
 
     /**
-     * 制定日
+     * 版数
      */
-    @GenericField(aggregable = Aggregable.YES)
-    @JsonFormat(pattern = "yyyy/MM/dd")
-    private LocalDate enactmentDate;
+    @KeywordField
+    private String versionNumber;
+
 
     /**
-     * 最終改定日
+     * 作成部門
+     */
+    @KeywordField
+    private String departmentForCreation;
+
+    /**
+     * 作成担当者
+     */
+    @KeywordField
+    private String chargePersonForCreation;
+
+    /**
+     * 作成責任者
+     */
+    @KeywordField
+    private String responsiblePersonForCreation;
+
+    /**
+     * 発行部門
+     */
+    @KeywordField
+    private String departmentForPublish;
+
+    /**
+     * 発行責任者
+     */
+    @KeywordField
+    private String responsiblePersonForPublish;
+
+    /**
+     * 発行日
      */
     @GenericField(aggregable = Aggregable.YES)
-    @JsonFormat(pattern = "yyyy/MM/dd")
+    private LocalDate publishedDate;
+
+    /**
+     * 改定日
+     */
+    @GenericField(aggregable = Aggregable.YES)
     private LocalDate lastRevisedDate;
 
     /**
-     * 実施日
+     * 廃止日
      */
     @GenericField(aggregable = Aggregable.YES)
-    @JsonFormat(pattern = "yyyy/MM/dd")
-    private LocalDate implementationDate;
+    private LocalDate invalidationDate;
 
     /**
-     * 制定箇所
+     * 周知日
      */
-    @KeywordField(aggregable = Aggregable.YES)
-    private String enactmentDepartment;
+    @GenericField(aggregable = Aggregable.YES)
+    private LocalDate announceDate;
 
     /**
      * 変更理由
@@ -233,9 +255,9 @@ public class DocumentIndex implements Serializable, StatusInterface {
     private String intendedReader;
 
     /**
-     * 概要
+     * 備考
      */
-    private String summary;
+    private String remark;
 
     /**
      * 顧客公開区分

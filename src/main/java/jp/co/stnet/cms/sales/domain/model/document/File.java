@@ -23,7 +23,7 @@ public class File implements Serializable {
 
     private String fileUuid;
 
-    //    @Transient
+//    @Transient
     @ManyToOne
     @NotFound(action = NotFoundAction.IGNORE)
     @JoinColumn(name = "fileUuid", referencedColumnName = "uuid", unique = false, insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))

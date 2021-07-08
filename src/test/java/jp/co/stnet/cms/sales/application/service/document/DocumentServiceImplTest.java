@@ -41,7 +41,6 @@ class DocumentServiceImplTest {
 
     /**
      * エンティティ生成
-     *
      * @return
      */
     private Document createEntity() {

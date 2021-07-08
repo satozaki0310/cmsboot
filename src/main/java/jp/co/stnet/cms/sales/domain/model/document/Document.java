@@ -68,37 +68,58 @@ public class Document extends AbstractEntity<Long> implements Serializable, Stat
     private String documentNumber;
 
     /**
-     * 管理部門
+     * 版数
      */
-    private String chargeDepartment;
+    private String versionNumber;
 
     /**
-     * 管理担当者
+     * 作成部門
      */
-    private String chargePerson;
+    private String departmentForCreation;
 
     /**
-     * 制定日
+     * 作成担当者
+     */
+    private String chargePersonForCreation;
+
+    /**
+     * 作成責任者
+     */
+    private String responsiblePersonForCreation;
+
+    /**
+     * 発行部門
+     */
+    private String departmentForPublish;
+
+    /**
+     * 発行責任者
+     */
+    private String responsiblePersonForPublish;
+
+    /**
+     * 発行日
      */
     @JsonFormat(pattern = "yyyy/MM/dd")
-    private LocalDate enactmentDate;
+    private LocalDate publishedDate;
 
     /**
-     * 最終改定日
+     * 改定日
      */
     @JsonFormat(pattern = "yyyy/MM/dd")
     private LocalDate lastRevisedDate;
 
     /**
-     * 実施日
+     * 廃止日
      */
     @JsonFormat(pattern = "yyyy/MM/dd")
-    private LocalDate implementationDate;
+    private LocalDate invalidationDate;
 
     /**
-     * 制定箇所
+     * 周知日
      */
-    private String enactmentDepartment;
+    @JsonFormat(pattern = "yyyy/MM/dd")
+    private LocalDate announceDate;
 
     /**
      * 変更理由
@@ -159,9 +180,9 @@ public class Document extends AbstractEntity<Long> implements Serializable, Stat
     private String intendedReader;
 
     /**
-     * 概要
+     * 備考
      */
-    private String summary;
+    private String remark;
 
     /**
      * 顧客公開区分

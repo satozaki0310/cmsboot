@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html th:replace="~{/layout/template :: layout(~{::title},~{::body})}" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <!-- ページタイトルを記入 -->
-    <title>ドキュメント</title>
+  <!-- ページタイトルを記入 -->
+  <title>ドキュメント</title>
 </head>
 <body>
 
@@ -34,127 +34,127 @@ fieldset legend {
 </style>
 
 <section class="content-header">
-    <div class="container"> <!-- -fluidを外すと横幅が狭くなる-->
-        <div class="row">
-            <div class="col-18 mb-3">
-                <!-- ページタイトルを記入 -->
-                <h4>ドキュメント</h4>
-            </div>
-            <div class="col-18 text-right nav-tabs-wrapper">
-                <!-- ページタイトル右の余白 -->
-                <ul class="nav nav-tabs justify-content-end">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">ドキュメント詳細</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{'/sales/document/history/' + ${document.id}}">変更履歴</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+  <div class="container"> <!-- -fluidを外すと横幅が狭くなる-->
+    <div class="row">
+      <div class="col-18 mb-3">
+        <!-- ページタイトルを記入 -->
+        <h4>ドキュメント</h4>
+      </div>
+      <div class="col-18 text-right nav-tabs-wrapper">
+        <!-- ページタイトル右の余白 -->
+        <ul class="nav nav-tabs justify-content-end">
+          <li class="nav-item">
+            <a class="nav-link active" href="#">ドキュメント詳細</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{'/sales/document/history/' + ${document.id}}">変更履歴</a>
+          </li>
+        </ul>
+      </div>
     </div>
+  </div>
 </section>
 <section class="content">
-    <div class="container">
-        <div th:replace="~{/fragments/message-panel :: message-panel}"></div>
-        <!-- ここより下にメインコンテンツを記入 -->
-        <form autocomplete="off" enctype="multipart/form-data" method="post" th:action
-              th:object="${documentForm}" th:with="id= ${document != null} ? ${document.id} : 0">
+  <div class="container">
+    <div th:replace="~{/fragments/message-panel :: message-panel}"></div>
+    <!-- ここより下にメインコンテンツを記入 -->
+    <form autocomplete="off" enctype="multipart/form-data" method="post" th:action
+          th:object="${documentForm}" th:with="id= ${document != null} ? ${document.id} : 0">
 
-            <!-- EnterキーによるPOSTを無効化 -->
-            <input disabled style="display:none" type="submit"/>
+      <!-- EnterキーによるPOSTを無効化 -->
+      <input disabled style="display:none" type="submit"/>
 
-            <!-- 隠しフィールド -->
-            <!--            <input th:field="*{id}" type="hidden"/>-->
-            <input th:field="*{version}" type="hidden"/>
+      <!-- 隠しフィールド -->
+      <!--            <input th:field="*{id}" type="hidden"/>-->
+      <input th:field="*{version}" type="hidden"/>
 
-            <!-- button -->
-            <div th:replace="~{/fragments/button-area :: m(${id})}"></div>
-            <div th:replace="~{/fragments/field::checkbox-inline('saveRevision', '', 'document.saveRevision', '', '@CL_SAVE_REVISION.asMap()')}"></div>
-            <hr>
+      <!-- button -->
+      <div th:replace="~{/fragments/button-area :: m(${id})}"></div>
+      <div th:replace="~{/fragments/field::checkbox-inline('saveRevision', '', 'document.saveRevision', '', '@CL_SAVE_REVISION.asMap()')}"></div>
+      <hr>
 
-            <!-- Input -->
+      <!-- Input -->
 
-            <div class="row">
-                <div class="col-24">
-                    <fieldset class="col-36 border h-100">
-                        <legend>基本情報</legend>
-                        <div th:replace="~{/fragments/field::select2('docCategory', '文書区分', 'document.docCategory', '', '@CL_DOC_CATEGORY.asMap()')}"></div>
-                        <div th:replace="~{/fragments/field::select2('docService', 'サービス', 'document.docService', '', '@CL_DOC_SERVICE.asMap()')}"></div>
-                        <div th:replace="~{/fragments/field::input('title', 'タイトル', 'document.title', '')}"></div>
-                        <div class="col-12 p-0">
-                            <div th:replace="~{/fragments/label::m('status', 'ステータス')}"></div>
-                            <div class="form-control form-control__view" th:if="${fieldState.status__view}">
-                                [[${document != null} ? ${@CL_STATUS.asMap()[document.status]}]]
-                            </div>
-                        </div>
-                        <div th:replace="~{/fragments/field::radio('publicScope', '公開区分', 'document.publicScope', '', '@CL_DOC_PUBLIC_SCOPE.asMap()')}"></div>
-                        <div th:replace="~{/fragments/field::checkbox('useStage', '利用シーン', 'document.useStage', '', '@CL_DOC_STAGE.asMap()')}"></div>
-                        <div th:replace="~{/fragments/field::input('intendedReader', '想定読者', 'document.intendedReader', '')}"></div>
-                        <div th:replace="~{/fragments/field::textarea('summary', '概要', 'document.summary', '', '3')}"></div>
-                        <div th:replace="~{/fragments/field::input('reasonForChange', '変更理由', 'document.reasonForChange', '')}"></div>
-                    </fieldset>
-
-                </div><!-- <div class="col-24"> -->
-
-                <div class="col-12">
-                    <fieldset class="col-36 border h-100">
-                        <legend>管理情報</legend>
-                        <div th:replace="~{/fragments/field::input('documentNumber', '管理番号', 'document.documentNumber', '')}"></div>
-                        <div th:replace="~{/fragments/field::input('chargeDepartment', '管理部門', 'document.chargeDepartment', '')}"></div>
-                        <div th:replace="~{/fragments/field::input('chargePerson', '管理担当者', 'document.chargePerson', '')}"></div>
-                        <div th:replace="~{/fragments/field::date('enactmentDate', '制定日', 'document.enactmentDate', '')}"></div>
-                        <div th:replace="~{/fragments/field::date('lastRevisedDate', '最終改定日', 'document.lastRevisedDate', '')}"></div>
-                        <div th:replace="~{/fragments/field::date('implementationDate', '実施日', 'document.implementationDate', '')}"></div>
-                        <div th:replace="~{/fragments/field::input('enactmentDepartment', '制定箇所', 'document.enactmentDepartment', '')}"></div>
-                    </fieldset>
-
-                </div><!-- <div class="col-12"> -->
+      <div class="row">
+        <div class="col-24">
+          <fieldset class="col-36 border h-100">
+            <legend>基本情報</legend>
+            <div th:replace="~{/fragments/field::select2('docCategory', '文書区分', 'document.docCategory', '', '@CL_DOC_CATEGORY.asMap()')}"></div>
+            <div th:replace="~{/fragments/field::select2('docService', 'サービス', 'document.docService', '', '@CL_DOC_SERVICE.asMap()')}"></div>
+            <div th:replace="~{/fragments/field::input('title', 'タイトル', 'document.title', '')}"></div>
+            <div class="col-12 p-0">
+              <div th:replace="~{/fragments/label::m('status', 'ステータス')}"></div>
+              <div class="form-control form-control__view" th:if="${fieldState.status__view}">
+                [[${document != null} ? ${@CL_STATUS.asMap()[document.status]}]]
+              </div>
             </div>
+            <div th:replace="~{/fragments/field::radio('publicScope', '公開区分', 'document.publicScope', '', '@CL_DOC_PUBLIC_SCOPE.asMap()')}"></div>
+            <div th:replace="~{/fragments/field::checkbox('useStage', '利用シーン', 'document.useStage', '', '@CL_DOC_STAGE.asMap()')}"></div>
+            <div th:replace="~{/fragments/field::input('intendedReader', '想定読者', 'document.intendedReader', '')}"></div>
+            <div th:replace="~{/fragments/field::textarea('summary', '概要', 'document.summary', '', '3')}"></div>
+            <div th:replace="~{/fragments/field::input('reasonForChange', '変更理由', 'document.reasonForChange', '')}"></div>
+          </fieldset>
 
-            <br>
-            <div class="row">
-                <div class="col-36">
-                    <table class="table-sm" id="filesArea">
-                        <thead>
-                        <tr>
-                            <td class="row">
-                                <div class="col-6">文書種類</div>
-                                <div class="col-14">ファイル</div>
-                                <div class="col-14">ファイル(PDF)</div>
-                                <div class="col-2 text-center">削除</div>
-                            </td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="item, status : *{files}">
-                            <td class="row">
-                                <div class="col-6">
-                                    <!--                                    <input class="form-control" th:field="*{files[__${status.index}__].type}"/>-->
+        </div><!-- <div class="col-24"> -->
 
-                                    <select class="form-control" th:errorclass="is-invalid"
-                                            th:field="*{files[__${status.index}__].type}">
-                                        <option label="--Select--" value=""/>
-                                        <option th:each="item : ${@CL_DOC_TYPE.asMap()}"
-                                                th:text="${item.value}"
-                                                th:value="${item.key}"></option>
-                                    </select>
-                                    <span class="invalid-feedback whitespace-nowrap"
-                                          th:errors="*{files[__${status.index}__].type}"
-                                          th:id="files.type-error"></span>
-                                </div>
-                                <div class="col-14">
-                                    <input class="form-control form-control-file file-managed"
-                                           data-file-type="document_file"
-                                           th:id="|files[__${status.index}__].file|"
-                                           th:style="*{files[__${status.index}__].fileUuid} ? 'display:none' : 'display:block'"
-                                           type="file"/>
-                                    <span class="invalid-feedback whitespace-nowrap"
-                                          th:errors="*{files[__${status.index}__].fileUuid}"
-                                          th:id="file.fileUuid-error"></span>
+        <div class="col-12">
+          <fieldset class="col-36 border h-100">
+            <legend>管理情報</legend>
+            <div th:replace="~{/fragments/field::input('documentNumber', '管理番号', 'document.documentNumber', '')}"></div>
+            <div th:replace="~{/fragments/field::input('chargeDepartment', '管理部門', 'document.chargeDepartment', '')}"></div>
+            <div th:replace="~{/fragments/field::input('chargePerson', '管理担当者', 'document.chargePerson', '')}"></div>
+            <div th:replace="~{/fragments/field::date('enactmentDate', '制定日', 'document.enactmentDate', '')}"></div>
+            <div th:replace="~{/fragments/field::date('lastRevisedDate', '最終改定日', 'document.lastRevisedDate', '')}"></div>
+            <div th:replace="~{/fragments/field::date('implementationDate', '実施日', 'document.implementationDate', '')}"></div>
+            <div th:replace="~{/fragments/field::input('enactmentDepartment', '制定箇所', 'document.enactmentDepartment', '')}"></div>
+          </fieldset>
 
-                                    <th:block th:if="*{files[__${status.index}__].fileManaged}">
-                                        <div class="input-group" th:id="|files[${status.index}].file__attached-block|">
+        </div><!-- <div class="col-12"> -->
+      </div>
+
+      <br>
+      <div class="row">
+        <div class="col-36">
+          <table class="table-sm" id="filesArea">
+            <thead>
+            <tr>
+              <td class="row">
+                <div class="col-6">文書種類</div>
+                <div class="col-14">ファイル</div>
+                <div class="col-14">ファイル(PDF)</div>
+                <div class="col-2 text-center">削除</div>
+              </td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item, status : *{files}">
+              <td class="row">
+                <div class="col-6">
+                  <!--                                    <input class="form-control" th:field="*{files[__${status.index}__].type}"/>-->
+
+                  <select class="form-control" th:errorclass="is-invalid"
+                          th:field="*{files[__${status.index}__].type}">
+                    <option label="--Select--" value=""/>
+                    <option th:each="item : ${@CL_DOC_TYPE.asMap()}"
+                            th:text="${item.value}"
+                            th:value="${item.key}"></option>
+                  </select>
+                  <span class="invalid-feedback whitespace-nowrap"
+                        th:errors="*{files[__${status.index}__].type}"
+                        th:id="files.type-error"></span>
+                </div>
+                <div class="col-14">
+                  <input class="form-control form-control-file file-managed"
+                         data-file-type="document_file"
+                         th:id="|files[__${status.index}__].file|"
+                         th:style="*{files[__${status.index}__].fileUuid} ? 'display:none' : 'display:block'"
+                         type="file"/>
+                  <span class="invalid-feedback whitespace-nowrap"
+                        th:errors="*{files[__${status.index}__].fileUuid}"
+                        th:id="file.fileUuid-error"></span>
+
+                  <th:block th:if="*{files[__${status.index}__].fileManaged}">
+                    <div class="input-group" th:id="|files[${status.index}].file__attached-block|">
                                           <span>
                                             <i class="far fa-file ml-2"></i>
                                             <a class="link-attached"
@@ -165,22 +165,22 @@ fieldset legend {
                                                      th:onclick="|file_detach('files[${status.index}].file')|"></i>
                                             <input th:field="*{files[__${status.index}__].fileUuid}" type="hidden"/>
                                           </span>
-                                        </div>
-                                    </th:block>
+                    </div>
+                  </th:block>
 
-                                </div>
-                                <div class="col-14">
-                                    <input class="form-control form-control-file file-managed"
-                                           data-file-type="document_file"
-                                           th:id="|files[__${status.index}__].pdf|"
-                                           th:style="*{files[__${status.index}__].pdfUuid} ? 'display:none' : 'display:block'"
-                                           type="file"/>
-                                    <span class="invalid-feedback whitespace-nowrap"
-                                          th:errors="*{files[__${status.index}__].pdfUuid}"
-                                          th:id="file.pdfUuid-error"></span>
+                </div>
+                <div class="col-14">
+                  <input class="form-control form-control-file file-managed"
+                         data-file-type="document_file"
+                         th:id="|files[__${status.index}__].pdf|"
+                         th:style="*{files[__${status.index}__].pdfUuid} ? 'display:none' : 'display:block'"
+                         type="file"/>
+                  <span class="invalid-feedback whitespace-nowrap"
+                        th:errors="*{files[__${status.index}__].pdfUuid}"
+                        th:id="file.pdfUuid-error"></span>
 
-                                    <th:block th:if="*{files[__${status.index}__].pdfManaged}">
-                                        <div class="input-group" th:id="|files[${status.index}].pdf__attached-block|">
+                  <th:block th:if="*{files[__${status.index}__].pdfManaged}">
+                    <div class="input-group" th:id="|files[${status.index}].pdf__attached-block|">
                                           <span>
                                             <i class="far fa-file ml-2"></i>
                                             <a class="link-attached"
@@ -191,48 +191,47 @@ fieldset legend {
                                                      th:onclick="|file_detach('files[${status.index}].pdf')|"></i>
                                             <input th:field="*{files[__${status.index}__].pdfUuid}" type="hidden"/>
                                           </span>
-                                        </div>
-                                    </th:block>
-
-                                </div>
-                                <div class="col-2 text-center">
-                                    <button class="btn-button" onclick="lineDelete(this)" type="button">削除</button>
-                                </div>
-
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-
-                    <div class="row">
-                        <div class="col-36">
-                            <button class="btn-button" formaction="#addLinebutton" id="addLinebutton"
-                                    name="addlineitem">行追加
-                            </button>
-                        </div>
                     </div>
+                  </th:block>
 
                 </div>
-            </div>
-
-            <br>
-            <div class="row">
-                <div class="col-36">
-                    <div th:replace="~{/fragments/field::summernote('body', '本文', 'document.body', '', '8')}"></div>
+                <div class="col-2 text-center">
+                  <button class="btn-button" onclick="lineDelete(this)" type="button">削除</button>
                 </div>
+
+              </td>
+            </tr>
+            </tbody>
+          </table>
+
+          <div class="row">
+            <div class="col-36">
+              <button class="btn-button" formaction="#addLinebutton" id="addLinebutton" name="addlineitem">行追加
+              </button>
             </div>
+          </div>
+
+        </div>
+      </div>
+
+      <br>
+      <div class="row">
+        <div class="col-36">
+          <div th:replace="~{/fragments/field::summernote('body', '本文', 'document.body', '', '8')}"></div>
+        </div>
+      </div>
 
 
-            <!-- button -->
-            <br>
-            <hr>
-            <div th:replace="~{/fragments/button-area :: m(${id})}"></div>
-            <br>
-            <p></p>
+      <!-- button -->
+      <br>
+      <hr>
+      <div th:replace="~{/fragments/button-area :: m(${id})}"></div>
+      <br>
+      <p></p>
 
-        </form>
-        <!-- ここより上にメインコンテンツを記入 -->
-    </div>
+    </form>
+    <!-- ここより上にメインコンテンツを記入 -->
+  </div>
 </section>
 
 

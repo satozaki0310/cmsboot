@@ -18,6 +18,16 @@ public enum DocPublicScope implements EnumCodeList.CodeListItem {
     private final String value;
     private final String label;
 
+    @Override
+    public String getCodeLabel() {
+        return label;
+    }
+
+    @Override
+    public String getCodeValue() {
+        return value;
+    }
+
     /**
      * valueでEnumを取得
      *
@@ -31,16 +41,6 @@ public enum DocPublicScope implements EnumCodeList.CodeListItem {
             }
         }
         return null;
-    }
-
-    @Override
-    public String getCodeLabel() {
-        return label;
-    }
-
-    @Override
-    public String getCodeValue() {
-        return value;
     }
 
 }

@@ -17,12 +17,26 @@ import java.util.*;
 @Component
 public class DocumentHelper {
 
+    //管理画面
+    static final String TEMPLATE_LIST = "sales/document/list";
+    static final String TEMPLATE_LIST2 = "sales/document/history/1";
+    //全文検索画面
+    //static final String TEMPLATE_LIST = "sales/document/list";
+    //一覧画面
+    //static final String TEMPLATE_LIST = "sales/document/list";
+
+    private final String[] urlList = {TEMPLATE_LIST, TEMPLATE_LIST2};
+
+    @Autowired
+    DocumentHistoryService documentHistoryService;
+
     // 許可されたOperation
     private static final Set<String> allowedOperation = Set.of(
             Constants.OPERATION.CREATE,
             Constants.OPERATION.UPDATE,
             Constants.OPERATION.VIEW
     );
+
     // 表示するボタン
     private static final Set<String> buttons = Set.of(
             Constants.BUTTON.GOTOLIST,
@@ -37,10 +51,9 @@ public class DocumentHelper {
             Constants.BUTTON.COPY,
             Constants.BUTTON.ADD_ITEM
     );
+
     // 対象のフォーム
     private static final Class formClass = DocumentForm.class;
-    @Autowired
-    DocumentHistoryService documentHistoryService;
 
     /**
      * 許可されたOperationか
@@ -136,7 +149,7 @@ public class DocumentHelper {
      */
     StateMap getFiledStateMap(String operation, Document record, DocumentForm form) {
         List<String> excludeKeys = new ArrayList<>();
-        List<String> includeKeys = List.of("status");
+        List<String> includeKeys = List.of("status", "lastModifiedBy", "lastModifiedDate");
 
         // 常設の隠しフィールドは状態管理しない
         StateMap fieldState = new StateMap(formClass, includeKeys, excludeKeys);
@@ -146,6 +159,8 @@ public class DocumentHelper {
             fieldState.setInputTrueAll();
             fieldState.setInputFalse("status");
             fieldState.setInputFalse("saveRevision");
+            fieldState.setInputFalse("lastModifiedBy");
+            fieldState.setInputFalse("lastModifiedDate");
 
         }
 
@@ -153,6 +168,8 @@ public class DocumentHelper {
         else if (Constants.OPERATION.UPDATE.equals(operation)) {
             fieldState.setInputTrueAll();
             fieldState.setViewTrue("status");
+            fieldState.setInputFalse("lastModifiedBy");
+            fieldState.setInputFalse("lastModifiedDate");
 
             // スタータスが無効
             if (Status.INVALID.getCodeValue().equals(record.getStatus())) {
@@ -199,5 +216,20 @@ public class DocumentHelper {
         }
 
         return setScope;
+    }
+
+    /**
+     * 指定したURLに該当するかチェックする
+     *
+     * @param url 　検索対象URL
+     * @return ture or false
+     */
+    Boolean isReferer(String url) {
+        for (String arrayList : urlList) {
+            if (url.indexOf(arrayList) >= 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }

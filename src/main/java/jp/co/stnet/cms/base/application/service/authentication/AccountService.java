@@ -62,7 +62,6 @@ public interface AccountService extends NodeIService<Account, String> {
 
     /**
      * ユーザ氏名を取得する
-     *
      * @param username ユーザID
      * @return 氏名、ユーザが存在しない場合空白文字
      */
