@@ -2,6 +2,7 @@
 <html th:replace="~{/layout/template :: layout(~{::title},~{::body})}" xmlns:th="http://www.thymeleaf.org">
 <head>
     <!-- ページタイトルを記入 -->
+    <!--    <title th:text="${document.title != null}? ${document.title} : '新規ドキュメント'"/>test</title>-->
     <title>ドキュメント</title>
 </head>
 <body>
@@ -11,10 +12,21 @@
         <div class="row">
             <div class="col-18 mb-3">
                 <!-- ページタイトルを記入 -->
-                <h4>ドキュメント</h4>
+                <!--                <h4 th:text="${document.title != null}? ${document.title} : '新規ドキュメント'"/></h4>-->
+                <h4>Document</h4>
             </div>
-            <div class="col-18 text-right">
-                <!-- ページタイトル右の余白 -->
+            <div class="col-18 text-right nav-tabs-wrapper">
+                <th:block th:if="${id}">
+                    <ul class="nav nav-tabs justify-content-end">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">ドキュメント詳細</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{'/sales/document/history/' + ${document.id}}">変更履歴</a>
+                        </li>
+                    </ul>
+                </th:block>
             </div>
         </div>
     </div>
@@ -374,6 +386,8 @@ $(document).ready(function() {
             }
     });
 });
+
+
 
 
 

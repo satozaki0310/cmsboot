@@ -8,7 +8,6 @@ public class HelloController {
 
     /**
      * tests
-     *
      * @return
      */
     @GetMapping

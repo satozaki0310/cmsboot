@@ -72,7 +72,7 @@ public class DocumentHistoryController {
                                                           @PathVariable("id") Long id) {
         List<DocumentHistoryBean> list = new ArrayList<>();
 
-        OperationsUtil op = new OperationsUtil(null);
+        OperationsUtil op = new OperationsUtil(BASE_PATH);
 
         //Helperから返ってくる公開区分をセットする
         Set<String> publicScope = helper.getPublicScope(loggedInUser);
@@ -80,9 +80,9 @@ public class DocumentHistoryController {
 
         //全件表示のチェックボックスによって呼び出すメソッドを変更
         if (input.getHistory()) {
-            documentRevisionLPages = documentHistoryService.search(id, true, publicScope);
-        } else {
             documentRevisionLPages = documentHistoryService.search(id, false, publicScope);
+        } else {
+            documentRevisionLPages = documentHistoryService.search(id, true, publicScope);
         }
 
         //BeanにdocumentRevisionListと不足しているデータ(リンク、最終更新者名)を格納する
@@ -94,7 +94,7 @@ public class DocumentHistoryController {
             documentHistoryBean.setLastModifiedByLabel(helper.getUserName(loggedInUser.getAccount().getId()));
 
             //Ver項目をリンクにしたものを格納
-            documentHistoryBean.setRidLabel("<a href=\"" + op.getViewUrl(id.toString()) + "?version=" + documentRevision.getVersion() + "\" class=\"btn btn-button btn-sm\" style=\"white-space: nowrap\">" + documentRevision.getRid().toString() + "</a>");
+            documentHistoryBean.setRidLabel("<a href=\"" + op.getViewUrl(id.toString()) + "?version=" + documentRevision.getVersion() + "\" class=\"\" style=\"white-space: nowrap\">" + documentRevision.getRid().toString() + "</a>");
 
             //リストに必要項目を追加する
             list.add(documentHistoryBean);

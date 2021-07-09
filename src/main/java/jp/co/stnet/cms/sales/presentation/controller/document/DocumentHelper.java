@@ -66,6 +66,7 @@ public class DocumentHelper {
         }
     }
 
+
     /**
      * 画面に応じたボタンの状態を定義
      *
@@ -195,7 +196,7 @@ public class DocumentHelper {
      * @return ユーザ名
      */
     String getUserName(String userId) {
-        return documentHistoryService.nameSearch((userId)).getLastName() + " " + documentHistoryService.nameSearch((userId)).getFirstName();
+        return documentHistoryService.nameSearch((userId)).getFirstName() + " " + documentHistoryService.nameSearch((userId)).getLastName();
     }
 
     /**

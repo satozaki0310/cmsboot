@@ -2,7 +2,6 @@ package jp.co.stnet.cms.sales.application.repository.document;
 
 import jp.co.stnet.cms.base.application.repository.NodeRevRepository;
 import jp.co.stnet.cms.base.domain.model.authentication.Account;
-import jp.co.stnet.cms.sales.domain.model.document.Document;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentRevision;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,8 +37,17 @@ public interface DocumentRevisionRepository extends NodeRevRepository<DocumentRe
     @Query("SELECT c FROM Account c WHERE username = :id")
     Account findPerson(@Param("id") String id);
 
+
     DocumentRevision findTopByIdAndPublicScopeInOrderByVersionDesc(Long id, Set<String> publicScope);
 
-    Document findByIdAndPublicScopeIn(Long id, Set<String> publicScope);
+    /**
+     * 指定したidとVerのファイルを取得する
+     *
+     * @param id          　ドキュメントID
+     * @param version     　ドキュメントVer
+     * @param publicScope 　公開区分
+     * @return DocumentRevision型の検索結果
+     */
+    DocumentRevision findByIdAndVersionAndPublicScopeIn(Long id, Long version, Set<String> publicScope);
 
 }
