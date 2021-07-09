@@ -15,6 +15,7 @@ public class CsvUtils {
     public static CsvConfig getCsvDefault() {
         CsvConfig config = new CsvConfig(',', '"', '"');
         config.setNullString("");
+        config.setUtf8bomPolicy(true);
         return config;
     }
 

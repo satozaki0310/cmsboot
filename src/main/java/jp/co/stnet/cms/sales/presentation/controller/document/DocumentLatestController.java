@@ -19,7 +19,6 @@ import static jp.co.stnet.cms.sales.presentation.controller.document.DocumentCon
 
 @Controller
 @RequestMapping(BASE_PATH)
-@SessionAttributes(value = {"op"})
 public class DocumentLatestController {
 
     @Autowired
@@ -60,18 +59,23 @@ public class DocumentLatestController {
         model.addAttribute("buttonState", helper.getButtonStateMap(Constants.OPERATION.VIEW, document, null).asMap());
         model.addAttribute("fieldState", helper.getFiledStateMap(Constants.OPERATION.VIEW, document, null).asMap());
 
-        OperationsUtil op = new OperationsUtil(BASE_PATH);
-        //System.out.println(referer);
-        if (helper.isReferer(referer)) {
+        OperationsUtil op = new OperationsUtil(null);
 
-            op.setURL_LIST(referer);
-            session.setAttribute("op", op);
+
+        if (referer != null) {
+            if (helper.isReferer(referer)) {
+                session.setAttribute("referer", referer);
+            }
         } else {
-            //なかったときにセッションの中身を見る
-
             //セッションから情報がとれなかったときは検索一覧にとばす
-
+            op.setURL_LIST("list");
         }
+
+        if (session.getAttribute("referer") != null) {
+            op.setURL_LIST((String) session.getAttribute("referer"));
+        }
+
+        System.out.println("session:" + session.getAttribute("referer"));
         model.addAttribute("op", op);
 
         return BASE_PATH + "/form";
