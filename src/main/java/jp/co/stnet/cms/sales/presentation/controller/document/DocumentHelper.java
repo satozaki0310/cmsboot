@@ -25,7 +25,7 @@ public class DocumentHelper {
     //一覧画面
     //static final String TEMPLATE_LIST = "sales/document/list";
 
-    private final String[] urlList = {TEMPLATE_LIST, TEMPLATE_LIST2};
+    private final String[] urlList = {TEMPLATE_LIST};
 
     @Autowired
     DocumentHistoryService documentHistoryService;
@@ -215,12 +215,13 @@ public class DocumentHelper {
         } else if ((loggedInUser.getAuthorities().contains(new SimpleGrantedAuthority("DOC_VIEW_OUTSOURCING")))) {
             Collections.addAll(setScope, "10");
         }
-
         return setScope;
     }
 
     /**
      * 指定したURLに該当するかチェックする
+     * 該当した場合: TRUE
+     * 該当しない場合: FALSE
      *
      * @param url 　検索対象URL
      * @return ture or false

@@ -51,7 +51,7 @@ public class DocumentLatestController {
      * @param loggedInUser 　ユーザ情報
      * @param id           　ドキュメントID
      * @param referer      　遷移元URL
-     * @return
+     * @return VIEWのパス
      */
     @GetMapping(value = "{id}/last")
     public String viewLast(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser,
@@ -96,7 +96,7 @@ public class DocumentLatestController {
      * @param id           ドキュメントID
      * @param referer      遷移元URL
      * @param version      ドキュメントVer
-     * @return
+     * @return VIEWのパス
      */
     @GetMapping(value = "{id}", params = "version")
     public String viewLast(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser,
