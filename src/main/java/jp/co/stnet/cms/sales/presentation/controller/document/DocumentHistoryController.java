@@ -70,15 +70,17 @@ public class DocumentHistoryController {
     public DataTablesOutput<DocumentHistoryBean> listJson(DataTablesInputHistory input,
                                                           @AuthenticationPrincipal LoggedInUser loggedInUser,
                                                           @PathVariable("id") Long id) {
+
         List<DocumentHistoryBean> list = new ArrayList<>();
 
         OperationsUtil op = new OperationsUtil(BASE_PATH);
 
         //Helperから返ってくる公開区分をセットする
         Set<String> publicScope = helper.getPublicScope(loggedInUser);
+
         Page<DocumentRevision> documentRevisionLPages;
 
-        //全件表示のチェックボックスによって呼び出すメソッドを変更
+        //全件表示のチェックボックスの有無によって呼び出すメソッドを変更
         if (input.getHistory()) {
             documentRevisionLPages = documentHistoryService.search(id, false, publicScope);
         } else {
@@ -87,6 +89,7 @@ public class DocumentHistoryController {
 
         //BeanにdocumentRevisionListと不足しているデータ(リンク、最終更新者名)を格納する
         for (DocumentRevision documentRevision : documentRevisionLPages.getContent()) {
+
             //documentRevisionの値を格納
             DocumentHistoryBean documentHistoryBean = beanMapper.map(documentRevision, DocumentHistoryBean.class);
 
@@ -106,6 +109,7 @@ public class DocumentHistoryController {
         output.setDraw(input.getDraw());
         output.setRecordsTotal(0);
         output.setRecordsFiltered(documentRevisionLPages.getTotalElements());
+
         return output;
     }
 

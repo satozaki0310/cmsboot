@@ -19,12 +19,14 @@ public class DocumentHelper {
 
     //管理画面
     static final String TEMPLATE_LIST = "sales/document/list";
-    static final String TEMPLATE_LIST2 = "sales/document/history/1";
+
     //全文検索画面
     //static final String TEMPLATE_LIST = "sales/document/list";
+
     //一覧画面
     //static final String TEMPLATE_LIST = "sales/document/list";
 
+    //セッションとして情報を格納するURLの配列
     private final String[] urlList = {TEMPLATE_LIST};
 
     @Autowired
@@ -189,7 +191,7 @@ public class DocumentHelper {
     }
 
     /**
-     * ユーザIDからユーザ名を返すメソッド
+     * ユーザIDからユーザ名を返す
      * ユーザ名: 姓+名
      *
      * @param userId ユーザID
@@ -200,7 +202,7 @@ public class DocumentHelper {
     }
 
     /**
-     * ユーザ情報から公開区分を返すメソッド
+     * ユーザ情報から対応した公開区分を定義する
      * 99:社員 20:派遣 10:外部委託
      *
      * @param loggedInUser ユーザ情報
@@ -215,6 +217,7 @@ public class DocumentHelper {
         } else if ((loggedInUser.getAuthorities().contains(new SimpleGrantedAuthority("DOC_VIEW_OUTSOURCING")))) {
             Collections.addAll(setScope, "10");
         }
+
         return setScope;
     }
 
@@ -224,7 +227,7 @@ public class DocumentHelper {
      * 該当しない場合: FALSE
      *
      * @param url 　検索対象URL
-     * @return ture or false
+     * @return TRUE or FALSE
      */
     Boolean isReferer(String url) {
         for (String arrayList : urlList) {

@@ -26,13 +26,11 @@ public class DocumentHistoryServiceImpl implements DocumentHistoryService {
      */
     @Override
     public Page<DocumentRevision> search(Long id, boolean saveRevisionOnly, Set<String> publicScope) {
-//        Page<DocumentRevision> list = new ArrayList<>();
         if (saveRevisionOnly) {
             return documentRevisionRepository.findByIdAndSaveRevisionAndPublicScopeIn(id, true, publicScope, PageRequest.of(0, 20));
         } else {
             return documentRevisionRepository.findByIdAndPublicScopeIn(id, publicScope, PageRequest.of(0, 20));
         }
-//        return list;
     }
 
     @Override

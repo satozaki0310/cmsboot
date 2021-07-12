@@ -5,7 +5,6 @@ import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import jp.co.stnet.cms.common.constant.Constants;
 import jp.co.stnet.cms.common.datatables.OperationsUtil;
 import jp.co.stnet.cms.sales.application.service.document.DocumentRevisionService;
-import jp.co.stnet.cms.sales.application.service.document.DocumentService;
 import jp.co.stnet.cms.sales.domain.model.document.Document;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentRevision;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +27,6 @@ public class DocumentLatestController {
     DocumentRevisionService documentRevisionService;
 
     @Autowired
-    DocumentService documentService;
-
-    @Autowired
     Mapper beanMapper;
 
     @Autowired
@@ -39,53 +35,12 @@ public class DocumentLatestController {
     @Autowired
     HttpSession session;
 
+    @Autowired
+    DocumentAuthority authority;
+
     @ModelAttribute
     DocumentForm setUp() {
         return new DocumentForm();
-    }
-
-    /**
-     * 検索画面、全文検索、管理画面から遷移した際に最新のドキュメント情報を表示する
-     *
-     * @param model        モデル
-     * @param loggedInUser 　ユーザ情報
-     * @param id           　ドキュメントID
-     * @param referer      　遷移元URL
-     * @return VIEWのパス
-     */
-    @GetMapping(value = "{id}/last")
-    public String viewLast(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser,
-                           @PathVariable("id") Long id, @RequestHeader(value = "referer", required = false) final String referer) {
-
-        //公開区分を格納
-        Set<String> publicScope = helper.getPublicScope(loggedInUser);
-
-        Document document = documentRevisionService.findLatest(id, publicScope);
-
-        model.addAttribute("document", document);
-        model.addAttribute("buttonState", helper.getButtonStateMap(Constants.OPERATION.VIEW, document, null).asMap());
-        model.addAttribute("fieldState", helper.getFiledStateMap(Constants.OPERATION.VIEW, document, null).asMap());
-
-        OperationsUtil op = new OperationsUtil(BASE_PATH);
-
-
-        if (referer != null) {
-            if (helper.isReferer(referer)) {
-                session.setAttribute("referer", referer);
-            }
-        } else {
-            //セッションから情報がとれなかったときは検索一覧にとばす
-            op.setURL_LIST("list");
-        }
-
-        if (session.getAttribute("referer") != null) {
-            op.setBaseUrl("");
-            op.setURL_LIST((String) session.getAttribute("referer"));
-        }
-
-        model.addAttribute("op", op);
-
-        return BASE_PATH + "/form";
     }
 
     /**
@@ -103,32 +58,45 @@ public class DocumentLatestController {
                            @PathVariable("id") Long id, @RequestHeader(value = "referer", required = false) final String referer,
                            @RequestParam(value = "version", required = false) String version) {
 
-        //公開区分を格納
+        // 公開区分を格納
         Set<String> publicScope = helper.getPublicScope(loggedInUser);
 
-        DocumentRevision documentRevision = documentRevisionService.versionSpecification(id, Long.parseLong(version), publicScope);
+        DocumentRevision documentRevision;
 
-        model.addAttribute("document", documentRevision);
+        if (version.equals("last")) {
+            documentRevision = documentRevisionService.findLatest(id, publicScope);
+        } else {
+            documentRevision = documentRevisionService.versionSpecification(id, Long.parseLong(version), publicScope);
+        }
+
+        // Document型に変換
         Document documentRecord = beanMapper.map(documentRevision, Document.class);
-        model.addAttribute("buttonState", helper.getButtonStateMap(Constants.OPERATION.VIEW, documentRecord, null).asMap());
-        model.addAttribute("fieldState", helper.getFiledStateMap(Constants.OPERATION.VIEW, documentRecord, null).asMap());
+
+        // 権限チェック
+        authority.hasAuthority(Constants.OPERATION.VIEW, loggedInUser, documentRecord);
 
         OperationsUtil op = new OperationsUtil(BASE_PATH);
 
+        // セッション管理
         if (referer != null) {
             if (helper.isReferer(referer)) {
                 session.setAttribute("referer", referer);
             }
         } else {
-            //セッションから情報がとれなかったときは検索一覧にとばす
+            // セッションから情報がとれなかったときは検索一覧にとばす
             op.setURL_LIST("list");
         }
 
+        // セッションに値が格納されている場合、セッションに格納されたURLへ遷移する
         if (session.getAttribute("referer") != null) {
             op.setBaseUrl("");
             op.setURL_LIST((String) session.getAttribute("referer"));
         }
 
+        // Modelに値を格納
+        model.addAttribute("document", documentRevision);
+        model.addAttribute("buttonState", helper.getButtonStateMap(Constants.OPERATION.VIEW, documentRecord, null).asMap());
+        model.addAttribute("fieldState", helper.getFiledStateMap(Constants.OPERATION.VIEW, documentRecord, null).asMap());
         model.addAttribute("op", op);
 
         return BASE_PATH + "/form";

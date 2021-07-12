@@ -38,6 +38,11 @@ public interface DocumentRevisionRepository extends NodeRevRepository<DocumentRe
     Account findPerson(@Param("id") String id);
 
 
+    /**
+     * @param id
+     * @param publicScope
+     * @return
+     */
     DocumentRevision findTopByIdAndPublicScopeInOrderByVersionDesc(Long id, Set<String> publicScope);
 
     /**

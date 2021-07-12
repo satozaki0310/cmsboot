@@ -17,7 +17,7 @@
                 <!-- ページタイトル右の余白 -->
                 <ul class="nav nav-tabs justify-content-end">
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{'/sales/document/' + ${id}} + '/last'">ドキュメント詳細</a>
+                        <a class="nav-link" th:href="@{'/sales/document/' + ${id}}">ドキュメント詳細</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="#">変更履歴</a>
@@ -35,7 +35,7 @@
 
         <div class="row mb-3">
             <div class="form-check-inline">
-                <input id="showAll" name="showAll" type="checkbox">
+                <input checked id="showAll" name="showAll" type="checkbox">
                 <label for="showAll">全件表示</label>
             </div>
         </div>
@@ -90,7 +90,7 @@ var pagechange = false;
         var table = $('#history').DataTable({
 
           'ajax': {
-            'url': 'json/[[${id}]]?history=true',
+            'url': 'json/[[${id}]]?history=false',
             'data': myflatten
           },
 
@@ -165,12 +165,9 @@ var pagechange = false;
         } );
 
         // 全件表示チェックボックス押下時の操作
-        $('#showAll').change().on('change', function (e, s) {
-          //要検討
-          localStorage.dataTables_showAll = e.target.checked;
-          table.draw();
-          // fnColumns(table);
-        });
+         $('#showAll').change().on('change', function (e, s) {
+            table.ajax.url(encodeURI('json/[[${id}]]?history=' + e.target.checked)).load();
+         });
 
         // 画面表示時の下書きチェックボックスの復元
         if (localStorage.dataTables_showAll == 'false') {
@@ -191,6 +188,7 @@ var pagechange = false;
 //    }
 //    return params;
   }
+
 
 
 
