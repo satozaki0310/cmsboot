@@ -32,6 +32,9 @@ public class DocumentHelper {
     @Autowired
     DocumentHistoryService documentHistoryService;
 
+    @Autowired
+    DocumentAuthority authority;
+
     // 許可されたOperation
     private static final Set<String> allowedOperation = Set.of(
             Constants.OPERATION.CREATE,
@@ -142,6 +145,18 @@ public class DocumentHelper {
         return buttonState;
     }
 
+    StateMap getButtonStateMap(@NonNull String operation, Document record, DocumentForm form, LoggedInUser loggedInUser) {
+        StateMap buttonState = getButtonStateMap(operation, record, form);
+        if (operation.equals(Constants.OPERATION.VIEW)) {
+            if (!authority.hasAuthorityNotException(operation, loggedInUser, record)) {
+                buttonState.setViewFalse(Constants.BUTTON.GOTOUPDATE);
+            }
+        }
+
+
+        return buttonState;
+    }
+
     /**
      * 画面に応じたフィールドの状態を定義
      *
@@ -226,7 +241,7 @@ public class DocumentHelper {
      * 該当した場合: TRUE
      * 該当しない場合: FALSE
      *
-     * @param url 　検索対象URL
+     * @param url 検索対象URL
      * @return TRUE or FALSE
      */
     Boolean isReferer(String url) {

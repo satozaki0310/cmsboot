@@ -1,6 +1,7 @@
 package jp.co.stnet.cms.sales.presentation.controller.document;
 
 import com.github.dozermapper.core.Mapper;
+import com.github.dozermapper.core.MappingException;
 import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import jp.co.stnet.cms.common.constant.Constants;
 import jp.co.stnet.cms.common.datatables.OperationsUtil;
@@ -8,10 +9,13 @@ import jp.co.stnet.cms.sales.application.service.document.DocumentRevisionServic
 import jp.co.stnet.cms.sales.domain.model.document.Document;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentRevision;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.terasoluna.gfw.common.exception.BusinessException;
+import org.terasoluna.gfw.common.message.ResultMessages;
 
 import javax.servlet.http.HttpSession;
 import java.util.Set;
@@ -20,8 +24,7 @@ import static jp.co.stnet.cms.sales.presentation.controller.document.DocumentCon
 
 @Controller
 @RequestMapping(BASE_PATH)
-@SessionAttributes(value = {"op"})
-public class DocumentLatestController {
+public class DocumentSpecifiedController {
 
     @Autowired
     DocumentRevisionService documentRevisionService;
@@ -45,6 +48,9 @@ public class DocumentLatestController {
 
     /**
      * Ver指定したドキュメント情報を表示する
+     * versionパラメータの値によって表示するドキュメントを変更する
+     * last: 最新ドキュメント
+     * 数値: 数値のドキュメント
      *
      * @param model        モデル
      * @param loggedInUser ユーザ情報
@@ -54,28 +60,46 @@ public class DocumentLatestController {
      * @return VIEWのパス
      */
     @GetMapping(value = "{id}", params = "version")
-    public String viewLast(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser,
-                           @PathVariable("id") Long id, @RequestHeader(value = "referer", required = false) final String referer,
-                           @RequestParam(value = "version", required = false) String version) {
+    public String viewVersion(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser,
+                              @PathVariable("id") Long id, @RequestHeader(value = "referer", required = false) final String referer,
+                              @RequestParam(value = "version", required = false) String version) {
 
         // 公開区分を格納
         Set<String> publicScope = helper.getPublicScope(loggedInUser);
 
         DocumentRevision documentRevision;
+        Document documentRecord = null;
+        OperationsUtil op = new OperationsUtil(BASE_PATH);
 
-        if (version.equals("last")) {
+        // 指定した公開区分でドキュメントを検索　閲覧可能なものがない場合null
+        if (version.equals("latest")) {
             documentRevision = documentRevisionService.findLatest(id, publicScope);
         } else {
             documentRevision = documentRevisionService.versionSpecification(id, Long.parseLong(version), publicScope);
         }
 
-        // Document型に変換
-        Document documentRecord = beanMapper.map(documentRevision, Document.class);
+        try {
+            // Document型に変換
+            documentRecord = beanMapper.map(documentRevision, Document.class);
 
-        // 権限チェック
-        authority.hasAuthority(Constants.OPERATION.VIEW, loggedInUser, documentRecord);
+            // 権限チェック
+            authority.hasAuthority(Constants.OPERATION.VIEW, loggedInUser, documentRecord);
 
-        OperationsUtil op = new OperationsUtil(BASE_PATH);
+            // Modelに値を格納
+            model.addAttribute("document", documentRevision);
+
+        } catch (BusinessException e) {
+            model.addAttribute(e.getResultMessages());
+        } catch (AccessDeniedException | MappingException e) {
+            // 空のドキュメント情報を生成
+            Document document = new Document();
+
+            // エラーメッセージを生成
+            ResultMessages messages = ResultMessages.error().add("e.sl.fw.7003");
+
+            model.addAttribute("document", document);
+            model.addAttribute(messages);
+        }
 
         // セッション管理
         if (referer != null) {
@@ -93,11 +117,27 @@ public class DocumentLatestController {
             op.setURL_LIST((String) session.getAttribute("referer"));
         }
 
-        // Modelに値を格納
-        model.addAttribute("document", documentRevision);
-        model.addAttribute("buttonState", helper.getButtonStateMap(Constants.OPERATION.VIEW, documentRecord, null).asMap());
+        model.addAttribute("buttonState", helper.getButtonStateMap(Constants.OPERATION.VIEW, documentRecord, null, loggedInUser).asMap());
         model.addAttribute("fieldState", helper.getFiledStateMap(Constants.OPERATION.VIEW, documentRecord, null).asMap());
         model.addAttribute("op", op);
+
+        return BASE_PATH + "/form";
+    }
+
+    /**
+     * 最新のドキュメント情報を表示する
+     *
+     * @param model        モデル
+     * @param loggedInUser ユーザ情報
+     * @param id           ドキュメントID
+     * @param referer      遷移元URL
+     * @return VIEWのパス
+     */
+    @GetMapping(value = "{id}/latest")
+    public String viewLatest(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser,
+                             @PathVariable("id") Long id, @RequestHeader(value = "referer", required = false) final String referer) {
+
+        viewVersion(model, loggedInUser, id, referer, "latest");
 
         return BASE_PATH + "/form";
     }

@@ -21,10 +21,11 @@
                         <li class="nav-item">
                             <a class="nav-link active" href="#">ドキュメント詳細</a>
                         </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{'/sales/document/history/' + ${document.id}}">変更履歴</a>
-                        </li>
+                        <th:block th:if="${document.id} != null">
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{'/sales/document/history/' + ${document.id}}">変更履歴</a>
+                            </li>
+                        </th:block>
                     </ul>
                 </th:block>
             </div>
@@ -386,6 +387,7 @@ $(document).ready(function() {
             }
     });
 });
+
 
 
 

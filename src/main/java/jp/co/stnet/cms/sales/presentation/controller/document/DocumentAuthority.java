@@ -160,6 +160,116 @@ public class DocumentAuthority {
     }
 
     /**
+     * 権限チェックを行う。
+     *
+     * @param operation    操作の種類(Constants.OPERATIONに登録された値)
+     * @param loggedInUser ログインユーザ情報
+     * @param document     ドキュメントエンティティ
+     * @return true=操作する権限を持つ, false=操作する権限なし
+     */
+    public Boolean hasAuthorityNotException(String operation, LoggedInUser loggedInUser, Document document) {
+        // 入力チェック
+        validate(operation);
+
+        Collection<GrantedAuthority> authorities = loggedInUser.getAuthorities();
+
+        // 新規登録
+        if (Constants.OPERATION.CREATE.equals(operation)) {
+            return authorities.contains(new SimpleGrantedAuthority(Permission.DOC_MAN_CREATE.name()));
+        }
+
+        // 編集画面を開く
+        else if (Constants.OPERATION.UPDATE.equals(operation)) {
+            if (authorities.contains(new SimpleGrantedAuthority(Permission.DOC_MAN_UPDATE.name()))) {
+                return checkPublicScope(authorities, document);
+            } else {
+                return false;
+            }
+        }
+
+        // 保存
+        else if (Constants.OPERATION.SAVE.equals(operation)) {
+            if (authorities.contains(new SimpleGrantedAuthority(Permission.DOC_MAN_SAVE.name()))) {
+                return checkPublicScope(authorities, document);
+            } else {
+                return false;
+            }
+        }
+
+        // 下書き保存
+        else if (Constants.OPERATION.SAVE_DRAFT.equals(operation)) {
+            if (authorities.contains(new SimpleGrantedAuthority(Permission.DOC_MAN_SAVE_DRAFT.name()))) {
+                return checkPublicScope(authorities, document);
+            } else {
+                return false;
+            }
+        }
+
+        // 下書き取消
+        else if (Constants.OPERATION.CANCEL_DRAFT.equals(operation)) {
+            if (authorities.contains(new SimpleGrantedAuthority(Permission.DOC_MAN_SAVE_DRAFT.name()))) {
+                return checkPublicScope(authorities, document);
+            } else {
+                return false;
+            }
+        }
+
+        // 無効
+        else if (Constants.OPERATION.INVALID.equals(operation)) {
+            if (authorities.contains(new SimpleGrantedAuthority(Permission.DOC_MAN_INVALID.name()))) {
+                return checkPublicScope(authorities, document);
+            } else {
+                return false;
+            }
+        }
+
+        // 無効解除
+        else if (Constants.OPERATION.VALID.equals(operation)) {
+            if (authorities.contains(new SimpleGrantedAuthority(Permission.DOC_MAN_INVALID.name()))) {
+                return checkPublicScope(authorities, document);
+            } else {
+                return false;
+            }
+        }
+
+        // 削除
+        else if (Constants.OPERATION.DELETE.equals(operation)) {
+            if (authorities.contains(new SimpleGrantedAuthority(Permission.DOC_MAN_DELETE.name()))) {
+                return checkPublicScope(authorities, document);
+            } else {
+                return false;
+            }
+        }
+
+        // アップロード
+        else if (Constants.OPERATION.UPLOAD.equals(operation)) {
+            return authorities.contains(new SimpleGrantedAuthority(Permission.DOC_MAN_UPLOAD.name()));
+        }
+
+        // 管理一覧を開く
+        else if (Constants.OPERATION.LIST.equals(operation)) {
+            return authorities.contains(new SimpleGrantedAuthority(Permission.DOC_MAN_LIST.name()));
+        }
+
+        // 検索一覧を開く
+        else if ("SEARCH_LIST".equals(operation)) {
+            return authorities.contains(new SimpleGrantedAuthority(Permission.DOC_LIST.name()));
+        }
+
+        // 全文検索画面を開く
+        else if ("SEARCH_FULLTEXT".equals(operation)) {
+            return authorities.contains(new SimpleGrantedAuthority(Permission.DOC_SEARCH.name()));
+        }
+
+        // 参照
+        else if (Constants.OPERATION.VIEW.equals(operation)) {
+            return checkPublicScope(authorities, document);
+        }
+
+        return false;
+    }
+
+    /**
      * 公開区分によるアクセス権をチェック
      *
      * @param authorities ログインユーザが保持する権限

@@ -39,18 +39,21 @@ public interface DocumentRevisionRepository extends NodeRevRepository<DocumentRe
 
 
     /**
-     * @param id
-     * @param publicScope
-     * @return
+     * 下書きを含まない最新のドキュメント情報を取得
+     * 指定したIDのドキュメントをVerの降順にし、先頭の1件を取得する
+     *
+     * @param id          ドキュメントID
+     * @param publicScope 公開区分
+     * @return DocumentRevision型の検索結果
      */
     DocumentRevision findTopByIdAndPublicScopeInOrderByVersionDesc(Long id, Set<String> publicScope);
 
     /**
      * 指定したidとVerのファイルを取得する
      *
-     * @param id          　ドキュメントID
-     * @param version     　ドキュメントVer
-     * @param publicScope 　公開区分
+     * @param id          ドキュメントID
+     * @param version     ドキュメントVer
+     * @param publicScope 公開区分
      * @return DocumentRevision型の検索結果
      */
     DocumentRevision findByIdAndVersionAndPublicScopeIn(Long id, Long version, Set<String> publicScope);
