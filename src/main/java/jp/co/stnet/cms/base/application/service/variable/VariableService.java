@@ -12,4 +12,7 @@ import java.util.List;
 public interface VariableService extends NodeIService<Variable, Long> {
 
     List<Variable> findAllByTypeAndCode(String type, String code);
+
+    List<Variable> findAllByType(String type);
+
 }

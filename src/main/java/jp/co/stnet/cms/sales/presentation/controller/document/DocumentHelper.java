@@ -148,9 +148,9 @@ public class DocumentHelper {
     StateMap getButtonStateMap(@NonNull String operation, Document record, DocumentForm form, LoggedInUser loggedInUser) {
         StateMap buttonState = getButtonStateMap(operation, record, form);
         if (operation.equals(Constants.OPERATION.VIEW)) {
-            if (!authority.hasAuthorityNotException(operation, loggedInUser, record)) {
-                buttonState.setViewFalse(Constants.BUTTON.GOTOUPDATE);
-            }
+//            if (!authority.hasAuthorityNotException(operation, loggedInUser, record)) {
+//                buttonState.setViewFalse(Constants.BUTTON.GOTOUPDATE);
+//            }
         }
 
 

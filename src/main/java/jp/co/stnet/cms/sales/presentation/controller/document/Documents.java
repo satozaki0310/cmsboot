@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static jp.co.stnet.cms.sales.presentation.controller.document.DocumentConstant.BASE_PATH;
+
 @Component
 public class Documents {
 
@@ -30,9 +32,14 @@ public class Documents {
     @Named("CL_DOC_TYPE")
     private CodeList docTypeCodeList;
 
+    private static final String CSV_DELIMITER = ",";
+
     @Autowired
     private Mapper beanMapper;
-
+    private static final String BRAKE_LINE = "<br>";
+    @Autowired
+    @Named("CL_ACCOUNT_FULLNAME")
+    private CodeList accountFullNameCodeList;
 
     /**
      * DataTables用のリストを取得
@@ -51,26 +58,32 @@ public class Documents {
             // ボタン
             documentListBean.setOperations(getToggleButton(document.getId().toString()));
 
+            // タイトル(リンク)
+            documentListBean.setTitle(getTitleLink(document.getId(), document.getTitle()));
+
             // ステータスラベル
             documentListBean.setStatusLabel(getStatusLabel(document.getStatus()));
 
             // 活用シーン
-            documentListBean.setUseStageLabel(getUseStageLabel(document.getUseStage(), ", "));
+            documentListBean.setUseStageLabel(getUseStageLabel(document.getUseStage(), CSV_DELIMITER));
 
             // ファイル名のリスト
-            documentListBean.setFilesLabel(getFilesLabel(document.getFiles(), "<br>"));
+            documentListBean.setFilesLabel(getFilesLabel(document.getFiles(), BRAKE_LINE));
 
             // ファイル名(PDF)のリスト
-            documentListBean.setPdfFilesLabel(getPdfFilesLabel(document.getFiles(), "<br>"));
+            documentListBean.setPdfFilesLabel(getPdfFilesLabel(document.getFiles(), BRAKE_LINE));
 
             // 公開区分のラベル
             documentListBean.setPublicScopeLabel(getPublicScopeLabel(document.getPublicScope()));
 
             // 文書の種類
-            documentListBean.setFileTypeLabel(getFileTypeLabel(document.getFiles(), "<br>"));
+            documentListBean.setFileTypeLabel(getFileTypeLabel(document.getFiles(), BRAKE_LINE));
 
             // 顧客公開区分のラベル
             documentListBean.setCustomerPublicLabel(getCustomerPublicLabel(document.getCustomerPublic()));
+
+            // 最終更新者の氏名
+            documentListBean.setLastModifiedByLabel(getLastModifiedByLabel(document.getLastModifiedBy()));
 
             // 不要な情報をクリア
             documentListBean.setFiles(new ArrayList<>());
@@ -101,41 +114,50 @@ public class Documents {
             documentCsvBean.setStatusLabel(getStatusLabel(document.getStatus()));
 
             // 区分
-            documentCsvBean.setDocCategory(document.getDocCategoryVariable().getCode());
-            documentCsvBean.setDocCategoryValue1(document.getDocCategoryVariable().getValue1());
-            documentCsvBean.setDocCategoryValue2(document.getDocCategoryVariable().getValue2());
+            if (document.getDocCategoryVariable() != null) {
+                documentCsvBean.setDocCategory(document.getDocCategoryVariable().getCode());
+                documentCsvBean.setDocCategoryValue1(document.getDocCategoryVariable().getValue1());
+                documentCsvBean.setDocCategoryValue2(document.getDocCategoryVariable().getValue2());
+            }
 
             // サービス
-            documentCsvBean.setDocService(document.getDocServiceVariable().getCode());
-            documentCsvBean.setDocServiceValue1(document.getDocServiceVariable().getValue1());
-            documentCsvBean.setDocServiceValue2(document.getDocServiceVariable().getValue2());
-            documentCsvBean.setDocServiceValue3(document.getDocServiceVariable().getValue3());
+            if (document.getDocServiceVariable() != null) {
+                documentCsvBean.setDocService(document.getDocServiceVariable().getCode());
+                documentCsvBean.setDocServiceValue1(document.getDocServiceVariable().getValue1());
+                documentCsvBean.setDocServiceValue2(document.getDocServiceVariable().getValue2());
+                documentCsvBean.setDocServiceValue3(document.getDocServiceVariable().getValue3());
+            }
 
             // 活用シーン
-            documentCsvBean.setUseStageLabel(getUseStageLabel(document.getUseStage(), ","));
+            documentCsvBean.setUseStageLabel(getUseStageLabel(document.getUseStage(), CSV_DELIMITER));
 
             // ファイル名のリスト
-            documentCsvBean.setFilesLabel(getFilesLabel(document.getFiles(), ","));
+            documentCsvBean.setFilesLabel(getFilesLabel(document.getFiles(), CSV_DELIMITER));
 
             // ファイル名(PDF)のリスト
-            documentCsvBean.setPdfFilesLabel(getPdfFilesLabel(document.getFiles(), ","));
+            documentCsvBean.setPdfFilesLabel(getPdfFilesLabel(document.getFiles(), CSV_DELIMITER));
 
             // 公開区分のラベル
             documentCsvBean.setPublicScopeLabel(getPublicScopeLabel(document.getPublicScope()));
 
             // 文書の種類
-            documentCsvBean.setFileTypeLabel(getFileTypeLabel(document.getFiles(), ","));
+            documentCsvBean.setFileTypeLabel(getFileTypeLabel(document.getFiles(), CSV_DELIMITER));
 
             // 顧客公開区分のラベル
             documentCsvBean.setCustomerPublicLabel(getCustomerPublicLabel(document.getCustomerPublic()));
 
             // 最終更新者(氏名)
-            documentCsvBean.setLastModifiedByLabel(accountService.getUserFullName(document.getLastModifiedBy()));
+            documentCsvBean.setLastModifiedByLabel(getLastModifiedByLabel(document.getLastModifiedBy()));
 
             list.add(documentCsvBean);
         }
 
         return list;
+    }
+
+    protected String getTitleLink(Long id, String value) {
+        OperationsUtil op = new OperationsUtil(BASE_PATH);
+        return "<a href=\"" + op.getViewUrl(id.toString()) + "\">" + value + "</a>";
     }
 
 
@@ -249,6 +271,16 @@ public class Documents {
             return CustomerPublic.getByValue(value).getCodeLabel();
         }
         return null;
+    }
+
+    /**
+     * 最終更新者のフルネームのを取得
+     *
+     * @param lastModifiedBy 最終更新者のユーザ名
+     * @return 最終更新者のフルネーム(取得できない場合は空白文字列)
+     */
+    protected String getLastModifiedByLabel(String lastModifiedBy) {
+        return accountFullNameCodeList.asMap().get(lastModifiedBy);
     }
 
     /**

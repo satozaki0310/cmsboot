@@ -13,6 +13,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -83,9 +84,9 @@ public class Document extends AbstractEntity<Long> implements Serializable, Stat
     private String chargePersonForCreation;
 
     /**
-     * 作成責任者
+     * 発行担当者
      */
-    private String responsiblePersonForCreation;
+    private String chargePersonForPublish;
 
     /**
      * 発行部門
@@ -130,7 +131,7 @@ public class Document extends AbstractEntity<Long> implements Serializable, Stat
      * 活用シーン
      */
     @ElementCollection(fetch = FetchType.EAGER)
-    private Set<String> useStage;
+    private Set<String> useStage = new HashSet<>();
 
     /**
      * 区分

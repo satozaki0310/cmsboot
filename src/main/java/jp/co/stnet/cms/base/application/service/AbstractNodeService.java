@@ -14,6 +14,7 @@ import jp.co.stnet.cms.common.message.MessageKeys;
 import jp.co.stnet.cms.common.util.BeanUtils;
 import jp.co.stnet.cms.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.QueryHints;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -42,7 +43,6 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
     protected final Map<String, Annotation> elementCollectionFieldsMap;
 
     protected final Map<String, Annotation> relationFieldsMap;
-
 
     @Autowired
     public Mapper beanMapper;
@@ -226,12 +226,14 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
         TypedQuery typedQuery;
         if (!count) {
             // 通常は１ページに必要な範囲を抽出する。
-            typedQuery = entityManager.createQuery(sql, clazz);
-            typedQuery.setFirstResult(input.getStart()); //開始行数
-            typedQuery.setMaxResults(input.getLength()); //取得件数
+            typedQuery = entityManager.createQuery(sql, clazz)
+                    .setHint(QueryHints.READ_ONLY, true)
+                    .setFirstResult(input.getStart()) //開始行数
+                    .setMaxResults(input.getLength()); //取得件数
         } else {
             // 件数を取得する場合は、データの範囲を指定しない。
-            typedQuery = entityManager.createQuery(sql, Long.class);
+            typedQuery = entityManager.createQuery(sql, Long.class)
+                    .setHint(QueryHints.READ_ONLY, true);
         }
 
         // パラメータ値設定(フィールドフィルタ)
@@ -348,16 +350,30 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
     protected StringBuilder getLeftOuterJoinClause(DataTablesInput input) {
         StringBuilder sql = new StringBuilder();
         // @OneToOne etc, @ElementCollection フィールドのための結合
+
+
+        Set<String> relationEntities = new LinkedHashSet<>();
+        // 重複除去
+        for (Column column : input.getColumns()) {
+            String relationEntity = getRelationEntity(column.getData());
+            if (relationEntity != null) {
+                relationEntities.add(relationEntity);
+            }
+        }
+
+        for (String relationEntity : relationEntities) {
+            sql.append(" LEFT JOIN c.");
+            sql.append(relationEntity);
+        }
+
         for (Column column : input.getColumns()) {
             String originalColumnName = column.getData();
             String convertedColumnName = convertColumnName(originalColumnName);
 
-            if (isCollectionElement(convertedColumnName)) {
+            if (isCollectionElement(convertedColumnName) && getRelationEntity(originalColumnName) == null) {
                 sql.append(" LEFT JOIN c.");
                 sql.append(convertedColumnName);
-            } else if (getRelationEntity(originalColumnName) != null) {
-                sql.append(" LEFT JOIN c.");
-                sql.append(getRelationEntity(originalColumnName));
+                sql.append(" " + convertedColumnName);
             }
         }
         return sql;
@@ -484,7 +500,11 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
                 sql.append(" = :");
                 sql.append(replacedColumnName);
             } else if (isFilterINClause(convertedColumnName)) {
-                sql.append("c." + convertedColumnName);
+                if (isCollectionElement(convertedColumnName)) {
+                    sql.append(convertedColumnName);
+                } else {
+                    sql.append("c." + convertedColumnName);
+                }
                 sql.append(" IN (:");
                 sql.append(replacedColumnName);
                 sql.append(")");
@@ -513,7 +533,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
                 sql.append(" ESCAPE '~'");
             } else if (isCollection(convertedColumnName)) {
                 sql.append(convertedColumnName);
-                sql.append(" LIKE :"); // TODO 何かおかしい
+                sql.append(" LIKE :");
                 sql.append(replacedColumnName);
                 sql.append(" ESCAPE '~'");
             } else if (isRelation(originalColumnName)) {
@@ -700,14 +720,14 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
     /**
      * DataTablesのフィールド名とエンティティのフィールド名の変換
      *
-     * @param org 変換前のフィールド名
+     * @param fieldName 変換前のフィールド名
      * @return 変換後のフォールド名
      */
-    protected String convertColumnName(String org) {
-        if (StringUtils.endsWith(org, "Label")) {
-            return StringUtils.left(org, org.length() - 5);
+    protected String convertColumnName(String fieldName) {
+        if (StringUtils.endsWith(fieldName, "Label")) {
+            return StringUtils.left(fieldName, fieldName.length() - 5);
         } else {
-            return org;
+            return fieldName;
         }
     }
 

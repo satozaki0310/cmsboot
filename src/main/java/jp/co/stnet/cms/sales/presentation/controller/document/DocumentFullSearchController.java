@@ -47,7 +47,7 @@ public class DocumentFullSearchController {
     /**
      * 検索入力フォームに入力した内容をキーワードに検索する
      * 値が入力されている場合: 入力された内容でルシーンから検索
-     * 値が入っていない場合: 検索ボタンを選択できない？
+     * 値が入っていない場合: 検索ボタンを選択できない or 全検索
      *
      * @param model
      * @param form
@@ -56,7 +56,7 @@ public class DocumentFullSearchController {
      * @param loggedInUser
      * @return
      */
-    @GetMapping(value = "search", params = "q")
+    @GetMapping(value = "search", params = {"q", "period", "sort", "facets"})
     public String search(Model model, @Validated DocumentFullSearchForm form, BindingResult bindingResult,
                          @PageableDefault(size = 5) Pageable pageable, @AuthenticationPrincipal LoggedInUser loggedInUser) {
 

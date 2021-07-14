@@ -126,10 +126,10 @@ public class DocumentIndex implements Serializable, StatusInterface {
     private String chargePersonForCreation;
 
     /**
-     * 作成責任者
+     * 発行担当者
      */
     @KeywordField
-    private String responsiblePersonForCreation;
+    private String chargePersonForPublish;
 
     /**
      * 発行部門
@@ -246,13 +246,9 @@ public class DocumentIndex implements Serializable, StatusInterface {
     private FileManaged pdfManaged;
 
     @FullTextField(analyzer = "japanese")
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
 
-    /**
-     * 想定読者
-     */
-    private String intendedReader;
 
     /**
      * 備考
