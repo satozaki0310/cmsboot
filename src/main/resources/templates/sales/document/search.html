@@ -3,11 +3,10 @@
 
 <head>
     <!-- ページタイトルを記入 -->
-    <title>ドキュメント</title>
+    <title>全文検索</title>
 </head>
 
 <body>
-<div th:replace="~{/layout/libraries :: datatables}"></div>
 
 <section class="content-header">
     <div class="container">
@@ -15,7 +14,7 @@
         <div class="row">
             <div class="col-18 mb-3">
                 <!-- ページタイトルを記入 -->
-                <h4>ドキュメント</h4>
+                <h4>全文検索</h4>
             </div>
             <div class="col-18 text-right">
                 <!-- ページタイトル右の余白 -->
@@ -31,11 +30,11 @@
 
         <!-- ここより下にメインコンテンツを記入 -->
         <form autocomplete="off" enctype="multipart/form-data" method="get" th:action
-              th:object="${DocumentFullSearchForm}">
+              th:object="${documentFullSearchForm}">
             <div class="row">
                 <div class="col-18 offset-1">
                     <div class="input-group">
-                        <input class="form-control" name="q" th:field=*{q} type="text"/>
+                        <input class="form-control" name="q" th:value="*{q}" type="text"/>
                         <div class="input-group-append">
                             <button class="btn btn-button py-0">検索</button>
                         </div>
@@ -45,49 +44,48 @@
         </form>
     </div> <!-- <div class="row"> -->
 
-    <br>
-    <br>
-    <div class="row">
-        <div class="col-28 pr-5 pl-5">
-            <div th:if="${totalHitCount != null}">
-                <p th:text="${totalHitCount} + '件が検索にヒットしました。'"> 1件が検索にヒットしました。</p>
-            </div>
-            <div>
-                <tr th:each="item, status : ${hits}">
-                    <div class="mb-5">
-                        <h4>
-                            <a href="${item.id}" th:text="$item.attachedFile01Managed.originalFilename"></a>
-                            <span class="h6"><a
-                                    href="${pageContext.request.contextPath}/person/${item.attachedFile01Uuid}/download"><i
-                                    class="fas fa-file-download ml-2"></i></a></span>
-                        </h4>
-                        <p class="" th:text="${item.contentHighlight}"></p>
-                    </div>
-                <tr>
-            </div>
-            <div class="mx-auto text-center">
-                <li th:each="i : ${#pageInfo.sequence(page, 5)}">
-                    <a href="@{sample(page=${i-1},size=${page.size})}" th:text="${i}"></a>
-                </li>
-            </div>
-        </div>
-        <div class="col-8 p-4">
-            <div class="h-100 border-left p-4">
-                <div class="ml-4">
-                    <h6>ファセット検索</h6>
-                    <hr>
-                    <c:forEach items="${countsByGenre}" var="code" varStatus="status">
-                        <div>
-                            ${f:h(CL_SAMPLE[code.key])} <span
-                                class="badge badge-pill badge-secondary">${code.value}</span>
-                        </div>
-                    </c:forEach>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!--    <br>-->
+    <!--    <br>-->
+    <!--    <div class="row">-->
+    <!--        <div class="col-28 pr-5 pl-5">-->
+    <!--            <div th:if="${totalHitCount != null}">-->
+    <!--                <p th:text="${totalHitCount} + '件が検索にヒットしました。'"> 1件が検索にヒットしました。</p>-->
+    <!--            </div>-->
+    <!--            <div>-->
+    <!--                <tr th:each="item, status : ${hits}">-->
+    <!--                    <div class="mb-5">-->
+    <!--                        <h4>-->
+    <!--                            <a href="${item.id}" th:text="$item.attachedFile01Managed.originalFilename"></a>-->
+    <!--                            <span class="h6"><a-->
+    <!--                                    href="${pageContext.request.contextPath}/person/${item.attachedFile01Uuid}/download"><i-->
+    <!--                                    class="fas fa-file-download ml-2"></i></a></span>-->
+    <!--                        </h4>-->
+    <!--                        <p class="" th:text="${item.contentHighlight}"></p>-->
+    <!--                    </div>-->
+    <!--                <tr>-->
+    <!--            </div>-->
+    <!--            <div class="mx-auto text-center">-->
+    <!--                <li th:each="i : ${#pageInfo.sequence(page, 5)}">-->
+    <!--                    <a href="@{sample(page=${i-1},size=${page.size})}" th:text="${i}"></a>-->
+    <!--                </li>-->
+    <!--            </div>-->
+    <!--        </div>-->
+    <!--        <div class="col-8 p-4">-->
+    <!--            <div class="h-100 border-left p-4">-->
+    <!--                <div class="ml-4">-->
+    <!--                    <h6>ファセット検索</h6>-->
+    <!--                    <hr>-->
+    <!--                    <tr th:each="code: ${countsByGenre}">-->
+    <!--                        <div th:text="${code.key}">-->
+    <!--                            <span class="badge badge-pill badge-secondary" th:text="${code.value}"></span>-->
+    <!--                        </div>-->
+    <!--                    </tr>-->
+    <!--                </div>-->
+    <!--            </div>-->
+    <!--        </div>-->
+    <!--    </div>-->
 
 
-    <!-- ここより上にメインコンテンツを記入 -->
-    </div>
+    <!--    &lt;!&ndash; ここより上にメインコンテンツを記入 &ndash;&gt;-->
+    <!--    </div>-->
 </section>

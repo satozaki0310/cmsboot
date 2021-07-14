@@ -6,11 +6,13 @@ import jp.co.stnet.cms.sales.domain.model.document.DocumentIndex;
 import org.hibernate.search.engine.search.query.SearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class DocumentFullSearchServiceImpl implements DocumentFullSearchService {
 
     @Autowired
@@ -66,7 +68,7 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
     public List<Variable> label(Map<String, Long> text) {
         // Mapのコードの値だけをリストに格納する
         List<String> code = new ArrayList<>();
-        variableRepository.findByCode(code);
+        //variableRepository.findByCode(code);
         return null;
     }
 }
