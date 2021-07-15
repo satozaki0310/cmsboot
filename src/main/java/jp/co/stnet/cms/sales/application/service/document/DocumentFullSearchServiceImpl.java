@@ -1,13 +1,36 @@
 package jp.co.stnet.cms.sales.application.service.document;
 
 import jp.co.stnet.cms.base.domain.model.variable.Variable;
-import jp.co.stnet.cms.sales.application.repository.variable.VariableRepository;
+import jp.co.stnet.cms.common.util.StringUtils;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentIndex;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.ja.JapaneseTokenizer;
+import org.apache.lucene.analysis.ja.tokenattributes.BaseFormAttribute;
+import org.apache.lucene.analysis.ja.tokenattributes.InflectionAttribute;
+import org.apache.lucene.analysis.ja.tokenattributes.PartOfSpeechAttribute;
+import org.apache.lucene.analysis.ja.tokenattributes.ReadingAttribute;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.highlight.*;
+import org.hibernate.search.backend.lucene.LuceneBackend;
+import org.hibernate.search.engine.backend.Backend;
+import org.hibernate.search.engine.backend.index.IndexManager;
+import org.hibernate.search.engine.search.aggregation.AggregationKey;
 import org.hibernate.search.engine.search.query.SearchResult;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.mapping.SearchMapping;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +38,8 @@ import java.util.Map;
 @Service
 public class DocumentFullSearchServiceImpl implements DocumentFullSearchService {
 
-    @Autowired
-    VariableRepository variableRepository;
+    @PersistenceContext
+    EntityManager entityManager;
 
     /**
      * 入力フォームに入力した内容で全文検索を行う
@@ -33,7 +56,33 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
      */
     @Override
     public SearchResult<DocumentIndex> search(String term, Pageable pageable) {
-        return null;
+        SearchSession searchSession = Search.session(entityManager);
+
+        List<String> tokens = analyze(term);
+        System.out.println(StringUtils.join(tokens, " + "));
+
+        AggregationKey<Map<String, Long>> countsByGenreKey = AggregationKey.of("countsByGenre");
+
+        int pageSize = 5;
+        long offset = 0;
+
+        if (pageable != null) {
+            pageSize = pageable.getPageSize();
+            offset = pageable.getOffset();
+        }
+
+        SearchResult<DocumentIndex> result = searchSession.search(DocumentIndex.class)
+                .where(
+                        f -> f.simpleQueryString()
+                                .field("content")
+                                .matching(StringUtils.join(tokens, " + "))
+                )
+                .aggregation(countsByGenreKey, f -> f.terms()
+                        .field("documentNumber", String.class))
+                .sort(f -> f.score())
+                .fetch((int) offset, pageSize);
+
+        return result;
     }
 
     /**
@@ -45,17 +94,89 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
      */
     @Override
     public String highlight(String text, String term) {
-        return null;
+        try {
+
+
+            SearchMapping mapping = Search.mapping(entityManager.getEntityManagerFactory());
+            IndexManager indexManager = mapping.indexManager("DocumentIndex");
+            Backend backend = mapping.backend();
+            LuceneBackend luceneBackend = backend.unwrap(LuceneBackend.class);
+            Analyzer analyzer = luceneBackend.analyzer("japanese").orElseThrow(() -> new IllegalStateException());
+//
+//            Analyzer analyzer2 = new JapaneseAnalyzer();
+            QueryParser queryParser = new QueryParser("content", analyzer);
+//            queryParser.setAllowLeadingWildcard(true);
+            Query query = queryParser.parse(term);
+            QueryScorer scorer = new QueryScorer(query, "content");
+            Formatter formatter = new SimpleHTMLFormatter("<em>", "</em>");
+            Highlighter highlighter = new Highlighter(formatter, scorer);
+
+            Fragmenter fragmenter = new SimpleSpanFragmenter(scorer);
+            highlighter.setTextFragmenter(fragmenter);
+
+            TokenStream stream = analyzer.tokenStream("content", text);
+//
+            String[] frags = highlighter.getBestFragments(stream, text, 4);
+
+
+            String fragsString = "";
+            for (String f : frags) {
+                fragsString = fragsString + f + " ";
+            }
+
+            return fragsString;
+
+            //
+//
+        } catch (IOException | ParseException | InvalidTokenOffsetsException e) {
+            e.printStackTrace();
+        }
+
+        return "";
     }
 
     /**
      * 日本語形態素解析を行う
      *
-     * @param term 入力フォームに入力した内容
+     * @param q 入力フォームに入力した内容
      * @return 形態素解析の結果(List)
      */
-    private List<String> analyze(String term) {
-        return null;
+    private List<String> analyze(String q) {
+
+        List<String> tokens = new ArrayList<>();
+
+        JapaneseTokenizer tokenizer = new JapaneseTokenizer(null, false, JapaneseTokenizer.Mode.NORMAL);
+
+        CharTermAttribute term = tokenizer.addAttribute(CharTermAttribute.class);
+        OffsetAttribute offset = tokenizer.addAttribute(OffsetAttribute.class);
+        PartOfSpeechAttribute partOfSpeech = tokenizer.addAttribute(PartOfSpeechAttribute.class);
+        InflectionAttribute inflection = tokenizer.addAttribute(InflectionAttribute.class);
+        BaseFormAttribute baseForm = tokenizer.addAttribute(BaseFormAttribute.class);
+        ReadingAttribute reading = tokenizer.addAttribute(ReadingAttribute.class);
+
+        tokenizer.setReader(new StringReader(q));
+        try {
+            tokenizer.reset();
+            while (tokenizer.incrementToken()) {
+
+                tokens.add(term.toString());
+                System.out.println(term + "\t" // 表層形
+                        + offset.startOffset() + "-" + offset.endOffset() + "," // 文字列中の位置
+                        + partOfSpeech.getPartOfSpeech() + "," // 品詞-品詞細分類1-品詞細分類2
+                        + inflection.getInflectionType() + "," // 活用型
+                        + inflection.getInflectionForm() + "," // 活用形
+                        + baseForm.getBaseForm() + "," // 原形 (活用しない語では null)
+                        + reading.getReading() + "," // 読み
+                        + reading.getPronunciation()); // 発音
+            }
+            tokenizer.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            // TODO throw new Exception
+        }
+
+        return tokens;
     }
 
     /**

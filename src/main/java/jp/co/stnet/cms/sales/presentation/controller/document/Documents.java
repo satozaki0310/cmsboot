@@ -32,14 +32,14 @@ public class Documents {
     @Named("CL_DOC_TYPE")
     private CodeList docTypeCodeList;
 
-    private static final String CSV_DELIMITER = ",";
-
-    @Autowired
-    private Mapper beanMapper;
-    private static final String BRAKE_LINE = "<br>";
     @Autowired
     @Named("CL_ACCOUNT_FULLNAME")
     private CodeList accountFullNameCodeList;
+
+    private static final String CSV_DELIMITER = ",";
+    private static final String BRAKE_LINE = "<br>";
+    @Autowired
+    private Mapper beanMapper;
 
     /**
      * DataTables用のリストを取得
@@ -76,8 +76,8 @@ public class Documents {
             // 公開区分のラベル
             documentListBean.setPublicScopeLabel(getPublicScopeLabel(document.getPublicScope()));
 
-            // 文書の種類
-            documentListBean.setFileTypeLabel(getFileTypeLabel(document.getFiles(), BRAKE_LINE));
+            // ファイルメモ
+            documentListBean.setFileMemo(getMemo(document.getFiles(), BRAKE_LINE));
 
             // 顧客公開区分のラベル
             documentListBean.setCustomerPublicLabel(getCustomerPublicLabel(document.getCustomerPublic()));
@@ -140,8 +140,8 @@ public class Documents {
             // 公開区分のラベル
             documentCsvBean.setPublicScopeLabel(getPublicScopeLabel(document.getPublicScope()));
 
-            // 文書の種類
-            documentCsvBean.setFileTypeLabel(getFileTypeLabel(document.getFiles(), CSV_DELIMITER));
+            // ファイルメモ
+            documentCsvBean.setFileMemo(getMemo(document.getFiles(), CSV_DELIMITER));
 
             // 顧客公開区分のラベル
             documentCsvBean.setCustomerPublicLabel(getCustomerPublicLabel(document.getCustomerPublic()));
@@ -175,24 +175,20 @@ public class Documents {
     }
 
     /**
-     * 文書の種類のリストを取得する
+     * ファイルメモのリストを取得する
      *
      * @param files     Fileのリスト
      * @param delimiter 区切り文字
-     * @return 文書の書類のラベル
+     * @return ファイルメモ
      */
-    protected String getFileTypeLabel(List<File> files, String delimiter) {
-        List<String> fileTypeLabel = new ArrayList<>();
+    protected String getMemo(List<File> files, String delimiter) {
+        List<String> memo = new ArrayList<>();
         for (File file : files) {
-            if (file.getType() != null) {
-                for (String v : docTypeCodeList.asMap().keySet()) {
-                    if (file.getType().equals(v)) {
-                        fileTypeLabel.add(docTypeCodeList.asMap().get(v));
-                    }
-                }
+            if (file.getMemo() != null) {
+                memo.add(file.getMemo());
             }
         }
-        return String.join(delimiter, fileTypeLabel);
+        return String.join(delimiter, memo);
     }
 
     /**

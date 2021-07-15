@@ -8,6 +8,76 @@
 
 <body>
 
+<style>
+    .pagination {
+  display: inline-block;
+  padding-left: 0;
+  margin: 20px 0;
+  border-radius: 4px;
+}
+
+.pagination > li {
+  display: inline;
+}
+
+.pagination > li > a,
+.pagination > li > span {
+  position: relative;
+  float: left;
+  padding: 6px 12px;
+  margin-left: -1px;
+  line-height: 1.428571429;
+  text-decoration: none;
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+}
+
+.pagination > li:first-child > a,
+.pagination > li:first-child > span {
+  margin-left: 0;
+  border-bottom-left-radius: 4px;
+  border-top-left-radius: 4px;
+}
+
+.pagination > li:last-child > a,
+.pagination > li:last-child > span {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.pagination > li > a:hover,
+.pagination > li > span:hover,
+.pagination > li > a:focus,
+.pagination > li > span:focus {
+  background-color: #eeeeee;
+}
+
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover,
+.pagination > .active > a:focus,
+.pagination > .active > span:focus {
+  z-index: 2;
+  color: #ffffff;
+  cursor: default;
+  background-color: #428bca;
+  border-color: #428bca;
+}
+
+.pagination > .disabled > span,
+.pagination > .disabled > a,
+.pagination > .disabled > a:hover,
+.pagination > .disabled > a:focus {
+  color: #999999;
+  cursor: not-allowed;
+  background-color: #ffffff;
+  border-color: #dddddd;
+}
+
+
+
+</style>
 <section class="content-header">
     <div class="container">
         <!-- -fluidを外すと横幅が狭くなる-->
@@ -32,7 +102,7 @@
         <form autocomplete="off" enctype="multipart/form-data" method="get" th:action
               th:object="${documentFullSearchForm}">
             <div class="row">
-                <div class="col-18 offset-1">
+                <div class="col-18 offset-10 mb-4 mt-5">
                     <div class="input-group">
                         <input class="form-control" name="q" th:value="*{q}" type="text"/>
                         <div class="input-group-append">
@@ -41,51 +111,270 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-4 offset-20">
+                    <th:block>
+                        <select class="form-control"
+                                th:placeholder="${placeholder}">
+                            <!--                    <option th:each="item : ${__${items}__}"-->
+                            <!--                            th:text="${item.value}"-->
+                            <!--                            th:value="${item.key}"></option>-->
+                            <option value="lastUpdate">最終更新日(降)</option>
+                            <option value="title">タイトル(昇)</option>
+                            <option value="class">区分(昇)</option>
+                        </select>
+                    </th:block>
+                </div>
+                <div class="col-4">
+                    <th:block>
+                        <select class="form-control"
+                                th:placeholder="${placeholder}">
+                            <!--                    <option th:each="item : ${__${items}__}"-->
+                            <!--                            th:text="${item.value}"-->
+                            <!--                            th:value="${item.key}"></option>-->
+                            <option value="not">期間指定なし</option>
+                            <option value="1week">1週間</option>
+                            <option value="1month">一ヶ月</option>
+                            <option value="1year">1年</option>
+                        </select>
+                    </th:block>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-8 offset-10 mt-2">
+                    <block th:if="${totalHitCount != null}">
+                        <p th:text="${totalHitCount} + '件が検索にヒットしました。'"></p>
+                    </block>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-9">
+                    <div class="border p-4 mb-5">
+                        <div class="ml-4">
+                            <h6>区分</h6>
+                            <hr>
+                            <!--                    <tr th:each="code: ${countsByGenre}">-->
+                            <!--                        <div th:text="${code.key}">-->
+                            <!--                            <span class="badge badge-pill badge-secondary" th:text="${code.value}"></span>-->
+                            <!--                        </div>-->
+                            <!--                    </tr>-->
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    年度計画
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="facets">
+                                <label class="form-check-label">
+
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    規定
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    トラブル関連
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    プロモーション
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    パンフレット
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    提案書(雛形)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    業務フロー
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    業務マニュアル
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    システム操作マニュアル
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    契約書 （約款・雛形）
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    その他資料
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border p-4">
+                        <div class="ml-4">
+                            <h6>サービス</h6>
+                            <hr>
+                            <!--                    <tr th:each="code: ${countsByGenre}">-->
+                            <!--                        <div th:text="${code.key}">-->
+                            <!--                            <span class="badge badge-pill badge-secondary" th:text="${code.value}"></span>-->
+                            <!--                        </div>-->
+                            <!--                    </tr>-->
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    PF
+                                </label>
+                                <span>(22)</span>
+                            </div>
+                            <div class="form-check ml-3">
+                                <input class="form-check-input" type="checkbox" value="facets">
+                                <label class="form-check-label">
+                                    NI
+                                </label>
+                                <span>(2)</span>
+                            </div>
+                            <div class="form-check ml-3">
+                                <input class="form-check-input" type="checkbox" value="facets">
+                                <label class="form-check-label">
+                                    PF共通
+                                </label>
+                                <span>(4)</span>
+                            </div>
+                            <div class="form-check ml-3">
+                                <input class="form-check-input" type="checkbox" value="facets">
+                                <label class="form-check-label">
+                                    Web会議
+                                </label>
+                                <span>(1)</span>
+                            </div>
+                            <div class="form-check ml-3">
+                                <input class="form-check-input" type="checkbox" value="facets">
+                                <label class="form-check-label">
+                                    クラウド
+                                </label>
+                                <span>(3)</span>
+                            </div>
+                            <div class="form-check ml-3">
+                                <input class="form-check-input" type="checkbox" value="facets">
+                                <label class="form-check-label">
+                                    グループウェア
+                                </label>
+                                <span>(4)</span>
+                            </div>
+                            <div class="form-check ml-3">
+                                <input class="form-check-input" type="checkbox" value="facets">
+                                <label class="form-check-label">
+                                    サービス間コネクティビティ
+                                </label>
+                                <span>(2)</span>
+                            </div>
+                            <div class="form-check ml-3">
+                                <input class="form-check-input" type="checkbox" value="facets">
+                                <label class="form-check-label">
+                                    ストレージ
+                                </label>
+                                <span>(1)</span>
+                            </div>
+                            <div class="form-check ml-3">
+                                <input class="form-check-input" type="checkbox" value="facets">
+                                <label class="form-check-label">
+                                    セキュリティ
+                                </label>
+                                <span>(3)</span>
+                            </div>
+
+                            <div class="form-check ml-3">
+                                <input class="form-check-input" type="checkbox" value="facets">
+                                <label class="form-check-label">
+                                    グループウェア
+                                </label>
+                                <span>(4)</span>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    SI
+                                </label>
+                                <span>(4)</span>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    事業全般
+                                </label>
+                                <span>(2)</span>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="share">
+                                <label class="form-check-label">
+                                    通信
+                                </label>
+                                <span>(1)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-18 offset-1">
+                    <tr th:each="item, status : ${hits}">
+                        <div>
+                            <div class="mb-4">
+                                <h4>
+                                    <a th:href="${item.id + '/latest'}" th:text="${item.title}"></a>
+                                    <!--                            <span class="h6"><a-->
+                                    <!--                                    href="${pageContext.request.contextPath}/person/${item.attachedFile01Uuid}/download"><i-->
+                                    <!--                                    class="fas fa-file-download ml-2"></i></a></span>-->
+                                    <span class="h6">
+                                        <a href="search">
+                                            <i class="fas fa-file-download ml-2"></i>
+                                        </a>
+                                    </span>
+                                </h4>
+                            </div>
+
+                            <p class="" th:text="${item.contentHighlight}"></p>
+                            <p>【区分1】【区分2】【区分3】</p>
+                        </div>
+                    </tr>
+                </div>
+            </div>
         </form>
-    </div> <!-- <div class="row"> -->
+    </div>
 
-    <!--    <br>-->
-    <!--    <br>-->
-    <!--    <div class="row">-->
-    <!--        <div class="col-28 pr-5 pl-5">-->
-    <!--            <div th:if="${totalHitCount != null}">-->
-    <!--                <p th:text="${totalHitCount} + '件が検索にヒットしました。'"> 1件が検索にヒットしました。</p>-->
-    <!--            </div>-->
-    <!--            <div>-->
-    <!--                <tr th:each="item, status : ${hits}">-->
-    <!--                    <div class="mb-5">-->
-    <!--                        <h4>-->
-    <!--                            <a href="${item.id}" th:text="$item.attachedFile01Managed.originalFilename"></a>-->
-    <!--                            <span class="h6"><a-->
-    <!--                                    href="${pageContext.request.contextPath}/person/${item.attachedFile01Uuid}/download"><i-->
-    <!--                                    class="fas fa-file-download ml-2"></i></a></span>-->
-    <!--                        </h4>-->
-    <!--                        <p class="" th:text="${item.contentHighlight}"></p>-->
-    <!--                    </div>-->
-    <!--                <tr>-->
-    <!--            </div>-->
-    <!--            <div class="mx-auto text-center">-->
-    <!--                <li th:each="i : ${#pageInfo.sequence(page, 5)}">-->
-    <!--                    <a href="@{sample(page=${i-1},size=${page.size})}" th:text="${i}"></a>-->
-    <!--                </li>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--        <div class="col-8 p-4">-->
-    <!--            <div class="h-100 border-left p-4">-->
-    <!--                <div class="ml-4">-->
-    <!--                    <h6>ファセット検索</h6>-->
-    <!--                    <hr>-->
-    <!--                    <tr th:each="code: ${countsByGenre}">-->
-    <!--                        <div th:text="${code.key}">-->
-    <!--                            <span class="badge badge-pill badge-secondary" th:text="${code.value}"></span>-->
-    <!--                        </div>-->
-    <!--                    </tr>-->
-    <!--                </div>-->
-    <!--            </div>-->
-    <!--        </div>-->
+
+    <div class="text-center">
+        <div th:replace="~{fragments/page :: pagination (${page})}"></div>
+    </div>
+
+    <!--    <div class="mx-auto text-center">-->
+    <!--        <li th:each="i : ${#pageInfo.sequence(page, 5)}">-->
+    <!--            <a href="@{sample(page=${i-1},size=${page.size})}" th:text="${i}"></a>-->
+    <!--        </li>-->
     <!--    </div>-->
 
 
-    <!--    &lt;!&ndash; ここより上にメインコンテンツを記入 &ndash;&gt;-->
-    <!--    </div>-->
+    <!-- ここより上にメインコンテンツを記入 -->
+    <!--        </div>-->
 </section>

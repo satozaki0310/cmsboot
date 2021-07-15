@@ -3,6 +3,7 @@ package jp.co.stnet.cms.sales.presentation.controller.document;
 import com.github.dozermapper.core.Mapper;
 import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import jp.co.stnet.cms.sales.application.service.document.DocumentFullSearchService;
+import jp.co.stnet.cms.sales.application.service.document.DocumentHistoryService;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentFullSearchForm;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentIndex;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentIndexSearchRow;
@@ -21,10 +22,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.terasoluna.gfw.common.message.ResultMessages;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,15 +39,38 @@ public class DocumentFullSearchController {
     @Autowired
     Mapper beanMapper;
 
+    @Autowired
+    DocumentHistoryService documentHistoryService;
+
+    @Autowired
+    DocumentHelper helper;
+
     @ModelAttribute
     private DocumentFullSearchForm setUpFullSearchForm() {
         return new DocumentFullSearchForm();
     }
 
-    @GetMapping("search")
-    public String search(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser) {
-        return BASE_PATH + "/search";
-    }
+//    @GetMapping("search")
+//    public String search(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser) {
+//        model.addAttribute("totalHitCount", "2");
+//        List<DocumentIndexSearchRow> hits = new ArrayList<>();
+//        long j = 1;
+//        for (int i=0; i<3; i++) {
+//            DocumentIndexSearchRow d = new DocumentIndexSearchRow();
+//            d.setContentHighlight("test");
+//            d.setTitle("ピカラ　営業マニュアル");
+//            d.setId(j);
+//            j++;
+//            hits.add(d);
+//        }
+//        Set<String> publicScope = helper.getPublicScope(loggedInUser);
+//        long id = 1;
+//        Page<DocumentRevision> page = documentHistoryService.search(id, true, publicScope);
+//
+//        model.addAttribute("hits", hits);
+//        model.addAttribute("page", page);
+//        return BASE_PATH + "/search";
+//    }
 
     /**
      * 検索入力フォームに入力した内容をキーワードに検索する
@@ -62,15 +84,15 @@ public class DocumentFullSearchController {
      * @param loggedInUser
      * @return
      */
-    @GetMapping(value = "search", params = {"q", "period", "sort", "facets"})
+    @GetMapping(value = "search", params = "q")
     public String search(Model model, @Validated DocumentFullSearchForm form, BindingResult bindingResult,
                          @PageableDefault(size = 5) Pageable pageable, @AuthenticationPrincipal LoggedInUser loggedInUser) {
 
         // 検索キーワードが入力されていないときにエラー表示 ここはなにかを検索させたほうがいい？
-        if (form.getQ() == null) {
-            model.addAttribute(ResultMessages.info().add("e.sl.fw.5001"));
-            return search(model, loggedInUser);
-        }
+//        if (form.getQ() == null) {
+//            model.addAttribute(ResultMessages.info().add("e.sl.fw.5001"));
+//            return search(model, loggedInUser);
+//        }
 
         SearchResult<DocumentIndex> result = documentFullSearchService.search(form.getQ(), pageable);
 
@@ -88,13 +110,13 @@ public class DocumentFullSearchController {
         // ページの表示情報を渡す？
         Page<DocumentIndexSearchRow> page = new PageImpl<>(hits, pageable, result.total().hitCount());
 
-        Map<String, String> query = new HashMap<>();
-        query.put("q", form.getQ());
+//        Map<String, String> query = new HashMap<>();
+//        query.put("q", form.getQ());
 
         // Modelに格納
-        model.addAttribute("query", query);
+//        model.addAttribute("query", query);
         model.addAttribute("page", page);
-        model.addAttribute("q", form.getQ());
+//        model.addAttribute("q", form.getQ());
         model.addAttribute("result", result);
         model.addAttribute("hits", hits);
         model.addAttribute("totalHitCount", result.total().hitCount());

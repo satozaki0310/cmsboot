@@ -26,8 +26,6 @@
 div#list_filter {
     display: none;
 }
-
-
 </style>
 
 <section class="content">
@@ -51,7 +49,7 @@ div#list_filter {
         <table class="table-sm table-striped nowrap" id="list">
             <thead>
             <tr class="filter">
-                <!--                <th class="text-center px-2" data-filter="disable"></th>&lt;!&ndash; 隠しフィールド &ndash;&gt;-->
+<!--                <th class="text-center px-2" data-filter="disable"></th>&lt;!&ndash; 隠しフィールド &ndash;&gt;-->
                 <th data-filter="disable"></th><!-- # -->
                 <th data-filter="disable"></th><!-- 操作 -->
                 <th data-filter="disable"><!-- ステータス -->
@@ -83,8 +81,8 @@ div#list_filter {
                 <th></th><!-- 発行部門 -->
                 <th></th><!-- 備考 -->
                 <th></th><!-- 変更理由 -->
-                <th data-filter="disable"></th><!-- 文書種類 -->
                 <th data-filter="disable"></th><!-- ファイル -->
+                <th data-filter="disable"></th><!-- ファイルメモ -->
                 <th data-filter="disable"><!-- 活用シーン -->
                     <select class="dataTables_column_filter form-control multiple-select" data-column="11"
                             data-container=".content" id="col_filter_11" multiple="multiple">
@@ -146,8 +144,8 @@ div#list_filter {
                 <th class="text-center">発行部門</th>
                 <th class="text-center">備考</th>
                 <th class="text-center">変更理由</th>
-                <th class="text-center">文書種類</th>
                 <th class="text-center">ファイル</th>
+                <th class="text-center">ファイルメモ</th>
                 <th class="text-center">活用シーン</th>
                 <th class="text-center">公開区分</th>
                 <th class="text-center">顧客公開</th>
@@ -302,12 +300,12 @@ var pagechange = false;
               render: $.fn.dataTable.render.text(),
             },
             {
-              data: 'fileTypeLabel',
+              data: 'filesLabel',
               orderable: false,
               searchable: false,
             },
             {
-              data: 'filesLabel',
+              data: 'fileMemo',
               orderable: false,
               searchable: false,
             },
