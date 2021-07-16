@@ -60,6 +60,8 @@ public class DocumentHelper {
     // 対象のフォーム
     private static final Class formClass = DocumentForm.class;
 
+    private static final String DOC_CATEGORY2 = "DOC_CATEGORY2";
+
     /**
      * 許可されたOperationか
      *

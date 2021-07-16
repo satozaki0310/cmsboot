@@ -25,7 +25,10 @@ public class CsvUtils {
      * @return CsvConfig(TAB区切り)
      */
     public static CsvConfig getTsvDefault() {
-        return new CsvConfig('\t');
+        CsvConfig config = new CsvConfig('\t');
+        config.setNullString("");
+        config.setUtf8bomPolicy(true);
+        return config;
     }
 
 }

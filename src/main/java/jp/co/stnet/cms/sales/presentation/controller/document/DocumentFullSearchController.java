@@ -7,6 +7,7 @@ import jp.co.stnet.cms.sales.application.service.document.DocumentHistoryService
 import jp.co.stnet.cms.sales.domain.model.document.DocumentFullSearchForm;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentIndex;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentIndexSearchRow;
+import jp.co.stnet.cms.sales.domain.model.document.DocumentRevision;
 import org.hibernate.search.engine.search.aggregation.AggregationKey;
 import org.hibernate.search.engine.search.query.SearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static jp.co.stnet.cms.sales.presentation.controller.document.DocumentConstant.BASE_PATH;
 
@@ -50,27 +52,27 @@ public class DocumentFullSearchController {
         return new DocumentFullSearchForm();
     }
 
-//    @GetMapping("search")
-//    public String search(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser) {
-//        model.addAttribute("totalHitCount", "2");
-//        List<DocumentIndexSearchRow> hits = new ArrayList<>();
-//        long j = 1;
-//        for (int i=0; i<3; i++) {
-//            DocumentIndexSearchRow d = new DocumentIndexSearchRow();
-//            d.setContentHighlight("test");
-//            d.setTitle("ピカラ　営業マニュアル");
-//            d.setId(j);
-//            j++;
-//            hits.add(d);
-//        }
-//        Set<String> publicScope = helper.getPublicScope(loggedInUser);
-//        long id = 1;
-//        Page<DocumentRevision> page = documentHistoryService.search(id, true, publicScope);
-//
-//        model.addAttribute("hits", hits);
-//        model.addAttribute("page", page);
-//        return BASE_PATH + "/search";
-//    }
+    @GetMapping("search")
+    public String search(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser) {
+        model.addAttribute("totalHitCount", "2");
+        List<DocumentIndexSearchRow> hits = new ArrayList<>();
+        long j = 1;
+        for (int i = 0; i < 3; i++) {
+            DocumentIndexSearchRow d = new DocumentIndexSearchRow();
+            d.setContentHighlight("test");
+            d.setTitle("ピカラ　営業マニュアル");
+            d.setId(j);
+            j++;
+            hits.add(d);
+        }
+        Set<String> publicScope = helper.getPublicScope(loggedInUser);
+        long id = 1;
+        Page<DocumentRevision> page = documentHistoryService.search(id, true, publicScope);
+
+        model.addAttribute("hits", hits);
+        model.addAttribute("page", page);
+        return BASE_PATH + "/search";
+    }
 
     /**
      * 検索入力フォームに入力した内容をキーワードに検索する
