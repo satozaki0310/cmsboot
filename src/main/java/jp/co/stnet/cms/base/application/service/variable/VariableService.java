@@ -12,29 +12,29 @@ import java.util.List;
 public interface VariableService extends NodeIService<Variable, Long> {
 
     /**
-     * �^�C�v�Ō�������B
+     * タイプで検索する。
      *
-     * @param type �^�C�v
-     * @return �q�b�g�����f�[�^�̃��X�g
+     * @param type タイプ
+     * @return ヒットしたデータのリスト
      */
     List<Variable> findAllByType(String type);
 
     /**
-     * �^�C�v�ƃR�[�h�Ō�������B
+     * タイプとコードで検索する。
      *
-     * @param type �^�C�v
-     * @param code �R�[�h
-     * @return �q�b�g�����f�[�^�̃��X�g
+     * @param type タイプ
+     * @param code コード
+     * @return ヒットしたデータのリスト
      */
     List<Variable> findAllByTypeAndCode(String type, String code);
 
     /**
-     * �^�C�v��valueX�̒l�Ō�������B(X = 1 ? 10)
+     * タイプとvalueXの値で検索する。(X = 1 〜 10)
      *
-     * @param type  �^�C�v
-     * @param i     valueX��X����������(1 - 10)
-     * @param value valueX�̒l
-     * @return �q�b�g�����f�[�^�̃��X�g
+     * @param type  タイプ
+     * @param i     valueXのXを示す整数(1 - 10)
+     * @param value valueXの値
+     * @return ヒットしたデータのリスト
      */
     List<Variable> findAllByTypeAndValueX(String type, int i, String value);
 

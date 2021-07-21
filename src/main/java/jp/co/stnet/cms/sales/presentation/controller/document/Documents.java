@@ -3,7 +3,6 @@ package jp.co.stnet.cms.sales.presentation.controller.document;
 import com.github.dozermapper.core.Mapper;
 import jp.co.stnet.cms.base.application.service.authentication.AccountService;
 import jp.co.stnet.cms.base.domain.model.common.Status;
-import jp.co.stnet.cms.base.domain.model.variable.Variable;
 import jp.co.stnet.cms.common.datatables.OperationsUtil;
 import jp.co.stnet.cms.common.util.StringUtils;
 import jp.co.stnet.cms.sales.domain.model.document.*;
@@ -91,11 +90,6 @@ public class Documents {
             // 不要な情報をクリア
             documentListBean.setFiles(new ArrayList<>());
 
-            // null対策
-            if (documentListBean.getDocServiceVariable() == null) {
-                documentListBean.setDocServiceVariable(new Variable());
-            }
-
             list.add(documentListBean);
         }
 
@@ -118,7 +112,7 @@ public class Documents {
 
             // 区分
             if (document.getDocCategoryVariable2() != null) {
-                documentCsvBean.setDocCategory(document.getDocCategoryVariable2().getCode());
+
                 documentCsvBean.setDocCategoryValue1(document.getDocCategoryVariable1().getValue1());
                 documentCsvBean.setDocCategoryValue2(document.getDocCategoryVariable2().getValue1());
             }
@@ -133,7 +127,6 @@ public class Documents {
             }
 
             if (document.getDocServiceVariable3() != null) {
-                documentCsvBean.setDocService(document.getDocServiceVariable3().getCode());
                 documentCsvBean.setDocServiceValue3(document.getDocServiceVariable3().getValue1());
             }
 

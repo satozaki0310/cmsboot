@@ -7,7 +7,9 @@ import jp.co.stnet.cms.base.domain.model.variable.Variable;
 import lombok.*;
 import org.hibernate.annotations.*;
 import org.hibernate.search.engine.backend.types.Aggregable;
+import org.hibernate.search.engine.backend.types.Sortable;
 import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.IdentifierBridgeRef;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.*;
 
 import javax.persistence.Entity;
@@ -25,7 +27,6 @@ import java.util.Set;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = false)
-@IdClass(DocumentIndexPK.class)
 public class DocumentIndex implements Serializable, StatusInterface {
 
     /**
@@ -56,20 +57,26 @@ public class DocumentIndex implements Serializable, StatusInterface {
     /**
      * 最終更新日時
      */
+    @GenericField(aggregable = Aggregable.YES, sortable = Sortable.YES)
     @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss")
     @Column(nullable = false)
     private LocalDateTime lastModifiedDate;
 
+    @EmbeddedId
+    @DocumentId(
+            identifierBridge = @IdentifierBridgeRef(type = DocumentIndexPKBridge.class)
+    )
+    private DocumentIndexPK pk;
+
     /**
      * 内部ID
      */
-    @Id
-    @DocumentId
-    private Long id;
+//    private Long id;
 
-    @Id
-    @DocumentId
-    private Integer no;
+    /**
+     *
+     */
+//    private Integer no;
 
     /**
      * ステータス
@@ -85,14 +92,20 @@ public class DocumentIndex implements Serializable, StatusInterface {
      * タイトル
      */
     @FullTextField(analyzer = "japanese")
+//    @KeywordField(sortable = Sortable.YES)
     private String title;
+
+    /**
+     * 本文
+     */
+    private String body;
 
     /**
      * 本文
      */
     @FullTextField(analyzer = "japanese")
     @Column(columnDefinition = "TEXT")
-    private String body;
+    private String bodyPlane;
 
     /**
      * 公開区分
@@ -111,7 +124,6 @@ public class DocumentIndex implements Serializable, StatusInterface {
      */
     @KeywordField
     private String versionNumber;
-
 
     /**
      * 作成部門
@@ -146,31 +158,31 @@ public class DocumentIndex implements Serializable, StatusInterface {
     /**
      * 発行日
      */
-    @GenericField(aggregable = Aggregable.YES)
+    @GenericField
     private LocalDate publishedDate;
 
     /**
      * 改定日
      */
-    @GenericField(aggregable = Aggregable.YES)
+    @GenericField
     private LocalDate lastRevisedDate;
 
     /**
      * 廃止日
      */
-    @GenericField(aggregable = Aggregable.YES)
+    @GenericField
     private LocalDate invalidationDate;
 
     /**
      * 周知日
      */
-    @GenericField(aggregable = Aggregable.YES)
+    @GenericField
     private LocalDate announceDate;
 
     /**
      * 変更理由
      */
-    @KeywordField(aggregable = Aggregable.YES)
+    @KeywordField
     private String reasonForChange;
 
     /**
@@ -181,49 +193,10 @@ public class DocumentIndex implements Serializable, StatusInterface {
     private Set<String> useStage;
 
     /**
-     * 区分
-     */
-    @GenericField(aggregable = Aggregable.YES)
-    private Long docCategory;
-
-    /**
-     * 区分(Variable)
-     */
-    @IndexedEmbedded
-    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
-    @ManyToOne
-    @NotFound(action = NotFoundAction.IGNORE)
-//    @JoinColumn(name = "docCategory", referencedColumnName = "id", unique = false, insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
-    @JoinColumnsOrFormulas({
-            @JoinColumnOrFormula(formula = @JoinFormula(value = "'DOC_CATEGORY'", referencedColumnName = "type")),
-            @JoinColumnOrFormula(column = @JoinColumn(name = "docCategory", referencedColumnName = "code", unique = false, insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)))
-    })
-    private Variable docCategoryVariable;
-
-    /**
-     * サービス
-     */
-    private Long docService;
-
-    /**
-     * サービス(Variable)
-     */
-    @IndexedEmbedded
-    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
-    @ManyToOne
-    @NotFound(action = NotFoundAction.IGNORE)
-//    @JoinColumn(name = "docService", referencedColumnName = "code", unique = false, insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
-    @JoinColumnsOrFormulas({
-            @JoinColumnOrFormula(formula = @JoinFormula(value = "'DOC_SERVICE'", referencedColumnName = "type")),
-            @JoinColumnOrFormula(column = @JoinColumn(name = "docService", referencedColumnName = "code", unique = false, insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)))
-    })
-    private Variable docServiceVariable;
-
-
-    /**
      * 区分1
      */
-    private Long docCategory1;
+    @KeywordField(aggregable = Aggregable.YES, sortable = Sortable.YES)
+    private String docCategory1;
 
     /**
      * 区分1(Variable)
@@ -239,7 +212,8 @@ public class DocumentIndex implements Serializable, StatusInterface {
     /**
      * 区分2
      */
-    private Long docCategory2;
+    @KeywordField(aggregable = Aggregable.YES)
+    private String docCategory2;
 
     /**
      * 区分2(Variable)
@@ -255,7 +229,8 @@ public class DocumentIndex implements Serializable, StatusInterface {
     /**
      * サービス-事業領域
      */
-    private Long docService1;
+    @KeywordField(aggregable = Aggregable.YES)
+    private String docService1;
 
     /**
      * サービス-事業領域(Variable)
@@ -271,7 +246,8 @@ public class DocumentIndex implements Serializable, StatusInterface {
     /**
      * サービス-サービス種別
      */
-    private Long docService2;
+    @KeywordField(aggregable = Aggregable.YES)
+    private String docService2;
 
     /**
      * サービス-サービス種別(Variable)
@@ -287,7 +263,8 @@ public class DocumentIndex implements Serializable, StatusInterface {
     /**
      * サービス-サービス
      */
-    private Long docService3;
+    @KeywordField(aggregable = Aggregable.YES)
+    private String docService3;
 
     /**
      * サービス-サービス(Variable)
@@ -331,15 +308,16 @@ public class DocumentIndex implements Serializable, StatusInterface {
     @Column(columnDefinition = "LONGTEXT")
     private String content;
 
-
     /**
      * 備考
      */
+    @FullTextField(analyzer = "japanese")
     private String remark;
 
     /**
      * 顧客公開区分
      */
+    @KeywordField(aggregable = Aggregable.YES)
     private String customerPublic;
 
 }

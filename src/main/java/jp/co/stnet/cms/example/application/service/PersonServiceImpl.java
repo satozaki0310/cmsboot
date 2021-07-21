@@ -2,9 +2,6 @@ package jp.co.stnet.cms.example.application.service;
 
 import jp.co.stnet.cms.base.application.service.AbstractNodeService;
 import jp.co.stnet.cms.base.application.service.filemanage.FileManagedSharedService;
-import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
-import jp.co.stnet.cms.common.datatables.Column;
-import jp.co.stnet.cms.common.datatables.DataTablesInput;
 import jp.co.stnet.cms.common.util.StringUtils;
 import jp.co.stnet.cms.example.application.repository.person.PersonRepository;
 import jp.co.stnet.cms.example.domain.model.person.Person;
@@ -34,7 +31,6 @@ import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -165,12 +161,6 @@ public class PersonServiceImpl extends AbstractNodeService<Person, Long> impleme
     }
 
     @Override
-    @PostAuthorize("returnObject == true")
-    public Boolean hasAuthority(String operation, LoggedInUser loggedInUser) {
-        return true;
-    }
-
-    @Override
     public void test(String term) {
 
         SearchSession searchSession = Search.session(entityManager);
@@ -260,7 +250,7 @@ public class PersonServiceImpl extends AbstractNodeService<Person, Long> impleme
             while (tokenizer.incrementToken()) {
 
                 tokens.add(term.toString());
-                System.out.println(term.toString() + "\t" // 表層形
+                System.out.println(term + "\t" // 表層形
                         + offset.startOffset() + "-" + offset.endOffset() + "," // 文字列中の位置
                         + partOfSpeech.getPartOfSpeech() + "," // 品詞-品詞細分類1-品詞細分類2
                         + inflection.getInflectionType() + "," // 活用型

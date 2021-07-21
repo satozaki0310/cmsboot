@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:replace="~{/layout/template :: layout(~{::title},~{::body})}" xmlns:th="http://www.thymeleaf.org">
+<html th:replace="~{layout/template :: layout(~{::title},~{::body})}" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <!-- ページタイトルを記入 -->
@@ -16,6 +16,9 @@
   border-radius: 4px;
 }
 
+em {
+  color: red;
+}
 .pagination > li {
   display: inline;
 }
@@ -80,7 +83,6 @@
 
 
 
-
 </style>
 <section class="content-header">
     <div class="container">
@@ -100,7 +102,7 @@
 <section class="content">
     <div class="container">
 
-        <div th:replace="~{/fragments/message-panel :: message-panel}"></div>
+        <div th:replace="~{fragments/message-panel :: message-panel}"></div>
 
         <!-- ここより下にメインコンテンツを記入 -->
         <form autocomplete="off" enctype="multipart/form-data" method="get" th:action
@@ -119,20 +121,20 @@
                 <div class="col-4 offset-20">
                     <th:block>
                         <select class="form-control"
-                                th:placeholder="${placeholder}">
+                                name="sort" th:placeholder="${placeholder}">
                             <!--                    <option th:each="item : ${__${items}__}"-->
                             <!--                            th:text="${item.value}"-->
                             <!--                            th:value="${item.key}"></option>-->
-                            <option value="lastUpdate">最終更新日(降)</option>
+                            <option value="lastModifiedDate">最終更新日(降)</option>
                             <option value="title">タイトル(昇)</option>
-                            <option value="class">区分(昇)</option>
+                            <option value="docCategory1">区分(昇)</option>
                         </select>
                     </th:block>
                 </div>
                 <div class="col-4">
                     <th:block>
                         <select class="form-control"
-                                th:placeholder="${placeholder}">
+                                name="period" th:placeholder="${placeholder}">
                             <!--                    <option th:each="item : ${__${items}__}"-->
                             <!--                            th:text="${item.value}"-->
                             <!--                            th:value="${item.key}"></option>-->
@@ -158,321 +160,103 @@
                         <div class="ml-4">
                             <h6>区分</h6>
                             <hr>
-                            <!--                    <tr th:each="code: ${countsByGenre}">-->
-                            <!--                        <div th:text="${code.key}">-->
-                            <!--                            <span class="badge badge-pill badge-secondary" th:text="${code.value}"></span>-->
-                            <!--                        </div>-->
-                            <!--                    </tr>-->
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="share">
-                                <label class="form-check-label">
-                                    トラブル関連
-                                </label>
-                                <span>(4)</span>
-                            </div>
-                            <div class="form-check ml-3">
-                                <input class="form-check-input" type="checkbox" value="facets">
-                                <label class="form-check-label">
-                                    障害対応関連
-                                </label>
-                                <span>(4)</span>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="share">
-                                <label class="form-check-label">
-                                    プロモーション
-                                </label>
-                                <span>(1)</span>
-                            </div>
-                            <div class="form-check ml-3">
-                                <input class="form-check-input" type="checkbox" value="facets">
-                                <label class="form-check-label">
-                                    キャンペーン
-                                </label>
-                                <span>(1)</span>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="share">
-                                <label class="form-check-label">
-                                    パンフレット
-                                </label>
-                                <span>(2)</span>
-                            </div>
-                            <div class="form-check ml-3">
-                                <input class="form-check-input" type="checkbox" value="facets">
-                                <label class="form-check-label">
-                                    サービスパンフレット
-                                </label>
-                                <span>(2)</span>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="share">
-                                <label class="form-check-label">
-                                    営業マニュアル
-                                </label>
-                                <span>(7)</span>
-                            </div>
-                            <div class="form-check ml-3">
-                                <input class="form-check-input" type="checkbox" value="facets">
-                                <label class="form-check-label">
-                                    サービスマニュアル
-                                </label>
-                                <span>(2)</span>
-                            </div>
-                            <div class="form-check ml-3">
-                                <input class="form-check-input" type="checkbox" value="facets">
-                                <label class="form-check-label">
-                                    販売マニュアル
-                                </label>
-                                <span>(5)</span>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="share">
-                                <label class="form-check-label">
-                                    システム操作マニュアル
-                                </label>
-                                <span>(3)</span>
-                            </div>
-                            <div class="form-check ml-3">
-                                <input class="form-check-input" type="checkbox" value="facets">
-                                <label class="form-check-label">
-                                    その他
-                                </label>
-                                <span>(3)</span>
-                            </div>
+                            <tr th:each="variableList: ${variableCategoryBeanList}">
+                                <div class="form-check">
+                                    <block th:if="${variableList.level == '1'}">
+                                        <input class="form-check-input" name="facets1"
+                                               th:text="${variableList.codeName}"
+                                               th:value="${variableList.codeName}" type="checkbox">
+                                        <label class="form-check-label badge badge-pill badge-secondary"
+                                               th:text="${variableList.counts}"></label>
+                                    </block>
+                                    <div class="ml-3">
+                                        <block th:if="${variableList.level == '2'}">
+                                            <input class="form-check-input" name="facets1"
+                                                   th:text="${variableList.codeName}"
+                                                   th:value="${variableList.codeName}" type="checkbox">
+                                            <label class="form-check-label badge badge-pill badge-secondary"
+                                                   th:text="${variableList.counts}"></label>
+                                        </block>
+                                    </div>
+                                </div>
+                            </tr>
                         </div>
                     </div>
                     <div class="border p-4">
                         <div class="ml-4">
                             <h6>サービス</h6>
                             <hr>
-                            <!--                    <tr th:each="code: ${countsByGenre}">-->
-                            <!--                        <div th:text="${code.key}">-->
-                            <!--                            <span class="badge badge-pill badge-secondary" th:text="${code.value}"></span>-->
-                            <!--                        </div>-->
-                            <!--                    </tr>-->
-
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="share">
-                                <label class="form-check-label">
-                                    事業全般
-                                </label>
-                                <span>(2)</span>
-                            </div>
-                            <div class="form-check ml-3">
-                                <input class="form-check-input" type="checkbox" value="facets">
-                                <label class="form-check-label">
-                                    サービス全般
-                                </label>
-                                <span>(2)</span>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="share">
-                                <label class="form-check-label">
-                                    通信
-                                </label>
-                                <span>(1)</span>
-                            </div>
-                            <div class="form-check ml-3">
-                                <input class="form-check-input" type="checkbox" value="facets">
-                                <label class="form-check-label">
-                                    インターネット(SITA)
-                                </label>
-                                <span>(1)</span>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="share">
-                                <label class="form-check-label">
-                                    PF
-                                </label>
-                                <span>(10)</span>
-                            </div>
-                            <div class="form-check ml-3">
-                                <input class="form-check-input" type="checkbox" value="facets">
-                                <label class="form-check-label">
-                                    NI
-                                </label>
-                                <span>(2)</span>
-                            </div>
-                            <div class="form-check ml-3">
-                                <input class="form-check-input" type="checkbox" value="facets">
-                                <label class="form-check-label">
-                                    PF共通
-                                </label>
-                                <span>(4)</span>
-                            </div>
-                            <div class="form-check ml-3">
-                                <input class="form-check-input" type="checkbox" value="facets">
-                                <label class="form-check-label">
-                                    Web会議
-                                </label>
-                                <span>(1)</span>
-                            </div>
-                            <div class="form-check ml-3">
-                                <input class="form-check-input" type="checkbox" value="facets">
-                                <label class="form-check-label">
-                                    クラウド
-                                </label>
-                                <span>(3)</span>
-                            </div>
+                            <tr th:each="variableList: ${variableCategoryBeanList2}">
+                                <div class="form-check">
+                                    <block th:if="${variableList.level == '1'}">
+                                        <input class="form-check-input" name="facets1"
+                                               th:text="${variableList.codeName}"
+                                               th:value="${variableList.codeName}" type="checkbox">
+                                        <label class="form-check-label badge badge-pill badge-secondary"
+                                               th:text="${variableList.counts}"></label>
+                                    </block>
+                                    <div class="ml-3">
+                                        <block th:if="${variableList.level == '2'}">
+                                            <input class="form-check-input" name="facets1"
+                                                   th:text="${variableList.codeName}"
+                                                   th:value="${variableList.codeName}" type="checkbox">
+                                            <label class="form-check-label badge badge-pill badge-secondary"
+                                                   th:text="${variableList.counts}"></label>
+                                        </block>
+                                    </div>
+                                    <div class="ml-6">
+                                        <block th:if="${variableList.level == '3'}">
+                                            <input class="form-check-input" name="facets1"
+                                                   th:text="${variableList.codeName}"
+                                                   th:value="${variableList.codeName}" type="checkbox">
+                                            <label class="form-check-label badge badge-pill badge-secondary"
+                                                   th:text="${variableList.counts}"></label>
+                                        </block>
+                                    </div>
+                                </div>
+                            </tr>
                         </div>
                     </div>
                 </div>
                 <div class="col-18 offset-1">
-                    <!--                    <tr th:each="item, status : ${hits}">-->
-                    <!--                        <div>-->
-                    <!--                            <div class="mb-4">-->
-                    <!--                                <h4>-->
-                    <!--                                    <a th:href="${item.id + '/latest'}" th:text="${item.title}"></a>-->
-                    <!--                                    &lt;!&ndash;                            <span class="h6"><a&ndash;&gt;-->
-                    <!--                                    &lt;!&ndash;                                    href="${pageContext.request.contextPath}/person/${item.attachedFile01Uuid}/download"><i&ndash;&gt;-->
-                    <!--                                    &lt;!&ndash;                                    class="fas fa-file-download ml-2"></i></a></span>&ndash;&gt;-->
-                    <!--                                    <span class="h6">-->
-                    <!--                                        <a href="search">-->
-                    <!--                                            <i class="fas fa-file-download ml-2"></i>-->
-                    <!--                                        </a>-->
-                    <!--                                    </span>-->
-                    <!--                                </h4>-->
-                    <!--                            </div>-->
-
-                    <!--                            <p class="" th:text="${item.contentHighlight}"></p>-->
-                    <!--                            <p>【区分1】【区分2】【区分3】</p>-->
-                    <!--                        </div>-->
-                    <!--                    </tr>-->
-                    <!--                    <tr th:each="item, status : ${hits}">-->
-                    <div>
-                        <div class="mb-20">
-                            <div class="mb-4">
-                                <h4>
-                                    <a href="1/latest">ピカラ　営業マニュアル</a>
-                                    <!--                            <span class="h6"><a-->
-                                    <!--                                    href="${pageContext.request.contextPath}/person/${item.attachedFile01Uuid}/download"><i-->
-                                    <!--                                    class="fas fa-file-download ml-2"></i></a></span>-->
-                                    <span class="h6">
-                                        <a href="search">
-                                            <i class="fas fa-file-download ml-2"></i>
-                                        </a>
-                                    </span>
-                                </h4>
-                            </div>
-                            <!--                            <span><b>本文</b></span>-->
-                            <!--                            <p class="" th:text="${item.contentHighlight}"></p>-->
-                            <p>本ドキュメントは<font color="red">ピカラ</font>の営業マニュアルとして</p>
-
-                            <!--                            <span><b>ファイル内容</b></span>-->
-                            <p>「ノートンセキュリティオンライン」について、<font color="red">ピカラ</font>ではPCやセキュリティ対策として</p>
-                            <h5>
-                                <p>
-                                    <span class="badge badge-pill badge-secondary">営業マニュアル</span>
-                                    <span class="badge badge-pill badge-secondary">販売マニュアル</span>
-                                    <span class="badge badge-pill badge-secondary">通信</span>
-                                    <span class="badge badge-pill badge-secondary">インターネット(STIA)</span>
-                                </p>
-                            </h5>
-                        </div>
-
-                        <br>
-                        <br>
-                        <!--                    </tr>-->
-                        <div>
-                            <div class="mb-4">
-                                <h4>
-                                    <a href="1/latest">ピカラ(Pikara) - ノートンセキュリティについて.pptx</a>
-                                    <!--                            <span class="h6"><a-->
-                                    <!--                                    href="${pageContext.request.contextPath}/person/${item.attachedFile01Uuid}/download"><i-->
-                                    <!--                                    class="fas fa-file-download ml-2"></i></a></span>-->
-                                    <span class="h6">
-                                        <a href="search">
-                                            <i class="fas fa-file-download ml-2"></i>
-                                        </a>
-                                    </span>
-                                </h4>
-                            </div>
-
-                            <!--                            <span><b>本文</b></span>-->
-                            <!--                            <p class="" th:text="${item.contentHighlight}"></p>-->
-                            <p>本ドキュメントは<font color="red">ピカラ</font>の営業マニュアルとして</p>
-
-                            <!--                            <span><b>ファイル内容</b></span>-->
-                            <p>「ノートンセキュリティオンライン」について、<font color="red">ピカラ</font>ではPCやセキュリティ対策として</p>
-                            <h5>
-                                <p>
-                                    <span class="badge badge-pill badge-secondary">営業マニュアル</span>
-                                    <span class="badge badge-pill badge-secondary">販売マニュアル</span>
-                                    <span class="badge badge-pill badge-secondary">通信</span>
-                                    <span class="badge badge-pill badge-secondary">インターネット(STIA)</span>
-                                </p>
-                            </h5>
-                        </div>
-                        <br>
-                        <br>
-                        <div>
-                            <div class="mb-4">
-                                <h4>
-                                    <a href="1/latest">ピカラ　営業マニュアル</a>
-                                    <!--                            <span class="h6"><a-->
-                                    <!--                                    href="${pageContext.request.contextPath}/person/${item.attachedFile01Uuid}/download"><i-->
-                                    <!--                                    class="fas fa-file-download ml-2"></i></a></span>-->
-                                    <span class="h6">
-                                        <a href="search">
-                                            <i class="fas fa-file-download ml-2"></i>
-                                        </a>
-                                    </span>
-                                </h4>
-                            </div>
-
-                            <!--                            <span><b>本文</b></span>-->
-                            <!--                            <p class="" th:text="${item.contentHighlight}"></p>-->
+                    <block th:if="${hits} != null">
+                        <tr th:each="item, status : ${hits}">
                             <div>
-                                <span>本ドキュメントは<font color="red">ピカラ</font>の営業マニュアルとして</span>
-                            </div>
-
-                            <!--                            <span><b>ファイル内容</b></span>-->
-                            <p>「ノートンセキュリティオンライン」について、<font color="red">ピカラ</font>ではPCやセキュリティ対策として</p>
-                            <h5>
-                                <p>
-                                    <span class="badge badge-pill badge-secondary">営業マニュアル</span>
-                                    <span class="badge badge-pill badge-secondary">販売マニュアル</span>
-                                    <span class="badge badge-pill badge-secondary">通信</span>
-                                    <span class="badge badge-pill badge-secondary">インターネット(STIA)</span>
-                                </p>
-                            </h5>
-                        </div>
-                        <br>
-                        <br>
-                        <div>
-                            <div class="mb-4">
-                                <h4>
-                                    <a href="1/latest">ピカラ　営業マニュアル</a>
-                                    <!--                            <span class="h6"><a-->
-                                    <!--                                    href="${pageContext.request.contextPath}/person/${item.attachedFile01Uuid}/download"><i-->
-                                    <!--                                    class="fas fa-file-download ml-2"></i></a></span>-->
-                                    <span class="h6">
+                                <div class="mb-4">
+                                    <h4>
+                                        <a th:href="${item.pk.id + '/latest'}" th:text="${item.title}"></a>
+                                        <!--                            <span class="h6"><a-->
+                                        <!--                                    href="${pageContext.request.contextPath}/person/${item.attachedFile01Uuid}/download"><i-->
+                                        <!--                                    class="fas fa-file-download ml-2"></i></a></span>-->
+                                        <span class="h6">
                                         <a href="search">
                                             <i class="fas fa-file-download ml-2"></i>
                                         </a>
                                     </span>
-                                </h4>
+                                    </h4>
+                                </div>
+                                <p class="" th:utext="${item.contentHighlight}"></p>
+                                <h5>
+                                    <p>
+                                        <span class="badge badge-pill badge-secondary"
+                                              th:text="${item.docCategory1Name}"></span>
+                                        <span class="badge badge-pill badge-secondary"
+                                              th:text="${item.docCategory2Name}"></span>
+                                        <span class="badge badge-pill badge-secondary"
+                                              th:text="${item.docService1Name}"></span>
+                                        <span class="badge badge-pill badge-secondary"
+                                              th:text="${item.docService2Name}"></span>
+                                        <span class="badge badge-pill badge-secondary"
+                                              th:text="${item.docService3Name}"></span>
+                                    </p>
+                                </h5>
                             </div>
+                            <hr>
+                            <br>
+                        </tr>
+                    </block>
 
-                            <!--                            <span><b>本文</b></span>-->
-                            <!--                            <p class="" th:text="${item.contentHighlight}"></p>-->
-                            <div>
-                                <span>本ドキュメントは<font color="red">ピカラ</font>の営業マニュアルとして</span>
-                            </div>
 
-                            <!--                            <span><b>ファイル内容</b></span>-->
-                            <p>「ノートンセキュリティオンライン」について、<font color="red">ピカラ</font>ではPCやセキュリティ対策として</p>
-                            <h5>
-                                <p>
-                                    <span class="badge badge-pill badge-secondary">営業マニュアル</span>
-                                    <span class="badge badge-pill badge-secondary">販売マニュアル</span>
-                                    <span class="badge badge-pill badge-secondary">通信</span>
-                                    <span class="badge badge-pill badge-secondary">インターネット(STIA)</span>
-                                </p>
-                            </h5>
-                        </div>
-                    </div>
                 </div>
             </div>
         </form>
@@ -480,7 +264,9 @@
 
 
     <div class="text-center">
-        <div th:replace="~{fragments/page :: pagination (${page})}"></div>
+        <block th:if="${page} != null">
+            <div th:replace="~{fragments/page :: pagination (${page})}"></div>
+        </block>
     </div>
 
     <!--    <div class="mx-auto text-center">-->

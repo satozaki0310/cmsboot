@@ -4,7 +4,6 @@ package jp.co.stnet.cms.example.application.service;
 import jp.co.stnet.cms.base.application.repository.NodeRevRepository;
 import jp.co.stnet.cms.base.application.service.AbstractNodeRevService;
 import jp.co.stnet.cms.base.application.service.filemanage.FileManagedSharedService;
-import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import jp.co.stnet.cms.example.application.repository.simpleentity.SimpleEntityRepository;
 import jp.co.stnet.cms.example.application.repository.simpleentity.SimpleEntityRevisionRepository;
 import jp.co.stnet.cms.example.domain.model.simpleentity.SimpleEntity;
@@ -65,11 +64,6 @@ public class SimpleEntityServiceImpl extends AbstractNodeRevService<SimpleEntity
         fileManagedSharedService.permanent(entity.getAttachedFile01Uuid());
 
         return simpleEntity;
-    }
-
-    @Override
-    public Boolean hasAuthority(String operation, LoggedInUser loggedInUser) {
-        return true;
     }
 
     @Override

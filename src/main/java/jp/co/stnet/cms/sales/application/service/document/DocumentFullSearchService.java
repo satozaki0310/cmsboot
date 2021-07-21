@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface DocumentFullSearchService {
-    SearchResult<DocumentIndex> search(String term, Pageable pageable);
+    SearchResult<DocumentIndex> search(String term, String period, String sort, List<String> facets, Pageable pageable);
 
     String highlight(String text, String term);
 

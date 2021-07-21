@@ -3,7 +3,6 @@ package jp.co.stnet.cms.base.application.service.variable;
 
 import jp.co.stnet.cms.base.application.repository.variable.VariableRepository;
 import jp.co.stnet.cms.base.application.service.AbstractNodeService;
-import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import jp.co.stnet.cms.base.domain.model.variable.Variable;
 import jp.co.stnet.cms.base.domain.model.variable.VariableType;
 import jp.co.stnet.cms.common.util.StringUtils;
@@ -61,13 +60,6 @@ public class VariableServiceImpl extends AbstractNodeService<Variable, Long> imp
     @Override
     protected JpaRepository<Variable, Long> getRepository() {
         return variableRepository;
-    }
-
-    @Override
-    public Boolean hasAuthority(String operation, LoggedInUser loggedInUser) {
-
-        // TODO 権限チェックの追加
-        return true;
     }
 
     @Override

@@ -3,6 +3,7 @@ package jp.co.stnet.cms.sales.presentation.controller.document;
 import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import jp.co.stnet.cms.common.constant.Constants;
 import jp.co.stnet.cms.common.datatables.OperationsUtil;
+import jp.co.stnet.cms.sales.application.service.document.DocumentAccessService;
 import jp.co.stnet.cms.sales.application.service.document.DocumentService;
 import jp.co.stnet.cms.sales.domain.model.document.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,9 @@ public class DocumentController {
     @Autowired
     DocumentService documentService;
 
+    @Autowired
+    DocumentAccessService documentAccessService;
+
     @ModelAttribute
     DocumentForm setUp() {
         return new DocumentForm();
@@ -43,18 +47,16 @@ public class DocumentController {
     public String view(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser,
                        @PathVariable("id") Long id) {
 
-
-        // データ取得
         Document document = documentService.findById(id);
 
-        // 権限チェック
         authority.hasAuthority(Constants.OPERATION.VIEW, loggedInUser, document);
 
         model.addAttribute("document", document);
-
         model.addAttribute("buttonState", helper.getButtonStateMap(Constants.OPERATION.VIEW, document, null).asMap());
         model.addAttribute("fieldState", helper.getFiledStateMap(Constants.OPERATION.VIEW, document, null).asMap());
         model.addAttribute("op", new OperationsUtil(BASE_PATH));
+
+        documentAccessService.save(id, loggedInUser.getUsername());
 
         return TEMPLATE_FORM;
     }

@@ -1,13 +1,11 @@
 package jp.co.stnet.cms.base.application.service;
 
 import jp.co.stnet.cms.base.domain.model.AbstractEntity;
-import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import jp.co.stnet.cms.common.datatables.DataTablesInput;
 import jp.co.stnet.cms.common.exception.InvalidArgumentBusinessException;
 import jp.co.stnet.cms.common.exception.NoChangeBusinessException;
 import jp.co.stnet.cms.common.exception.OptimisticLockingFailureBusinessException;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.AccessDeniedException;
 import org.terasoluna.gfw.common.exception.ResourceNotFoundException;
 
 /**
@@ -74,21 +72,22 @@ public interface NodeIService<T extends AbstractEntity<ID>, ID> {
      */
     void delete(Iterable<T> entities);
 
-    /**
-     * 権限チェックを行う。
-     * @param operation 操作の種類(Constants.OPERATIONに登録された値)
-     * @param loggedInUser ログインユーザ情報
-     * @return true=操作する権限を持つ, false=操作する権限なし
-     * @throws AccessDeniedException @PostAuthorizeを用いてfalse時にスロー
-     */
-    @Deprecated
-    Boolean hasAuthority(String operation, LoggedInUser loggedInUser);
+//    /**
+//     * 権限チェックを行う。
+//     * @param operation 操作の種類(Constants.OPERATIONに登録された値)
+//     * @param loggedInUser ログインユーザ情報
+//     * @return true=操作する権限を持つ, false=操作する権限なし
+//     * @throws AccessDeniedException @PostAuthorizeを用いてfalse時にスロー
+//     */
+//    @Deprecated
+//    Boolean hasAuthority(String operation, LoggedInUser loggedInUser);
 
 
     /**
      * エンティティの比較
+     *
      * @param entity 比較対象
-     * @param other 比較対象
+     * @param other  比較対象
      * @return true:差異なし, false:差異あり
      */
     boolean equalsEntity(T entity, T other);

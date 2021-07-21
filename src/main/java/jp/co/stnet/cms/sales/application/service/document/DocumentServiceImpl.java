@@ -3,23 +3,20 @@ package jp.co.stnet.cms.sales.application.service.document;
 import jp.co.stnet.cms.base.application.repository.NodeRevRepository;
 import jp.co.stnet.cms.base.application.service.AbstractNodeRevService;
 import jp.co.stnet.cms.base.application.service.filemanage.FileManagedSharedService;
-import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import jp.co.stnet.cms.sales.application.repository.document.DocumentIndexRepository;
 import jp.co.stnet.cms.sales.application.repository.document.DocumentRepository;
 import jp.co.stnet.cms.sales.application.repository.document.DocumentRevisionRepository;
 import jp.co.stnet.cms.sales.domain.model.document.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.exception.TikaException;
+import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -38,10 +35,6 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
     @Autowired
     FileManagedSharedService fileManagedSharedService;
 
-    @PersistenceContext
-    EntityManager entityManager;
-
-
     protected DocumentServiceImpl() {
         super(Document.class, DocumentRevision.class, DocumentMaxRev.class);
     }
@@ -57,13 +50,6 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
     }
 
     @Override
-    public Boolean hasAuthority(String operation, LoggedInUser loggedInUser) {
-        return true;
-    }
-
-    // FileManagedの永続化処理を追加
-
-    @Override
     public Document save(Document document) {
         removeNullFile(document.getFiles());
         Document saved = super.save(document);
@@ -76,7 +62,7 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
         }
 
         List<DocumentIndex> documentIndices = mapDocumentIndex(saved);
-        documentIndexRepository.deleteById(saved.getId());
+        documentIndexRepository.deleteByPkId(saved.getId());
         documentIndexRepository.saveAll(documentIndices);
 
         return saved;
@@ -100,7 +86,7 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
     @Override
     public Document invalid(Long id) {
         Document saved = super.invalid(id);
-        documentIndexRepository.deleteById(id);
+        documentIndexRepository.deleteByPkId(id);
         return saved;
     }
 
@@ -108,7 +94,7 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
     public Document valid(Long id) {
         Document saved = super.valid(id);
         List<DocumentIndex> documentIndices = mapDocumentIndex(saved);
-        documentIndexRepository.deleteById(saved.getId());
+        documentIndexRepository.deleteByPkId(saved.getId());
         documentIndexRepository.saveAll(documentIndices);
         return saved;
     }
@@ -124,9 +110,7 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
         }
 
         super.delete(id);
-
-        documentIndexRepository.deleteById(id);
-
+        documentIndexRepository.deleteByPkId(id);
     }
 
     @Override
@@ -138,26 +122,15 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
      * フィールドがnullのFileを除去
      *
      * @param files Fileのリスト
-     * @return Fileのリスト
      */
-    private List<File> removeNullFile(List<File> files) {
+    private void removeNullFile(List<File> files) {
         if (files != null) {
-            Iterator<File> iterator = files.iterator();
-            while (iterator.hasNext()) {
-                File file = iterator.next();
-                if (StringUtils.isAllBlank(file.getType(), file.getFileUuid(), file.getPdfUuid())) {
-                    iterator.remove();
-                }
-            }
-            return files;
+            files.removeIf(file -> StringUtils.isAllBlank(file.getType(), file.getFileUuid(), file.getPdfUuid()));
         }
-
-        return new ArrayList<>();
     }
 
     @Override
     protected boolean isFilterINClause(String fieldName) {
-
         if ("status".equals(convertColumnName(fieldName))) {
             return true;
         } else if ("publicScope".equals(convertColumnName(fieldName))) {
@@ -177,26 +150,47 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
      */
     private List<DocumentIndex> mapDocumentIndex(Document document) {
 
+        final int NO_CASE_NOFILE = 9999;
+
         if (document == null) {
             throw new IllegalArgumentException("document must not be null.");
         }
 
         List<DocumentIndex> documentIndices = new ArrayList<>();
 
-        for (int i = 0; i < document.getFiles().size(); i++) {
-            File file = document.getFiles().get(i);
-            DocumentIndex documentIndex = beanMapper.map(file, DocumentIndex.class);
-            beanMapper.map(document, documentIndex);
-            documentIndex.setNo(i);
 
-            documentIndex.setContent(getContent(documentIndex.getFileUuid()));
-
+        if (document.getFiles().isEmpty()) {
+            DocumentIndex documentIndex = beanMapper.map(document, DocumentIndex.class);
+            documentIndex.setBodyPlane(getBodyPlane(document.getBody()));
+            documentIndex.setPk(new DocumentIndexPK(document.getId(), NO_CASE_NOFILE));
             documentIndices.add(documentIndex);
+        } else {
+            for (int i = 0; i < document.getFiles().size(); i++) {
+                File file = document.getFiles().get(i);
+                DocumentIndex documentIndex = beanMapper.map(document, DocumentIndex.class);
+                documentIndex.setBodyPlane(getBodyPlane(document.getBody()));
+                beanMapper.map(document, documentIndex);
+                documentIndex.setPk(new DocumentIndexPK(document.getId(), i));
+                documentIndex.setContent(getContent(document.getFiles().get(i).getFileUuid()));
+                documentIndices.add(documentIndex);
+            }
         }
 
         return documentIndices;
     }
 
+    /**
+     * HTMLをテキストに変換
+     *
+     * @param html HTML
+     * @return テキスト
+     */
+    private String getBodyPlane(String html) {
+        if (html != null) {
+            return Jsoup.parse(html).text();
+        }
+        return null;
+    }
 
     /**
      * uuidに基づくファイルの中身を取得。既に取得済みの場合は以前取得した値を再利用。
@@ -214,7 +208,6 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
         if (before != null && StringUtils.isNotBlank(before.getContent())) {
             return before.getContent();
         }
-
 
         try {
             String content = fileManagedSharedService.getContent(uuid);

@@ -74,7 +74,7 @@ public class DocumentAuthority {
      * @param document     ドキュメントエンティティ
      * @return true=操作する権限を持つ, false=権限を持たない
      * @throws IllegalArgumentException 不正なOperationが指定された場合
-     * @throws NullPointerException     operation, loggedInUser がnullの場合
+     * @throws NullPointerException operation, loggedInUser がnullの場合
      */
     public Boolean hasAuthorityWOException(@NonNull String operation, @NonNull LoggedInUser loggedInUser, Document document) {
 
@@ -192,16 +192,8 @@ public class DocumentAuthority {
      */
     private boolean checkPublicScope(Collection<GrantedAuthority> authorities, Document document) {
 
-        if (document == null) {
-            return false;
-        }
-
-        if (authorities == null) {
-            return false;
-        }
-
         // 公開区分が全公開
-        else if (DocPublicScope.ALL.getValue().equals(document.getPublicScope())) {
+        if (DocPublicScope.ALL.getValue().equals(document.getPublicScope())) {
             return authorities.contains(new SimpleGrantedAuthority(Permission.DOC_VIEW_ALL.name()))
                     || authorities.contains(new SimpleGrantedAuthority(Permission.DOC_VIEW_DISPATCHED_LABOR.name()))
                     || authorities.contains(new SimpleGrantedAuthority(Permission.DOC_VIEW_OUTSOURCING.name()));

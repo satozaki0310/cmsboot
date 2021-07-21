@@ -2,6 +2,8 @@ package jp.co.stnet.cms.sales.domain.model.document;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class DocumentFullSearchForm {
 
@@ -23,5 +25,5 @@ public class DocumentFullSearchForm {
     /**
      * ファセット項目で選択したもの
      */
-    private String facets;
+    private List<String> facets;
 }

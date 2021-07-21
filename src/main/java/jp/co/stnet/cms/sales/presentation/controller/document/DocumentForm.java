@@ -2,6 +2,7 @@ package jp.co.stnet.cms.sales.presentation.controller.document;
 
 import jp.co.stnet.cms.sales.domain.model.document.CustomerPublic;
 import jp.co.stnet.cms.sales.domain.model.document.DocPublicScope;
+import jp.co.stnet.cms.sales.domain.validation.ValidService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ValidService
 public class DocumentForm implements Serializable {
 
     @NotNull(groups = Update.class)
@@ -54,11 +56,13 @@ public class DocumentForm implements Serializable {
     /**
      * 作成部門
      */
+    @NotNull
     private String departmentForCreation;
 
     /**
      * 作成担当者
      */
+    @NotNull
     private String chargePersonForCreation;
 
     /**
@@ -110,28 +114,28 @@ public class DocumentForm implements Serializable {
      * 区分1
      */
     @NotNull
-    private Long docCategory1;
+    private String docCategory1;
 
     /**
      * 区分2
      */
     @NotNull
-    private Long docCategory2;
+    private String docCategory2;
 
     /**
      * サービス-事業領域
      */
-    private Long docService1;
+    private String docService1;
 
     /**
      * サービス-サービス種別
      */
-    private Long docService2;
+    private String docService2;
 
     /**
      * サービス-サービス
      */
-    private Long docService3;
+    private String docService3;
 
     /**
      * ファイル

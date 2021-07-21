@@ -115,7 +115,6 @@ public class Account extends AbstractEntity<String> implements Serializable, Sta
 
     /**
      * フルネーム(姓 + 名、半角スペース区切り)
-     *
      * @return フルネーム
      */
     public String getFullName() {

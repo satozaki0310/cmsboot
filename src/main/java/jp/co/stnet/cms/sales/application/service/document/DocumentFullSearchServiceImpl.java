@@ -38,6 +38,10 @@ import java.util.Map;
 @Service
 public class DocumentFullSearchServiceImpl implements DocumentFullSearchService {
 
+    private static final String sort1 = "lastModifiedDate";
+    private static final String Sort2 = "title";
+    private static final String Sort3 = "docCategory1";
+
     @PersistenceContext
     EntityManager entityManager;
 
@@ -51,17 +55,23 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
      * .fetch: ページの表示数
      *
      * @param term     　入力フォームに入力した内容
+     * @param period
+     * @param sort
      * @param pageable 　ページ情報
      * @return
      */
     @Override
-    public SearchResult<DocumentIndex> search(String term, Pageable pageable) {
+    public SearchResult<DocumentIndex> search(String term, String period, String sort, List<String> facets, Pageable pageable) {
         SearchSession searchSession = Search.session(entityManager);
 
         List<String> tokens = analyze(term);
         System.out.println(StringUtils.join(tokens, " + "));
 
-        AggregationKey<Map<String, Long>> countsByGenreKey = AggregationKey.of("countsByGenre");
+        AggregationKey<Map<String, Long>> countsByDocCategory1 = AggregationKey.of("countsByDocCategory1");
+        AggregationKey<Map<String, Long>> countsByDocCategory2 = AggregationKey.of("countsByDocCategory2");
+        AggregationKey<Map<String, Long>> countsByDocService1 = AggregationKey.of("countsByDocService1");
+        AggregationKey<Map<String, Long>> countsByDocService2 = AggregationKey.of("countsByDocService2");
+        AggregationKey<Map<String, Long>> countsByDocService3 = AggregationKey.of("countsByDocService3");
 
         int pageSize = 5;
         long offset = 0;
@@ -77,9 +87,28 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
                                 .field("content")
                                 .matching(StringUtils.join(tokens, " + "))
                 )
-                .aggregation(countsByGenreKey, f -> f.terms()
-                        .field("documentNumber", String.class))
-                .sort(f -> f.score())
+                .aggregation(countsByDocCategory1, f -> f.terms()
+                        .field("docCategory1", String.class))
+                .aggregation(countsByDocCategory2, f -> f.terms()
+                        .field("docCategory2", String.class))
+                .aggregation(countsByDocService1, f -> f.terms()
+                        .field("docService1", String.class))
+                .aggregation(countsByDocService2, f -> f.terms()
+                        .field("docService2", String.class))
+                .aggregation(countsByDocService3, f -> f.terms()
+                        .field("docService3", String.class))
+                .sort(f -> f.field(sort).desc())
+
+//                .sort(
+//                        f -> {
+//                            if (sort.equals(sort1)) {
+//                                f.field(sort);
+//                            }
+//                            return f.field(sort);
+//                        }
+//                    )
+
+
                 .fetch((int) offset, pageSize);
 
         return result;
@@ -116,7 +145,7 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
 
             TokenStream stream = analyzer.tokenStream("content", text);
 //
-            String[] frags = highlighter.getBestFragments(stream, text, 4);
+            String[] frags = highlighter.getBestFragments(stream, text, 1);
 
 
             String fragsString = "";
