@@ -16,16 +16,14 @@
 package jp.co.stnet.cms.base.application.service.authentication;
 
 import com.github.dozermapper.core.Mapper;
-
-import jp.co.stnet.cms.base.application.repository.authentication.AccountRepository;
-import jp.co.stnet.cms.base.application.service.filemanage.FileManagedSharedService;
-import jp.co.stnet.cms.base.application.service.filemanage.FileUploadSharedService;
+import jp.co.stnet.cms.base.application.repository.account.AccountRepository;
+import jp.co.stnet.cms.base.application.service.filemanage.FileManagedService;
 import jp.co.stnet.cms.base.domain.model.authentication.Account;
 import jp.co.stnet.cms.base.domain.model.authentication.FailedAuthentication;
 import jp.co.stnet.cms.base.domain.model.authentication.PasswordHistory;
 import jp.co.stnet.cms.base.domain.model.authentication.SuccessfulAuthentication;
-import jp.co.stnet.cms.base.domain.model.filemanage.FileManaged;
 import jp.co.stnet.cms.base.domain.model.common.Status;
+import jp.co.stnet.cms.base.domain.model.filemanage.FileManaged;
 import jp.co.stnet.cms.common.auditing.CustomDateFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.passay.CharacterRule;
@@ -46,7 +44,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static jp.co.stnet.cms.common.message.MessageKeys.*;
+import static jp.co.stnet.cms.common.message.MessageKeys.E_SL_FW_5001;
 
 @Slf4j
 @Service
@@ -60,13 +58,10 @@ public class AccountSharedServiceImpl implements AccountSharedService {
     AccountRepository accountRepository;
 
     @Autowired
-    FileUploadSharedService fileUploadSharedService;
+    FileManagedService fileManagedService;
 
     @Autowired
-    FileManagedSharedService fileManagedSharedService;
-
-    @Autowired
-    AuthenticationEventSharedService authenticationEventSharedService;
+    AuthenticationEventService authenticationEventService;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -75,7 +70,7 @@ public class AccountSharedServiceImpl implements AccountSharedService {
     PasswordGenerator passwordGenerator;
 
     @Autowired
-    PasswordHistorySharedService passwordHistorySharedService;
+    PasswordHistoryService passwordHistoryService;
 
     @Autowired
     CustomDateFactory dateFactory;
@@ -106,7 +101,7 @@ public class AccountSharedServiceImpl implements AccountSharedService {
     @Override
     public LocalDateTime getLastLoginDate(String username) {
 
-        List<SuccessfulAuthentication> events = authenticationEventSharedService
+        List<SuccessfulAuthentication> events = authenticationEventService
                 .findLatestSuccessEvents(username, 1);
 
         if (!events.isEmpty()) {
@@ -130,15 +125,6 @@ public class AccountSharedServiceImpl implements AccountSharedService {
         account.setStatus(Status.INVALID.getCodeValue());
         accountRepository.save(account);
 
-//        if (imageId != null) {
-//            TempFile tempFile = fileUploadSharedService.findTempFile(imageId);
-//            AccountImage image = AccountImage.builder()
-//                    .username(account.getUsername())
-//                    .extension(StringUtils.getFilenameExtension(tempFile.getOriginalName()))
-//                    .body(tempFile.getBody()).build();
-//            accountImageRepository.save(image);
-//        }
-
         return rawPassword;
     }
 
@@ -149,7 +135,7 @@ public class AccountSharedServiceImpl implements AccountSharedService {
 
     @Override
     public boolean isLocked(String username) {
-        List<FailedAuthentication> failureEvents = authenticationEventSharedService
+        List<FailedAuthentication> failureEvents = authenticationEventService
                 .findLatestFailureEvents(username, lockingThreshold);
 
         if (failureEvents.size() < lockingThreshold) {
@@ -164,7 +150,7 @@ public class AccountSharedServiceImpl implements AccountSharedService {
     @Override
     @Cacheable("isInitialPassword")
     public boolean isInitialPassword(String username) {
-        List<PasswordHistory> passwordHistories = passwordHistorySharedService
+        List<PasswordHistory> passwordHistories = passwordHistoryService
                 .findLatest(username, 1);
 
         if (passwordHistories.isEmpty()) {
@@ -173,18 +159,14 @@ public class AccountSharedServiceImpl implements AccountSharedService {
 
         // システム管理者がパスワードを変更した場合、初期パスワードと判定する
         String lastUpdatedBy = passwordHistories.get(0).getCreatedBy();
-        if (username.equals(lastUpdatedBy) || "unknown".equals(lastUpdatedBy)) {
-            return false;
-        } else {
-            return true;
-        }
+        return !username.equals(lastUpdatedBy) && !"unknown".equals(lastUpdatedBy);
 
     }
 
     @Override
     @Cacheable("isCurrentPasswordExpired")
     public boolean isCurrentPasswordExpired(String username) {
-        List<PasswordHistory> passwordHistories = passwordHistorySharedService
+        List<PasswordHistory> passwordHistories = passwordHistoryService
                 .findLatest(username, 1);
 
         if (passwordHistories.isEmpty()) {
@@ -204,13 +186,13 @@ public class AccountSharedServiceImpl implements AccountSharedService {
 
         Account account = findOne(username);
         account.setPassword(password);
-        account = accountRepository.save(account);
+        accountRepository.save(account);
 
-        passwordHistorySharedService.insert(
+        passwordHistoryService.insert(
                 PasswordHistory.builder()
-                .username(username)
-                .password(password)
-                .useFrom(dateFactory.newLocalDateTime()).build());
+                        .username(username)
+                        .password(password)
+                        .useFrom(dateFactory.newLocalDateTime()).build());
 
         return true;
     }
@@ -220,7 +202,7 @@ public class AccountSharedServiceImpl implements AccountSharedService {
 
         Account account = findOne(username);
         account.setEmail(email);
-        account = accountRepository.save(account);
+        accountRepository.save(account);
 
         return true;
     }
@@ -228,14 +210,14 @@ public class AccountSharedServiceImpl implements AccountSharedService {
     @Override
     @CacheEvict(value = {"isInitialPassword", "isCurrentPasswordExpired"}, key = "#username")
     public void clearPasswordValidationCache(String username) {
+        return;
     }
 
     @Override
     public FileManaged getImage(String username) {
         Account account = accountRepository.findById(username)
                 .orElseThrow(() -> new ResourceNotFoundException(ResultMessages.error().add(E_SL_FW_5001, username)));
-        FileManaged fileManaged = fileManagedSharedService.findByUuid(account.getImageUuid());
-        return fileManaged;
+        return fileManagedService.findByUuid(account.getImageUuid());
     }
 
 }

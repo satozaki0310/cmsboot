@@ -9,7 +9,7 @@ import jp.co.stnet.cms.sales.application.service.document.DocumentHistoryService
 import jp.co.stnet.cms.sales.domain.model.document.DocumentFullSearchForm;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentIndex;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentIndexSearchRow;
-import jp.co.stnet.cms.sales.domain.model.variable.VariableCategoryBean;
+import jp.co.stnet.cms.sales.domain.model.variable.VariableBean;
 import org.hibernate.search.engine.search.aggregation.AggregationKey;
 import org.hibernate.search.engine.search.query.SearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +25,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.terasoluna.gfw.common.message.ResultMessages;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static jp.co.stnet.cms.sales.presentation.controller.document.DocumentConstant.BASE_PATH;
@@ -63,8 +63,10 @@ public class DocumentFullSearchController {
     }
 
     @GetMapping("search")
-    public String search(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser) {
-        return BASE_PATH + "/search";
+    public String search(Model model, @Validated DocumentFullSearchForm form, BindingResult bindingResult,
+                         @PageableDefault(size = 5) Pageable pageable, @AuthenticationPrincipal LoggedInUser loggedInUser) {
+
+        return searchFacets(model, form, bindingResult, pageable, loggedInUser);
     }
 
     /**
@@ -83,19 +85,43 @@ public class DocumentFullSearchController {
     public String searchFacets(Model model, @Validated DocumentFullSearchForm form, BindingResult bindingResult,
                                @PageableDefault(size = 5) Pageable pageable, @AuthenticationPrincipal LoggedInUser loggedInUser) {
 
-        // 検索キーワードが入力されていないときにエラー表示 ここはなにかを検索させたほうがいい？
-        if (form.getQ() == null) {
-            model.addAttribute(ResultMessages.info().add("e.sl.fw.5001"));
-            return search(model, loggedInUser);
+        // 全件検索に切り替え
+//        if (form.getQ() == null) {
+//            model.addAttribute(ResultMessages.info().add("e.sl.fw.5001"));
+//            return search(model, loggedInUser);
+//        }
+
+        if (form.getPeriod() != null) {
+            LocalDateTime now = LocalDateTime.now();
+            if (form.getPeriod().equals("year")) {
+                form.setPeriodDate(now.minusYears(1));
+            } else if (form.getPeriod().equals("month")) {
+                form.setPeriodDate(now.minusMonths(1));
+            } else if (form.getPeriod().equals("week")) {
+                form.setPeriodDate(now.minusWeeks(1));
+            } else {
+                form.setPeriodDate(null);
+            }
         }
 
-        SearchResult<DocumentIndex> result = documentFullSearchService.search(form.getQ(), form.getPeriod(), form.getSort(), form.getFacets(), pageable);
+        // 公開区分を格納
+        form.setPublicScope(helper.getPublicScopeNumber(loggedInUser));
+
+        SearchResult<DocumentIndex> result = documentFullSearchService.search(form, pageable);
 
         // 検索にヒットしたものを加工したデータを格納するもの
         List<DocumentIndexSearchRow> hits = new ArrayList<>();
         for (DocumentIndex d : result.hits()) {
             DocumentIndexSearchRow i = beanMapper.map(d, DocumentIndexSearchRow.class);
-            i.setContentHighlight(documentFullSearchService.highlight(d.getContent(), form.getQ()));
+            if (form.getQ() != null) {
+                i.setContentHighlight(documentFullSearchService.highlight(d.getContent(), form.getQ(), "content"));
+                if (i.getContentHighlight().equals("")) {
+                    i.setContentHighlight(null);
+                }
+                if (d.getBodyPlain() != null) {
+                    i.setBodyHighlight(documentFullSearchService.highlight(d.getBodyPlain(), form.getQ(), "bodyPlane"));
+                }
+            }
             i.setDocCategory1Name(getCodeName(docCategory1, i.getDocCategory1()));
             i.setDocCategory2Name(getCodeName(docCategory2, i.getDocCategory2()));
             i.setDocService1Name(getCodeName(docService1, i.getDocService1()));
@@ -111,38 +137,42 @@ public class DocumentFullSearchController {
         // ソート機能を実装
         List<Variable> variableCategoryList1 = variableService.findAllByType(docCategory1);
         List<Variable> variableCategoryList2 = variableService.findAllByType(docCategory2);
+        // ソート
+        sortList(variableCategoryList1, variableCategoryList2);
 
-        List<VariableCategoryBean> variableCategoryBeanList = new ArrayList<>();
+        List<VariableBean> variableCategoryBeanList = new ArrayList<>();
         for (Variable v1 : variableCategoryList1) {
             if (countsByDocCategory1.get(v1.getCode()) != null) {
-                variableCategoryBeanList.add(new VariableCategoryBean(v1.getCode(), v1.getValue1(), "1", countsByDocCategory1.get(v1.getCode())));
+                variableCategoryBeanList.add(new VariableBean(v1.getCode(), v1.getValue1(), "1", countsByDocCategory1.get(v1.getCode())));
                 for (Variable v2 : variableCategoryList2) {
                     if (Objects.equals(v2.getValue2(), v1.getCode())) {
-                        System.out.println("____" + v2.getCode() + ": " + v2.getValue1() + " " + countsByDocCategory2.get(v2.getCode()));
-                        variableCategoryBeanList.add(new VariableCategoryBean(v2.getCode(), v2.getValue1(), "2", countsByDocCategory2.get(v2.getCode())));
+                        variableCategoryBeanList.add(new VariableBean(v2.getCode(), v2.getValue1(), "2", countsByDocCategory2.get(v2.getCode())));
                     }
                 }
             }
         }
 
-        Map<String, Long> countsByDocService1 = getFacets(docService1, result.aggregation(AggregationKey.of("countsByDocService1")));
-        Map<String, Long> countsByDocService2 = getFacets(docService2, result.aggregation(AggregationKey.of("countsByDocService2")));
-        Map<String, Long> countsByDocService3 = getFacets(docService3, result.aggregation(AggregationKey.of("countsByDocService3")));
+        Map<String, Long> countsByDocService1 = result.aggregation(AggregationKey.of("countsByDocService1"));
+        Map<String, Long> countsByDocService2 = result.aggregation(AggregationKey.of("countsByDocService2"));
+        Map<String, Long> countsByDocService3 = result.aggregation(AggregationKey.of("countsByDocService3"));
+
 
         List<Variable> variableServiceList1 = variableService.findAllByType(docService1);
         List<Variable> variableServiceList2 = variableService.findAllByType(docService2);
         List<Variable> variableServiceList3 = variableService.findAllByType(docService3);
+        // ソート
+        sortList(variableServiceList1, variableServiceList2, variableServiceList3);
 
-        List<VariableCategoryBean> variableCategoryBeanList2 = new ArrayList<>();
+        List<VariableBean> variableServiceBeanList = new ArrayList<>();
         for (Variable v1 : variableServiceList1) {
-            if (countsByDocCategory1.get(v1.getCode()) != null) {
-                variableCategoryBeanList2.add(new VariableCategoryBean(v1.getCode(), v1.getValue1(), "1", countsByDocService1.get(v1.getCode())));
+            if (countsByDocService1.get(v1.getCode()) != null) {
+                variableServiceBeanList.add(new VariableBean(v1.getCode(), v1.getValue1(), "1", countsByDocService1.get(v1.getCode())));
                 for (Variable v2 : variableServiceList2) {
                     if (Objects.equals(v2.getValue2(), v1.getCode())) {
-                        variableCategoryBeanList2.add(new VariableCategoryBean(v2.getCode(), v2.getValue1(), "2", countsByDocService2.get(v2.getCode())));
+                        variableServiceBeanList.add(new VariableBean(v2.getCode(), v2.getValue1(), "2", countsByDocService2.get(v2.getCode())));
                         for (Variable v3 : variableServiceList3) {
                             if (Objects.equals(v3.getValue2(), v2.getCode())) {
-                                variableCategoryBeanList2.add(new VariableCategoryBean(v3.getCode(), v3.getValue1(), "3", countsByDocService3.get(v3.getCode())));
+                                variableServiceBeanList.add(new VariableBean(v3.getCode(), v3.getValue1(), "3", countsByDocService3.get(v3.getCode())));
                             }
                         }
                     }
@@ -153,19 +183,14 @@ public class DocumentFullSearchController {
         // ページの表示情報を渡す？
         Page<DocumentIndexSearchRow> page = new PageImpl<>(hits, pageable, result.total().hitCount());
 
-
-//        Map<String, String> query = new HashMap<>();
-//        query.put("q", form.getQ());
-
         // Modelに格納
-//        model.addAttribute("query", query);
         model.addAttribute("page", page);
-//        model.addAttribute("q", form.getQ());
+        model.addAttribute("form", form);
         model.addAttribute("result", result);
         model.addAttribute("hits", hits);
         model.addAttribute("totalHitCount", result.total().hitCount());
         model.addAttribute("variableCategoryBeanList", variableCategoryBeanList);
-        model.addAttribute("variableCategoryBeanList2", variableCategoryBeanList2);
+        model.addAttribute("variableServiceBeanList", variableServiceBeanList);
 
 
         return BASE_PATH + "/search";
@@ -180,22 +205,6 @@ public class DocumentFullSearchController {
 
     /**
      * @param type
-     * @param map
-     * @return
-     */
-    private Map<String, Long> getFacets(String type, Map<String, Long> map) {
-        Map<String, Long> facets = new HashMap<>();
-        for (Map.Entry<String, Long> entry : map.entrySet()) {
-            List<Variable> codeName = variableService.findAllByTypeAndCode(type, entry.getKey());
-            for (Variable v : codeName) {
-                facets.put(v.getValue1(), entry.getValue());
-            }
-        }
-        return facets;
-    }
-
-    /**
-     * @param type
      * @param code
      * @return
      */
@@ -206,5 +215,13 @@ public class DocumentFullSearchController {
             codeName = v.getValue1();
         }
         return codeName;
+    }
+
+    @SafeVarargs
+    private void sortList(List<Variable>... list) {
+        for (List<Variable> l : list) {
+            Comparator<Variable> compare = Comparator.comparing(Variable::getCode);
+            l.sort(compare);
+        }
     }
 }

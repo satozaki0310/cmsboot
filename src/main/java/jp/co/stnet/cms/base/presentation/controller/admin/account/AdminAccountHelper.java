@@ -4,8 +4,8 @@ import jp.co.stnet.cms.base.domain.model.authentication.Account;
 import jp.co.stnet.cms.base.domain.model.common.Status;
 import jp.co.stnet.cms.common.constant.Constants;
 import jp.co.stnet.cms.common.util.StateMap;
-import jp.co.stnet.cms.common.util.StringUtils;
 import lombok.NonNull;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.validation.groups.Default;
@@ -53,8 +53,8 @@ public class AdminAccountHelper {
      * 画面に応じたボタンの状態を定義
      *
      * @param operation 操作
-     * @param record DBから取り出したデータ
-     * @param form 画面から入力されたデータ
+     * @param record    DBから取り出したデータ
+     * @param form      画面から入力されたデータ
      * @return StateMap
      */
     StateMap getButtonStateMap(@NonNull String operation, Account record, AccountForm form) {
@@ -127,8 +127,8 @@ public class AdminAccountHelper {
      * 画面に応じたフィールドの状態を定義
      *
      * @param operation 操作
-     * @param record DBから取り出したデータ
-     * @param form 画面から入力されたデータ
+     * @param record    DBから取り出したデータ
+     * @param form      画面から入力されたデータ
      * @return StateMap
      */
     StateMap getFiledStateMap(String operation, Account record, AccountForm form) {

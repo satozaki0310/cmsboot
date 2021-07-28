@@ -21,4 +21,3 @@ public class PageInfo {
         return NumberUtils.sequence(begin, end);
     }
 }
-

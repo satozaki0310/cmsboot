@@ -25,7 +25,7 @@ import org.springframework.validation.SmartValidator;
 
 import java.util.List;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
 
 @Component
 public class ImportVariableTasklet implements Tasklet {
@@ -58,7 +58,7 @@ public class ImportVariableTasklet implements Tasklet {
         MDC.put("jobInstanceId", jobInstanceId.toString());
         MDC.put("jobName", jobName);
         MDC.put("jobExecutionId", jobExecutionId.toString());
-        MDC.put("jobName_jobExecutionId", jobName + "_" + jobExecutionId.toString());
+        MDC.put("jobName_jobExecutionId", jobName + "_" + jobExecutionId);
 
 
         // DB操作時の例外発生の有無を記録する

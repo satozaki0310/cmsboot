@@ -1,12 +1,12 @@
 package jp.co.stnet.cms.sales.domain.model.document;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jp.co.stnet.cms.base.domain.model.StatusInterface;
 import jp.co.stnet.cms.base.domain.model.filemanage.FileManaged;
 import jp.co.stnet.cms.base.domain.model.variable.Variable;
 import lombok.*;
 import org.hibernate.annotations.*;
 import org.hibernate.search.engine.backend.types.Aggregable;
+import org.hibernate.search.engine.backend.types.Sortable;
 import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.IdentifierBridgeRef;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.*;
@@ -15,8 +15,6 @@ import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Indexed
@@ -44,38 +42,29 @@ public class DocumentIndexSearchRow implements Serializable, StatusInterface {
      * 最終更新者
      */
     @Column(nullable = false)
+    @KeywordField(sortable = Sortable.YES)
     private String lastModifiedBy;
 
     /**
      * 作成日時
      */
-    @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss")
     @Column(nullable = false)
-    private LocalDateTime createdDate;
+    @KeywordField(sortable = Sortable.YES)
+    private String createdDate;
 
     /**
      * 最終更新日時
      */
-    @GenericField(aggregable = Aggregable.YES)
-    @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss")
     @Column(nullable = false)
-    private LocalDateTime lastModifiedDate;
+    @KeywordField(sortable = Sortable.YES)
+    private String lastModifiedDate;
 
     @EmbeddedId
     @DocumentId(
             identifierBridge = @IdentifierBridgeRef(type = DocumentIndexPKBridge.class)
     )
+    @IndexedEmbedded
     private DocumentIndexPK pk;
-
-    /**
-     * 内部ID
-     */
-//    private Long id;
-
-    /**
-     *
-     */
-//    private Integer no;
 
     /**
      * ステータス
@@ -90,7 +79,7 @@ public class DocumentIndexSearchRow implements Serializable, StatusInterface {
     /**
      * タイトル
      */
-    @FullTextField(analyzer = "japanese")
+    @KeywordField(sortable = Sortable.YES)
     private String title;
 
     /**
@@ -99,101 +88,101 @@ public class DocumentIndexSearchRow implements Serializable, StatusInterface {
     private String body;
 
     /**
-     * 本文
+     * 本文(HTMLタグ除去)
      */
     @FullTextField(analyzer = "japanese")
     @Column(columnDefinition = "TEXT")
-    private String bodyPlane;
+    private String bodyPlain;
 
     /**
      * 公開区分
      */
-    @KeywordField(aggregable = Aggregable.YES)
+    @KeywordField(aggregable = Aggregable.YES, sortable = Sortable.YES)
     private String publicScope;
 
     /**
      * ドキュメント管理番号
      */
-    @KeywordField
+    @KeywordField(sortable = Sortable.YES)
     private String documentNumber;
 
     /**
      * 版数
      */
-    @KeywordField
+    @KeywordField(sortable = Sortable.YES)
     private String versionNumber;
 
     /**
      * 作成部門
      */
-    @KeywordField
+    @KeywordField(sortable = Sortable.YES)
     private String departmentForCreation;
 
     /**
      * 作成担当者
      */
-    @KeywordField
+    @KeywordField(sortable = Sortable.YES)
     private String chargePersonForCreation;
 
     /**
      * 発行担当者
      */
-    @KeywordField
+    @KeywordField(sortable = Sortable.YES)
     private String chargePersonForPublish;
 
     /**
      * 発行部門
      */
-    @KeywordField
+    @KeywordField(sortable = Sortable.YES)
     private String departmentForPublish;
 
     /**
      * 発行責任者
      */
-    @KeywordField
+    @KeywordField(sortable = Sortable.YES)
     private String responsiblePersonForPublish;
 
     /**
      * 発行日
      */
-    @GenericField
-    private LocalDate publishedDate;
+    @KeywordField(sortable = Sortable.YES)
+    private String publishedDate;
 
     /**
      * 改定日
      */
-    @GenericField
-    private LocalDate lastRevisedDate;
+    @KeywordField(sortable = Sortable.YES)
+    private String lastRevisedDate;
 
     /**
      * 廃止日
      */
-    @GenericField
-    private LocalDate invalidationDate;
+    @KeywordField(sortable = Sortable.YES)
+    private String invalidationDate;
 
     /**
      * 周知日
      */
-    @GenericField
-    private LocalDate announceDate;
+    @KeywordField(sortable = Sortable.YES)
+    private String announceDate;
 
     /**
      * 変更理由
      */
-    @KeywordField
+    @KeywordField(sortable = Sortable.YES)
     private String reasonForChange;
 
     /**
      * 活用シーン
      */
-    @GenericField(aggregable = Aggregable.YES)
+    @GenericField(aggregable = Aggregable.YES, sortable = Sortable.YES)
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> useStage;
 
     /**
      * 区分1
      */
-    @KeywordField(aggregable = Aggregable.YES)
+    @KeywordField(aggregable = Aggregable.YES, sortable = Sortable.YES)
     private String docCategory1;
 
     /**
@@ -205,12 +194,14 @@ public class DocumentIndexSearchRow implements Serializable, StatusInterface {
             @JoinColumnOrFormula(formula = @JoinFormula(value = "'DOC_CATEGORY1'", referencedColumnName = "type")),
             @JoinColumnOrFormula(column = @JoinColumn(name = "docCategory1", referencedColumnName = "code", unique = false, insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)))
     })
+    @IndexedEmbedded
+    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.NO)
     private Variable docCategoryVariable1;
 
     /**
      * 区分2
      */
-    @KeywordField(aggregable = Aggregable.YES)
+    @KeywordField(aggregable = Aggregable.YES, sortable = Sortable.YES)
     private String docCategory2;
 
     /**
@@ -222,12 +213,14 @@ public class DocumentIndexSearchRow implements Serializable, StatusInterface {
             @JoinColumnOrFormula(formula = @JoinFormula(value = "'DOC_CATEGORY2'", referencedColumnName = "type")),
             @JoinColumnOrFormula(column = @JoinColumn(name = "docCategory2", referencedColumnName = "code", unique = false, insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)))
     })
+    @IndexedEmbedded
+    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.NO)
     private Variable docCategoryVariable2;
 
     /**
      * サービス-事業領域
      */
-    @KeywordField(aggregable = Aggregable.YES)
+    @KeywordField(aggregable = Aggregable.YES, sortable = Sortable.YES)
     private String docService1;
 
     /**
@@ -239,12 +232,14 @@ public class DocumentIndexSearchRow implements Serializable, StatusInterface {
             @JoinColumnOrFormula(formula = @JoinFormula(value = "'DOC_SERVICE1'", referencedColumnName = "type")),
             @JoinColumnOrFormula(column = @JoinColumn(name = "docService1", referencedColumnName = "code", unique = false, insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)))
     })
+    @IndexedEmbedded
+    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.NO)
     private Variable docServiceVariable1;
 
     /**
      * サービス-サービス種別
      */
-    @KeywordField(aggregable = Aggregable.YES)
+    @KeywordField(aggregable = Aggregable.YES, sortable = Sortable.YES)
     private String docService2;
 
     /**
@@ -256,12 +251,14 @@ public class DocumentIndexSearchRow implements Serializable, StatusInterface {
             @JoinColumnOrFormula(formula = @JoinFormula(value = "'DOC_SERVICE1'", referencedColumnName = "type")),
             @JoinColumnOrFormula(column = @JoinColumn(name = "docService2", referencedColumnName = "code", unique = false, insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)))
     })
+    @IndexedEmbedded
+    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.NO)
     private Variable docServiceVariable2;
 
     /**
      * サービス-サービス
      */
-    @KeywordField(aggregable = Aggregable.YES)
+    @KeywordField(aggregable = Aggregable.YES, sortable = Sortable.YES)
     private String docService3;
 
     /**
@@ -273,6 +270,8 @@ public class DocumentIndexSearchRow implements Serializable, StatusInterface {
             @JoinColumnOrFormula(formula = @JoinFormula(value = "'DOC_SERVICE3'", referencedColumnName = "type")),
             @JoinColumnOrFormula(column = @JoinColumn(name = "docService3", referencedColumnName = "code", unique = false, insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)))
     })
+    @IndexedEmbedded
+    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.NO)
     private Variable docServiceVariable3;
 
 //    /**
@@ -300,28 +299,34 @@ public class DocumentIndexSearchRow implements Serializable, StatusInterface {
     @JoinColumn(name = "pdfUuid", referencedColumnName = "uuid", unique = false, insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private FileManaged pdfManaged;
 
+    @KeywordField(sortable = Sortable.YES)
     private String fileMemo;
 
     @FullTextField(analyzer = "japanese")
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     /**
      * 備考
      */
-    @FullTextField(analyzer = "japanese")
+    @KeywordField(sortable = Sortable.YES)
     private String remark;
 
     /**
      * 顧客公開区分
      */
-    @KeywordField(aggregable = Aggregable.YES)
+    @KeywordField(aggregable = Aggregable.YES, sortable = Sortable.YES)
     private String customerPublic;
 
     /**
      * ハイライトテキスト
      */
-    private String contentHighlight;
+    private String contentHighlight = null;
+
+    /**
+     * ハイライトボディ
+     */
+    private String bodyHighlight = null;
 
     /**
      * 区分1 コード名称

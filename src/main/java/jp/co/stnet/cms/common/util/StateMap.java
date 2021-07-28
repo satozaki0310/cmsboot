@@ -28,13 +28,13 @@ public class StateMap {
 
     private final Map<String, Boolean> authMap = new HashMap<>();
 
-    private final String DISABLED = "disabled";
-    private final String READONLY = "readonly";
-    private final String HIDDEN = "hidden";
-    private final String INPUT = "input";
-    private final String VIEW = "view";
-    private final String LABEL = "label";
-    private final String[] attributes = {DISABLED, READONLY, HIDDEN, VIEW, INPUT, LABEL};
+    private static final String DISABLED = "disabled";
+    private static final String READONLY = "readonly";
+    private static final String HIDDEN = "hidden";
+    private static final String INPUT = "input";
+    private static final String VIEW = "view";
+    private static final String LABEL = "label";
+    private static final String[] attributes = {DISABLED, READONLY, HIDDEN, VIEW, INPUT, LABEL};
 
     /**
      * 初期化
@@ -336,7 +336,7 @@ public class StateMap {
                     }
                     break;
 
-                    // LABELは、INPUT,VIEWに連動
+                // LABELは、INPUT,VIEWに連動
             }
         }
 
@@ -419,16 +419,12 @@ public class StateMap {
 
     /**
      * __input, __viewの状態から、field__label を設定する。
-
+     *
      * @param fieldName フィールド名
      * @return StateMap
      */
     private StateMap setLabelFromInputAndView(String fieldName) {
-        if (getStatus(fieldName, INPUT) || getStatus(fieldName, VIEW)) {
-            setAttribute(fieldName, LABEL, true);
-        } else {
-            setAttribute(fieldName, LABEL, false);
-        }
+        setAttribute(fieldName, LABEL, getStatus(fieldName, INPUT) || getStatus(fieldName, VIEW));
         return this;
     }
 

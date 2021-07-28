@@ -1,11 +1,11 @@
 package jp.co.stnet.cms.example.application.service;
 
 import jp.co.stnet.cms.base.application.service.AbstractNodeService;
-import jp.co.stnet.cms.base.application.service.filemanage.FileManagedSharedService;
-import jp.co.stnet.cms.common.util.StringUtils;
+import jp.co.stnet.cms.base.application.service.filemanage.FileManagedService;
 import jp.co.stnet.cms.example.application.repository.person.PersonRepository;
 import jp.co.stnet.cms.example.domain.model.person.Person;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.ja.JapaneseTokenizer;
@@ -22,7 +22,6 @@ import org.apache.lucene.search.highlight.*;
 import org.apache.tika.exception.TikaException;
 import org.hibernate.search.backend.lucene.LuceneBackend;
 import org.hibernate.search.engine.backend.Backend;
-import org.hibernate.search.engine.backend.index.IndexManager;
 import org.hibernate.search.engine.search.aggregation.AggregationKey;
 import org.hibernate.search.engine.search.query.SearchResult;
 import org.hibernate.search.mapper.orm.Search;
@@ -34,8 +33,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -57,26 +54,12 @@ public class PersonServiceImpl extends AbstractNodeService<Person, Long> impleme
     PersonRepository personRepository;
 
     @Autowired
-    FileManagedSharedService fileManagedSharedService;
-
-    @PersistenceContext
-    EntityManager entityManager;
-
+    FileManagedService fileManagedService;
 
     @Override
     protected JpaRepository<Person, Long> getRepository() {
         return this.personRepository;
     }
-
-//    private boolean changeContent(Person entity, Person current) {
-//        if (entity == null || entity.getAttachedFile01Uuid() == null) {
-//            return false;
-//        } else {
-//            return current == null || current.getAttachedFile01Uuid() == null
-//                    || !Objects.equals(entity.getAttachedFile01Uuid(), current.getAttachedFile01Uuid());
-//        }
-//    }
-
 
     @Override
     protected void beforeSave(Person entity, Person current) {
@@ -92,16 +75,14 @@ public class PersonServiceImpl extends AbstractNodeService<Person, Long> impleme
             } else if (current == null || current.getAttachedFile01Uuid() == null
                     || !Objects.equals(entity.getAttachedFile01Uuid(), current.getAttachedFile01Uuid())) {
 
-                content = fileManagedSharedService.getContent(entity.getAttachedFile01Uuid());
-                content = content
-//                        .replaceAll("[　]+", " ")
-//                        .replaceAll("[ ]+", " ")
-//                        .replaceAll("[\t]+", " ")
-//                        .replaceAll("[ |\t]+", " ")
-                        .replaceAll("[ |　|\t|\\n|\\r\\n|\\r]+", " ");
+                content = fileManagedService.getContent(entity.getAttachedFile01Uuid());
+                content = content.replaceAll("[ |　|\t|\\n|\\r\\n|\\r]+", " ");
+                content = escapeHtml4(content);
             }
 
-            entity.setContent(escapeHtml4(content));
+            if (content != null) {
+                entity.setContent(content);
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -136,12 +117,12 @@ public class PersonServiceImpl extends AbstractNodeService<Person, Long> impleme
         // UUID変更されていた場合、以前のUUIDを物理削除
         if (current != null && current.getAttachedFile01Uuid() != null &&
                 !current.getAttachedFile01Uuid().equals(entity.getAttachedFile01Uuid())) {
-            fileManagedSharedService.delete(current.getAttachedFile01Uuid());
+            fileManagedService.delete(current.getAttachedFile01Uuid());
         }
 
         // 添付ファイル確定
         if (entity.getAttachedFile01Uuid() != null) {
-            fileManagedSharedService.permanent(entity.getAttachedFile01Uuid());
+            fileManagedService.permanent(entity.getAttachedFile01Uuid());
         }
     }
 
@@ -151,13 +132,13 @@ public class PersonServiceImpl extends AbstractNodeService<Person, Long> impleme
         // 添付ファイルURI取得
         String uri = null;
         if (findById(id).getAttachedFile01Uuid() != null) {
-            uri = fileManagedSharedService.findByUuid(findById(id).getAttachedFile01Uuid()).getUri();
+            uri = fileManagedService.findByUuid(findById(id).getAttachedFile01Uuid()).getUri();
         }
 
         super.delete(id);
 
         // 添付ファイル削除
-        fileManagedSharedService.deleteFile(uri);
+        fileManagedService.deleteFile(uri);
     }
 
     @Override
@@ -281,7 +262,7 @@ public class PersonServiceImpl extends AbstractNodeService<Person, Long> impleme
 
 
             SearchMapping mapping = Search.mapping(entityManager.getEntityManagerFactory());
-            IndexManager indexManager = mapping.indexManager("Person");
+//            IndexManager indexManager = mapping.indexManager("Person");
             Backend backend = mapping.backend();
             LuceneBackend luceneBackend = backend.unwrap(LuceneBackend.class);
             Analyzer analyzer = luceneBackend.analyzer("japanese").orElseThrow(() -> new IllegalStateException());

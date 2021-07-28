@@ -9,7 +9,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 /**
- * ���Ɨ̈��I��������A�T�[�r�X��ʂƃT�[�r�X(�I����������ꍇ)��K�{�Ƃ���B
+ * 事業領域を選択したら、サービス種別とサービス(選択肢がある場合)を必須とする。
  */
 public class ValidServiceValidator implements ConstraintValidator<ValidService, Object> {
 
@@ -35,10 +35,10 @@ public class ValidServiceValidator implements ConstraintValidator<ValidService, 
 
         context.disableDefaultConstraintViolation();
 
-        // ���Ɨ̈�ɒl���ݒ肳�ꂽ�ꍇ�A�T�[�r�X��ʁE�T�[�r�X�̕K�{�`�F�b�N���s���B
+        // 事業領域に値が設定された場合、サービス種別・サービスの必須チェックを行う。
         if (documentForm.getDocService1() != null) {
 
-            // �T�[�r�X��ʂ̕K�{�`�F�b�N
+            // サービス種別の必須チェック
             if (documentForm.getDocService2() == null) {
                 context.buildConstraintViolationWithTemplate(message)
                         .addPropertyNode("docService2")
@@ -46,7 +46,7 @@ public class ValidServiceValidator implements ConstraintValidator<ValidService, 
                 result = false;
             }
 
-            // �T�[�r�X��ʂ̒l�ɕR�Â��T�[�r�X�̗L�����m�F���A�I���\�ȃT�[�r�X������ꍇ�K�{
+            // サービス種別の値に紐づくサービスの有無を確認し、選択可能なサービスがある場合必須
             if (!variableService.findAllByTypeAndValueX(VariableType.DOC_SERVICE3.name(), 2, documentForm.getDocService2()).isEmpty()) {
                 if (documentForm.getDocService3() == null) {
                     context.buildConstraintViolationWithTemplate(message)

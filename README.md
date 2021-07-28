@@ -1,14 +1,12 @@
-## 初期設定
 
+## 初期設定
 ### 前提条件
 
 - docker
 - docker-compose
 
 ### 初回作業
-
 - docker で postgresql を起動
-
 ~~~
 cd docker
 docker-compose up -d

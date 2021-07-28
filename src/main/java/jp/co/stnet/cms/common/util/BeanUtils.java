@@ -1,6 +1,8 @@
 package jp.co.stnet.cms.common.util;
 
 
+import lombok.NonNull;
+
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -10,11 +12,11 @@ import java.util.*;
 /**
  * Apache Commons BeanUtils の拡張
  */
-public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
+public class BeanUtils {
 
     private static final String SEPARATOR = "_";
 
-    private static final Set<String> PRIMITIVE = Set.of(
+    private static final Set<String> PRIMITIVE_SET = Set.of(
             "java.lang.String",
             "java.lang.Integer",
             "java.lang.Long",
@@ -27,12 +29,16 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
             "java.lang.Enum"
     );
 
-    private static final Set<String> COLLECTION = Set.of(
+    private static final Set<String> COLLECTION_SET = Set.of(
             "java.util.Map",
             "java.util.List",
             "java.util.Set",
             "java.util.Collection"
     );
+
+    // インスタンス化禁止
+    private BeanUtils() {
+    }
 
     /**
      * クラスのフィールド一覧を取得する。(Map)
@@ -41,11 +47,7 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
      * @param parentClassName 親クラス名
      * @return Map(key : フィールド名, value : クラス名)
      */
-    public static Map<String, String> getFields(Class clazz, String parentClassName) {
-
-        if (clazz == null) {
-            throw new IllegalArgumentException();
-        }
+    public static Map<String, String> getFields(@NonNull Class clazz, String parentClassName) {
 
         Map<String, String> fieldsMap = new LinkedHashMap<>();
 
@@ -60,15 +62,16 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
                 Class fieldClass = m.getParameterTypes()[0];
                 String fieldName = Introspector.decapitalize(m.getName().substring(3));
 
-                if (PRIMITIVE.contains(fieldClass.getName())) {
+                if (PRIMITIVE_SET.contains(fieldClass.getName())) {
                     // 何もしない
 
-                } else if (COLLECTION.contains(fieldClass.getName())) {
+                } else if (COLLECTION_SET.contains(fieldClass.getName())) {
                     String c = getClassFromSig(getSignature(m));
 
-                    if (PRIMITIVE.contains(c)) {
+                    if (PRIMITIVE_SET.contains(c)) {
+                        // 何もしない
 
-                    } else  {
+                    } else {
                         try {
                             fieldsMap.putAll(getFields(Class.forName(c), fieldName));
                         } catch (ClassNotFoundException e) {
@@ -96,12 +99,7 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
      */
     private static List<String> getFieldList(Class clazz, String parentClassName) {
         Map<String, String> fields = getFields(clazz, parentClassName);
-        List<String> fieldList = new ArrayList<>();
-
-        for (String fieldName : fields.keySet()) {
-            fieldList.add(fieldName);
-        }
-        return fieldList;
+        return new ArrayList<>(fields.keySet());
     }
 
     /**
@@ -114,7 +112,6 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
         return getFieldList(clazz, "");
     }
 
-
     /**
      * 指定したアノテーションが設定されているフィールドを取得する。
      *
@@ -123,18 +120,9 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
      * @param annotationClass アノテーションクラス
      * @return フォールド名とアノテーションの組み合わせMap
      */
-    public static Map<String, Annotation> getFieldByAnnotation(Class clazz, String parentClassName, Class annotationClass) {
-
-        if (clazz == null) {
-            throw new IllegalArgumentException();
-        }
+    public static Map<String, Annotation> getFieldByAnnotation(@NonNull Class clazz, String parentClassName, Class annotationClass) {
 
         Map<String, Annotation> annotationMap = new LinkedHashMap<>();
-
-        String prefix = "";
-        if (parentClassName != null && !parentClassName.isEmpty()) {
-            prefix = parentClassName + SEPARATOR;
-        }
 
         Map<String, String> fields = getFields(clazz, parentClassName);
 
@@ -155,12 +143,13 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
     }
 
     /**
-     * シグネチャを取得する。(未使用)
+     * シグネチャを取得する。
      * https://stackoverflow.com/questions/45072268/how-can-i-get-the-signature-field-of-java-reflection-method-object
+     *
      * @param m メソッド
      * @return シグネチャ
      */
-    public static String getSignature(Method m) {
+    public static String getSignature(@NonNull Method m) {
         String sig;
         try {
             Field gSig = Method.class.getDeclaredField("signature");
@@ -176,6 +165,7 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
 
     /**
      * "(Ljava/util/List<Ljava/lang/String;>;)V" から "java.lang.String" を取得する。。
+     *
      * @param sig sig
      * @return クラス名
      */
@@ -184,8 +174,5 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
         int end = sig.indexOf(";>");
         return sig.substring(start + 2, end).replace("/", ".");
     }
-
-    // インスタンス化禁止
-    private BeanUtils() {}
 
 }

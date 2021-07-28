@@ -22,9 +22,9 @@ public class DocumentHistoryBean implements Serializable {
      */
     private Long rid;
     /**
-     * リンク用リビジョンID
+     * リンク用Ver
      */
-    private String ridLabel;
+    private String verLabel;
     /**
      * ドキュメントVer
      */

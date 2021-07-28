@@ -20,7 +20,6 @@ import org.springframework.batch.item.validator.ValidationException;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.SmartValidator;
@@ -71,7 +70,7 @@ public class ImportSimpleEntityTasklet implements Tasklet {
         MDC.put("jobInstanceId", jobInstanceId.toString());
         MDC.put("jobName", jobName);
         MDC.put("jobExecutionId", jobExecutionId.toString());
-        MDC.put("jobName_jobExecutionId", jobName + "_" + jobExecutionId.toString());
+        MDC.put("jobName_jobExecutionId", jobName + "_" + jobExecutionId);
 
         int count_read = 0; // 読み込み件数　読み込み件数 = 新規登録 + 更新 + 削除 + スキップ
         int count_insert = 0; // 新規登録件数

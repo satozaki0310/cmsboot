@@ -2,6 +2,7 @@ package jp.co.stnet.cms.sales.application.service.document;
 
 import jp.co.stnet.cms.base.domain.model.variable.Variable;
 import jp.co.stnet.cms.common.util.StringUtils;
+import jp.co.stnet.cms.sales.domain.model.document.DocumentFullSearchForm;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentIndex;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -20,6 +21,7 @@ import org.hibernate.search.backend.lucene.LuceneBackend;
 import org.hibernate.search.engine.backend.Backend;
 import org.hibernate.search.engine.backend.index.IndexManager;
 import org.hibernate.search.engine.search.aggregation.AggregationKey;
+import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.query.SearchResult;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.mapping.SearchMapping;
@@ -39,11 +41,10 @@ import java.util.Map;
 public class DocumentFullSearchServiceImpl implements DocumentFullSearchService {
 
     private static final String sort1 = "lastModifiedDate";
-    private static final String Sort2 = "title";
-    private static final String Sort3 = "docCategory1";
 
     @PersistenceContext
     EntityManager entityManager;
+
 
     /**
      * 入力フォームに入力した内容で全文検索を行う
@@ -54,18 +55,18 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
      * sort: sort項目の内容
      * .fetch: ページの表示数
      *
-     * @param term     　入力フォームに入力した内容
-     * @param period
-     * @param sort
-     * @param pageable 　ページ情報
+     * @param form
+     * @param pageable
      * @return
      */
     @Override
-    public SearchResult<DocumentIndex> search(String term, String period, String sort, List<String> facets, Pageable pageable) {
+    public SearchResult<DocumentIndex> search(DocumentFullSearchForm form, Pageable pageable) {
         SearchSession searchSession = Search.session(entityManager);
 
-        List<String> tokens = analyze(term);
-        System.out.println(StringUtils.join(tokens, " + "));
+        List<String> tokens = null;
+        if (form.getQ() != null) {
+            tokens = List.of(form.getQ().split(" "));
+        }
 
         AggregationKey<Map<String, Long>> countsByDocCategory1 = AggregationKey.of("countsByDocCategory1");
         AggregationKey<Map<String, Long>> countsByDocCategory2 = AggregationKey.of("countsByDocCategory2");
@@ -81,11 +82,37 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
             offset = pageable.getOffset();
         }
 
+        List<String> finalTokens = tokens;
+        System.out.println(StringUtils.join(finalTokens, "|"));
         SearchResult<DocumentIndex> result = searchSession.search(DocumentIndex.class)
                 .where(
-                        f -> f.simpleQueryString()
-                                .field("content")
-                                .matching(StringUtils.join(tokens, " + "))
+                        f -> {
+                            if (finalTokens == null) {
+                                return f.matchAll();
+                            }
+                            BooleanPredicateClausesStep<?> b = f.bool();
+                            b = b.should(f.match().field("content")
+                                    .matching(StringUtils.join(finalTokens, " + ")))
+                                    .should(f.match().field("title")
+                                            .matching("(" + StringUtils.join(finalTokens, "|") + ")"))
+                                    .should(f.match().field("docCategoryVariable1.value1")
+                                            .matching(StringUtils.join(finalTokens, "|")))
+                                    .should(f.match().field("docCategoryVariable2.value1")
+                                            .matching(StringUtils.join(finalTokens, "|")))
+                                    .should(f.wildcard().field("docServiceVariable1.value1")
+                                            .matching("*" + StringUtils.join(finalTokens, " | ") + "*"))
+                                    .should(f.wildcard().field("docServiceVariable2.value1")
+                                            .matching("*" + StringUtils.join(finalTokens, " | ") + "*"))
+                                    .should(f.wildcard().field("docServiceVariable3.value1")
+                                            .matching("*" + StringUtils.join(finalTokens, " | ") + "*"));
+                            if (form.getPeriodDate() != null) {
+                                b = b.must(f.range().field("lastModifiedDate")
+                                        .atLeast(form.getPeriodDate()))
+                                        .must(f.match().field("customerPublic")
+                                                .matching(form.getPublicScope()));
+                            }
+                            return b;
+                        }
                 )
                 .aggregation(countsByDocCategory1, f -> f.terms()
                         .field("docCategory1", String.class))
@@ -97,18 +124,19 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
                         .field("docService2", String.class))
                 .aggregation(countsByDocService3, f -> f.terms()
                         .field("docService3", String.class))
-                .sort(f -> f.field(sort).desc())
+                .sort(
+                        f -> {
+                            if (form.getSort() == null) {
+                                return f.score();
+                            }
 
-//                .sort(
-//                        f -> {
-//                            if (sort.equals(sort1)) {
-//                                f.field(sort);
-//                            }
-//                            return f.field(sort);
-//                        }
-//                    )
-
-
+                            if (form.getSort().equals(sort1)) {
+                                return f.field(form.getSort()).desc();
+                            } else {
+                                return f.score();
+                            }
+                        }
+                )
                 .fetch((int) offset, pageSize);
 
         return result;
@@ -122,7 +150,7 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
      * @return ヒットした箇所前後の文字列
      */
     @Override
-    public String highlight(String text, String term) {
+    public String highlight(String text, String term, String target) {
         try {
 
 
@@ -133,17 +161,17 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
             Analyzer analyzer = luceneBackend.analyzer("japanese").orElseThrow(() -> new IllegalStateException());
 //
 //            Analyzer analyzer2 = new JapaneseAnalyzer();
-            QueryParser queryParser = new QueryParser("content", analyzer);
+            QueryParser queryParser = new QueryParser(target, analyzer);
 //            queryParser.setAllowLeadingWildcard(true);
             Query query = queryParser.parse(term);
-            QueryScorer scorer = new QueryScorer(query, "content");
+            QueryScorer scorer = new QueryScorer(query, target);
             Formatter formatter = new SimpleHTMLFormatter("<em>", "</em>");
             Highlighter highlighter = new Highlighter(formatter, scorer);
 
             Fragmenter fragmenter = new SimpleSpanFragmenter(scorer);
             highlighter.setTextFragmenter(fragmenter);
 
-            TokenStream stream = analyzer.tokenStream("content", text);
+            TokenStream stream = analyzer.tokenStream(target, text);
 //
             String[] frags = highlighter.getBestFragments(stream, text, 1);
 

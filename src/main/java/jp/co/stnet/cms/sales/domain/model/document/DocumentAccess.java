@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
- * “ú’PˆÊ‚ÌƒAƒNƒZƒX
+ * æ—¥å˜ä½ã®ã‚¢ã‚¯ã‚»ã‚¹
  */
 @Entity
 @Data
@@ -27,17 +27,17 @@ public class DocumentAccess implements Serializable {
     private Long id;
 
     /**
-     * ƒAƒNƒZƒX“ú
+     * ã‚¢ã‚¯ã‚»ã‚¹æ—¥
      */
     private LocalDate accessDate;
 
     /**
-     * ƒ†[ƒU–¼
+     * ãƒ¦ãƒ¼ã‚¶å
      */
     private String username;
 
     /**
-     * ƒhƒLƒ…ƒƒ“ƒg‚ÌID
+     * ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆã®ID
      */
     private Long documentId;
 

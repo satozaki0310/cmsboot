@@ -97,7 +97,7 @@ public class DocumentHistoryController {
             documentHistoryBean.setLastModifiedByLabel(helper.getUserName(loggedInUser.getAccount().getId()));
 
             //Ver項目をリンクにしたものを格納
-            documentHistoryBean.setRidLabel("<a href=\"" + op.getViewUrl(id.toString()) + "?version=" + documentRevision.getVersion() + "\" class=\"\" style=\"white-space: nowrap\">" + documentRevision.getRid().toString() + "</a>");
+            documentHistoryBean.setVerLabel("<a href=\"" + op.getViewUrl(id.toString()) + "?version=" + documentRevision.getVersion() + "\" class=\"\" style=\"white-space: nowrap\">" + documentRevision.getRid().toString() + "</a>");
 
             //リストに必要項目を追加する
             list.add(documentHistoryBean);

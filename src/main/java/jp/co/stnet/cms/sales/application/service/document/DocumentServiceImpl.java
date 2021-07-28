@@ -2,7 +2,7 @@ package jp.co.stnet.cms.sales.application.service.document;
 
 import jp.co.stnet.cms.base.application.repository.NodeRevRepository;
 import jp.co.stnet.cms.base.application.service.AbstractNodeRevService;
-import jp.co.stnet.cms.base.application.service.filemanage.FileManagedSharedService;
+import jp.co.stnet.cms.base.application.service.filemanage.FileManagedService;
 import jp.co.stnet.cms.sales.application.repository.document.DocumentIndexRepository;
 import jp.co.stnet.cms.sales.application.repository.document.DocumentRepository;
 import jp.co.stnet.cms.sales.application.repository.document.DocumentRevisionRepository;
@@ -25,18 +25,33 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
 
     @Autowired
     DocumentRepository documentRepository;
-
     @Autowired
     DocumentRevisionRepository documentRevisionRepository;
-
     @Autowired
     DocumentIndexRepository documentIndexRepository;
-
     @Autowired
-    FileManagedSharedService fileManagedSharedService;
+    FileManagedService fileManagedService;
 
     protected DocumentServiceImpl() {
         super(Document.class, DocumentRevision.class, DocumentMaxRev.class);
+    }
+
+    @Override
+    protected String orderByFieldName(String fieldName) {
+
+        if ("docCategoryVariable1.value1".equals(fieldName)) {
+            return "docCategoryVariable1.code";
+        } else if ("docCategoryVariable2.value1".equals(fieldName)) {
+            return "docCategoryVariable2.code";
+        } else if ("docServiceVariable1.value1".equals(fieldName)) {
+            return "docServiceVariable1.code";
+        } else if ("docServiceVariable2.value1".equals(fieldName)) {
+            return "docServiceVariable2.code";
+        } else if ("docServiceVariable3.value1".equals(fieldName)) {
+            return "docServiceVariable3.code";
+        }
+
+        return super.orderByFieldName(fieldName);
     }
 
     @Override
@@ -56,8 +71,8 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
 
         if (saved.getFiles() != null) {
             for (File file : saved.getFiles()) {
-                fileManagedSharedService.permanent(file.getFileUuid());
-                fileManagedSharedService.permanent(file.getPdfUuid());
+                fileManagedService.permanent(file.getFileUuid());
+                fileManagedService.permanent(file.getPdfUuid());
             }
         }
 
@@ -75,8 +90,8 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
 
         if (saved.getFiles() != null) {
             for (File file : saved.getFiles()) {
-                fileManagedSharedService.permanent(file.getFileUuid());
-                fileManagedSharedService.permanent(file.getPdfUuid());
+                fileManagedService.permanent(file.getFileUuid());
+                fileManagedService.permanent(file.getPdfUuid());
             }
         }
 
@@ -104,8 +119,8 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
         Document document = documentRepository.findById(id).orElse(null);
         if (document != null && document.getFiles() != null) {
             for (File file : document.getFiles()) {
-                fileManagedSharedService.permanent(file.getFileUuid());
-                fileManagedSharedService.permanent(file.getPdfUuid());
+                fileManagedService.permanent(file.getFileUuid());
+                fileManagedService.permanent(file.getPdfUuid());
             }
         }
 
@@ -161,17 +176,17 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
 
         if (document.getFiles().isEmpty()) {
             DocumentIndex documentIndex = beanMapper.map(document, DocumentIndex.class);
-            documentIndex.setBodyPlane(getBodyPlane(document.getBody()));
+            documentIndex.setBodyPlain(getBodyPlane(document.getBody()));
             documentIndex.setPk(new DocumentIndexPK(document.getId(), NO_CASE_NOFILE));
             documentIndices.add(documentIndex);
         } else {
             for (int i = 0; i < document.getFiles().size(); i++) {
                 File file = document.getFiles().get(i);
                 DocumentIndex documentIndex = beanMapper.map(document, DocumentIndex.class);
-                documentIndex.setBodyPlane(getBodyPlane(document.getBody()));
-                beanMapper.map(document, documentIndex);
+                documentIndex.setBodyPlain(getBodyPlane(document.getBody()));
+                beanMapper.map(file, documentIndex);
                 documentIndex.setPk(new DocumentIndexPK(document.getId(), i));
-                documentIndex.setContent(getContent(document.getFiles().get(i).getFileUuid()));
+                documentIndex.setContent(getContent(documentIndex.getFileUuid()));
                 documentIndices.add(documentIndex);
             }
         }
@@ -210,12 +225,7 @@ public class DocumentServiceImpl extends AbstractNodeRevService<Document, Docume
         }
 
         try {
-            String content = fileManagedSharedService.getContent(uuid);
-
-            // 連続する空白文字を除去
-            content = content.replaceAll("[ |　|\t|\\n|\\r\\n|\\r]+", " ");
-
-            return content;
+            return fileManagedService.escapeContent(fileManagedService.getContent(uuid));
 
         } catch (IOException | TikaException e) {
             e.printStackTrace();

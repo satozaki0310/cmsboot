@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/template :: layout(~{::title},~{::body})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- �y�[�W�^�C�g�����L�� -->
+    <title>�h�L�������g�����ꗗ</title>
+</head>
+<body>
+<div th:replace="~{layout/libraries :: datatables}"></div>
+<div th:replace="~{layout/libraries :: multiple-select}"></div>
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row px-5">
+            <div class="col-18 mb-3">
+                <!-- �y�[�W�^�C�g�����L�� -->
+                <h4>�h�L�������g�����ꗗ</h4>
+            </div>
+            <div class="col-18 text-right">
+                <!-- �y�[�W�^�C�g���E�̗]�� -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+div#list_filter {
+    display: none;
+}
+
+
+</style>
+
+<section class="content">
+    <div class="container-fluid"><!-- -fluid���O���Ɖ����������Ȃ�-->
+        <div th:replace="~{fragments/message-panel :: message-panel}"></div>
+        <!-- ������艺�Ƀ��C���R���e���c���L�� -->
+
+        <div class="row mb-3">
+            <!--            <div class="form-check-inline">-->
+            <!--                <input id="draft" name="draft" type="checkbox" checked="checked">-->
+            <!--                <label for="draft">���������܂�</label>-->
+            <!--            </div>-->
+            <div class="dt-buttons btn-group flex-wrap ml-2">
+                <button class="btn btn-button" id="filter1">�敪��</button>
+                <button class="btn btn-button" id="filter2">�T�[�r�X��</button>
+                <button class="btn btn-button" id="filter3">���t�E����</button>
+                <button class="btn btn-button" id="filter9">�S����</button>
+            </div>
+        </div>
+
+        <table class="table-sm table-striped nowrap" id="list">
+            <thead>
+            <tr class="filter">
+                <!--                <th class="text-center px-2" data-filter="disable"></th>&lt;!&ndash; �B���t�B�[���h &ndash;&gt;-->
+                <th data-filter="disable"></th><!-- # -->
+                <th></th><!-- �Ǘ��ԍ� -->
+                <th></th><!-- �^�C�g�� -->
+                <th></th><!-- �Ő� -->
+                <th></th><!-- �敪1 -->
+                <th></th><!-- �敪2 -->
+                <!--                <th></th>&lt;!&ndash; �敪3 &ndash;&gt;-->
+                <th></th><!-- ���� -->
+                <th></th><!-- �T�[�r�X��� -->
+                <th></th><!-- �T�[�r�X -->
+                <th></th><!-- ���s�� -->
+                <th></th><!-- ������ -->
+                <th></th><!-- �p�~�� -->
+                <th></th><!-- ���m�� -->
+                <th></th><!-- �쐬�S���� -->
+                <th></th><!-- ���s�S���� -->
+                <th></th><!-- ���s�ӔC�� -->
+                <th></th><!-- �쐬���� -->
+                <th></th><!-- ���s���� -->
+                <th></th><!-- ���l -->
+                <th></th><!-- �ύX���R -->
+                <th></th><!-- �t�@�C�� -->
+                <th></th><!-- �t�@�C������ -->
+                <th data-filter="disable"><!-- ���p�V�[�� -->
+                    <select class="dataTables_column_filter form-control multiple-select" data-column="22"
+                            data-container=".content" id="col_filter_22" multiple="multiple">
+                        <!--                        <option value="">&nbsp;</option>-->
+                        <th:block th:each="obj : ${@CL_DOC_STAGE.asMap()}">
+                            <option th:value="${obj.key}">[[${obj.value}]]</option>
+                        </th:block>
+                    </select>
+                </th>
+                <th data-filter="disable">
+                    <select class="dataTables_column_filter form-control multiple-select" data-column="23"
+                            data-container=".content" id="col_filter_23" multiple="multiple">
+                        <!--                        <option value="">&nbsp;</option>-->
+                        <th:block th:each="obj : ${@CL_DOC_PUBLIC_SCOPE.asMap()}">
+                            <option th:value="${obj.key}">[[${obj.value}]]</option>
+                        </th:block>
+                    </select>
+                </th><!-- ���J�敪 -->
+                <th data-filter="disable"><!-- �ڋq���J -->
+                    <select class="dataTables_column_filter form-control multiple-select" data-column="24"
+                            data-container=".content" id="col_filter_24" multiple="multiple">
+                        <!--                        <option value="">&nbsp;</option>-->
+                        <th:block th:each="obj : ${@CL_CUSTOMER_PUBLIC.asMap()}">
+                            <option th:value="${obj.key}">[[${obj.value}]]</option>
+                        </th:block>
+                    </select>
+                </th>
+                <th data-filter="disable">
+                    <select class="dataTables_column_filter form-control multiple-select" data-column="26"
+                            data-container=".content" id="col_filter_26" multiple="multiple">
+                        <th:block th:each="obj : ${@CL_ACCOUNT_FULLNAME.asMap()}">
+                            <option th:value="${obj.key}">[[${obj.value}]]</option>
+                        </th:block>
+                    </select>
+                </th><!-- �ŏI�X�V�� -->
+                <th></th><!-- �ŏI�X�V�� -->
+            </tr>
+            <tr class="title">
+                <!--                <th class="text-center px-0"></th>-->
+                <th class="text-center">#</th>
+                <th class="text-center">�����ԍ�</th>
+                <th class="text-center">�^�C�g��</th>
+                <th class="text-center">�Ő�</th>
+                <th class="text-center">�敪1</th>
+                <th class="text-center">�敪2</th>
+                <th class="text-center">����</th>
+                <th class="text-center">�T�[�r�X���</th>
+                <th class="text-center">�T�[�r�X</th>
+                <th class="text-center">���s��</th>
+                <th class="text-center">������</th>
+                <th class="text-center">�p�~��</th>
+                <th class="text-center">���m��</th>
+                <th class="text-center">�쐬�S����</th>
+                <th class="text-center">���s�S����</th>
+                <th class="text-center">���s�ӔC��</th>
+                <th class="text-center">�쐬����</th>
+                <th class="text-center">���s����</th>
+                <th class="text-center">���l</th>
+                <th class="text-center">�ύX���R</th>
+                <th class="text-center">�t�@�C��</th>
+                <th class="text-center">�t�@�C������</th>
+                <th class="text-center">���p�V�[��</th>
+                <th class="text-center">���J�敪</th>
+                <th class="text-center">�ڋq���J</th>
+                <th class="text-center">�ŏI�X�V��</th>
+                <th class="text-center">�ŏI�X�V����</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <form id="bulk-operation-form" method="post" th:action></form>
+
+        <!-- ��������Ƀ��C���R���e���c���L�� -->
+    </div>
+</section>
+
+<!-- Page script -->
+<script>
+
+var pagechange = false;
+
+  $(document)
+    .ready(
+      function () {
+
+        // ���ڒP�ʃt�B���^�p��Input�t�B�[���h��ǉ�����B
+        // TODO �J�n��ԍ����w��
+        var startcolnum = 0;
+        $('tr.filter th').each(function () {
+          var idx = $(this).index();
+          if (startcolnum <= idx && $(this).data("filter") != 'disable') {
+            $(this).html('<input type="text" id="col_filter_' + idx + '" data-column="' + idx +
+              '" class="dataTables_column_filter form-control" />');
+          }
+        });
+
+        var table = $('#list').DataTable({
+
+          'ajax': {
+            'url': 'searchlist/json',
+            'data': flatten
+          },
+
+          scrollX: true,
+
+          // fixedColumns: {
+          //   leftColumns: 3
+          // },
+
+          // select: 'multi',
+
+          checkboxes: false,
+
+          // �ꗗ�ɕ\�����鍀�ڂ�JSON�̍��ڂɃ}�b�s���O
+          'columns': [
+<!--            {-->
+<!--              data: 'id',-->
+<!--              className: 'text-center',-->
+<!--              orderable: false,-->
+<!--              searchable: false,-->
+<!--              checkboxes: {-->
+<!--               'selectRow': false-->
+<!--              }-->
+<!--            },-->
+            {
+              data: 'id',
+              searchable: true,
+            },
+            {
+              data: 'documentNumber',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'title',
+<!--              render: $.fn.dataTable.render.text(),-->
+            },
+            {
+              data: 'versionNumber',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'docCategoryVariable1.value1',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'docCategoryVariable2.value1',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'docServiceVariable1.value1',
+              defaultContent: "",
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'docServiceVariable2.value1',
+              defaultContent: "",
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'docServiceVariable3.value1',
+              defaultContent: "",
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'publishedDate',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'lastRevisedDate',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'invalidationDate',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'announceDate',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'chargePersonForCreation',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'chargePersonForPublish',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'responsiblePersonForPublish',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'departmentForCreation',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'departmentForPublish',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'remark',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'reasonForChange',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'filesLabel',
+            },
+            {
+              data: 'fileMemo',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'useStageLabel',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'publicScopeLabel',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'customerPublicLabel',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'lastModifiedByLabel',
+              render: $.fn.dataTable.render.text(),
+            },
+            {
+              data: 'lastModifiedDate',
+              className: 'text-center',
+            },
+          ],
+
+          // �����\�[�g
+          'order': [
+            [0, 'asc']
+          ],
+
+          // �{�^���̕\��
+          // 'buttons': ['bulkdelete', 'bulkinvalid', 'bulkvalid',' colvis', 'stateClear', 'csvdownload', 'tsvdownload', 'exceldownload', 'upload', 'createnew'],
+          'buttons': ['colvis', 'stateClear', 'csvdownload', 'tsvdownload', 'upload', 'createnew'],
+
+          // �f�[�^���[�h�㏈��
+          'initComplete': function (settings, json) {
+            // �O���[�o���t�B���^�[��Enter�L�[�ŃT�[�o�ɑ��M
+            fnGlobalFilterOnReturn(table);
+
+          },
+        });
+
+        // ���ڒP�ʃt�B���^�̒ǉ�
+        // addFieldFilter(table) // �ʏ��
+        addFieldFilter2(table) // (��̕��я��Ή���)
+
+        // �y�[�W�l�[�V������ɉ�ʃg�b�v�ɖ߂�
+        table.on('page.dt', function () {
+          pagechange = true;
+        });
+
+        table.on( 'draw.dt', function (e, s) {
+          if (pagechange) {
+            pagechange = false;
+            $('html, body').animate({
+              scrollTop: 0
+            }, 0);
+          }
+        } );
+
+        // �������`�F�b�N�{�b�N�X�������̑���
+<!--        $('#draft').change().on('change', function (e, s) {-->
+<!--          localStorage.dataTables_Draft = e.target.checked;-->
+<!--          table.draw();-->
+<!--          // fnColumns(table);-->
+<!--        });-->
+
+        // ��ʕ\�����̉������`�F�b�N�{�b�N�X�̕���
+<!--        if (localStorage.dataTables_Draft == 'false') {-->
+<!--          $('#draft')[0].checked = false;-->
+<!--          table.draw();-->
+<!--        } else if (localStorage.dataTables_Draft != 'false' && $('#draft')[0].checked == false) {-->
+<!--          $('#draft')[0].checked = true;-->
+<!--          table.draw();-->
+<!--        }-->
+
+        // �敪��
+        $('#filter1').click( function (e) {
+            reset(table);
+            table.columns( [5, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21] ).visible( false );
+            table.colReorder.order( [0, 1, 2, 6, 7, 3, 4, 5, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26], true );
+        });
+
+        // �T�[�r�X��
+        $('#filter2').click( function (e) {
+            reset(table);
+            table.columns( [5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21] ).visible( false );
+            table.colReorder.order( [0, 1, 2, 8, 9, 10, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26], true );
+        });
+
+        // ���t�E����
+        $('#filter3').click( function (e) {
+            reset(table);
+            table.columns( [6, 7, 8, 9, 10, 11, 24, 25, 26] ).visible( false );
+            table.colReorder.order( [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26], true );
+        });
+
+        // ���Z�b�g
+        $('#filter9').click( function (e) {
+            reset(table);
+        });
+
+      });
+
+  function reset(table) {
+            table.columns( [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26] ).visible( true );
+            table.colReorder.order( [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26], true );
+  }
+
+
+  function myflatten(params, settings) {
+    params = flatten(params, settings);
+    if ($('#draft')[0] == undefined) {
+        params.draft = true;
+    } else {
+        params.draft = $('#draft')[0].checked
+    }
+    return params;
+  }
+
+
+
+</script>
+
+
+</body>
+</html>

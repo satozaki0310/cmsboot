@@ -17,9 +17,22 @@
                 <!-- ページタイトルを記入 -->
                 <h4>ドキュメント</h4>
             </div>
-            <div class="col-18 text-right">
+            <div class="col-18 text-right nav-tabs-wrapper">
                 <!-- ページタイトル右の余白 -->
+                <th:block th:if="${id}">
+                    <ul class="nav nav-tabs justify-content-end">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">ドキュメント詳細</a>
+                        </li>
+                        <th:block th:if="${document.id} != null">
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{'/sales/document/history/' + ${document.id}}">変更履歴</a>
+                            </li>
+                        </th:block>
+                    </ul>
+                </th:block>
             </div>
+
         </div>
     </div>
 </section>
@@ -52,7 +65,7 @@
             <!-- Input -->
             <div class="row">
                 <div class="col-3">
-                    <div th:replace="~{fragments/label::m('title', '文書タイトル')}"></div>
+                    <div th:replace="~{fragments/label::m('title', '文書タイトル *')}"></div>
                 </div>
                 <div class="col-14">
                     <div th:replace="~{fragments/field::input('title', '', 'document.title', '')}"></div>
@@ -80,48 +93,30 @@
                 </div>
             </div>
 
-            <!--            <div class="row mt-3">-->
-            <!--                <div class="col-3">-->
-            <!--                    <div th:replace="~{fragments/label::m('docCategory', '文書区分')}"></div>-->
-            <!--                </div>-->
-            <!--                <div class="col-33">-->
-            <!--                    <div th:replace="~{fragments/field::select-dialog('docCategory', '', 'document.docCategory', '', '@CL_DOC_CATEGORY.asMap()')}"></div>-->
-            <!--                </div>-->
-            <!--            </div>-->
-
             <div class="row mt-3">
                 <div class="col-3">
-                    <div th:replace="~{fragments/label::m('docCategory1', '文書区分1')}"></div>
+                    <div th:replace="~{fragments/label::m('docCategory1', '文書区分1 *')}"></div>
                 </div>
                 <div class="col-8">
                     <div th:replace="~{fragments/field::select('docCategory1', '', 'document.docCategory1', '', '@CL_DOC_CATEGORY1.asMap()')}"></div>
                 </div>
                 <div class="col-3 offset-1">
-                    <div th:replace="~{fragments/label::m('docCategory1', '文書区分2')}"></div>
+                    <div th:replace="~{fragments/label::m('docCategory1', '文書区分2 *')}"></div>
                 </div>
                 <div class="col-8">
                     <div th:replace="~{fragments/field::select('docCategory2', '', 'document.docCategory2', '', '@CL_DOC_CATEGORY2.asMap()')}"></div>
                 </div>
             </div>
 
-            <!--            <div class="row mt-3">-->
-            <!--                <div class="col-3">-->
-            <!--                    <div th:replace="~{fragments/label::m('docService', 'サービス')}"></div>-->
-            <!--                </div>-->
-            <!--                <div class="col-33">-->
-            <!--                    <div th:replace="~{fragments/field::select-dialog('docService', '', 'document.docService', '', '@CL_DOC_SERVICE.asMap()')}"></div>-->
-            <!--                </div>-->
-            <!--            </div>-->
-
             <div class="row mt-3">
                 <div class="col-3">
-                    <div th:replace="~{fragments/label::m('docService1', '事業領域')}"></div>
+                    <div th:replace="~{fragments/label::m('docService1', '事業領域 *')}"></div>
                 </div>
                 <div class="col-8">
                     <div th:replace="~{fragments/field::select('docService1', '', 'document.docService1', '', '@CL_DOC_SERVICE1.asMap()')}"></div>
                 </div>
                 <div class="col-3 offset-1">
-                    <div th:replace="~{fragments/label::m('docService2', 'サービス種別')}"></div>
+                    <div th:replace="~{fragments/label::m('docService2', 'サービス種別 *')}"></div>
                 </div>
                 <div class="col-8">
                     <div th:replace="~{fragments/field::select('docService2', '', 'document.docService2', '', '@CL_DOC_SERVICE2.asMap()')}"></div>
@@ -156,10 +151,10 @@
                         <thead>
                         <tr>
                             <td class="row">
-                                <div class="col-14">ファイル</div>
-                                <div class="col-14">ファイル(PDF)</div>
-                                <div class="col-6">メモ</div>
-                                <div class="col-2"></div>
+                                <div class="col-13">ファイル</div>
+                                <div class="col-13">ファイル(PDF)</div>
+                                <div class="col-9">メモ</div>
+                                <div class="col-1"></div>
                             </td>
                         </tr>
                         </thead>
@@ -167,7 +162,7 @@
                         <!-- 編集 -->
                         <tr th:each="item, status : *{files}">
                             <td class="row">
-                                <div class="col-14">
+                                <div class="col-13">
                                     <input class="form-control form-control-file file-managed"
                                            data-file-type="document_file"
                                            th:disabled="${fieldState.files_fileUuid__disabled}"
@@ -195,9 +190,9 @@
                                         </div>
                                     </th:block>
                                 </div>
-                                <div class="col-14">
+                                <div class="col-13">
                                     <input class="form-control form-control-file file-managed"
-                                           data-file-type="document_file"
+                                           data-file-type="document_pdf"
                                            th:disabled="${fieldState.files_pdfUuid__disabled}"
                                            th:id="|files[__${status.index}__].pdf|"
                                            th:style="*{files[__${status.index}__].pdfUuid} ? 'display:none' : 'display:block'"
@@ -223,35 +218,34 @@
                                         </div>
                                     </th:block>
                                 </div>
-                                <div class="col-6">
-                                    <input class="form-control" th:disabled="${fieldState.files_memo__disabled}"
+                                <div class="col-9">
+                                    <input class="form-control" th:disabled="${fieldState.files_fileMemo__disabled}"
                                            th:errorclass="is-invalid"
-                                           th:field="*{files[__${status.index}__].memo}"
+                                           th:field="*{files[__${status.index}__].fileMemo}"
                                            type="text">
                                     <span class="invalid-feedback whitespace-nowrap"
-                                          th:errors="*{files[__${status.index}__].memo}"
+                                          th:errors="*{files[__${status.index}__].fileMemo}"
                                           th:id="files.type-error"></span>
                                 </div>
-                                <div class="col-2 text-center">
+                                <div class="col-1 text-center">
                                     <button class="btn-button" onclick="lineDelete(this)"
-                                            type="button">削除
-                                    </button>
+                                            type="button"><i class="far fa-trash-alt"></i></button>
                                 </div>
                             </td>
                         </tr>
 
                         <!-- 参照用 -->
-                        <th:block th:if="${fieldState.files_type__view}">
+                        <th:block th:if="${fieldState.files_fileUuid__view}">
                             <tr th:each="item, status : ${document.files}">
                                 <td class="row">
-                                    <div class="col-14">
+                                    <div class="col-13">
                                         <div th:replace="~{fragments/view-file-document::m('files_file', '', 'item.fileManaged', '')}"></div>
                                     </div>
-                                    <div class="col-14">
+                                    <div class="col-13">
                                         <div th:replace="~{fragments/view-file-document::m('files_pdf', '', 'item.pdfManaged', '')}"></div>
                                     </div>
-                                    <div class="col-6">
-                                        <div th:replace="~{fragments/view::m('files_memo', '', 'item.memo', '')}"></div>
+                                    <div class="col-10">
+                                        <div th:replace="~{fragments/view::m('files_fileMemo', '', 'item.fileMemo', '')}"></div>
                                     </div>
                                 </td>
                             </tr>
@@ -274,14 +268,14 @@
             <!-- 本文 -->
             <div class="row mt-3">
                 <div class="col-3">
-                    <div th:replace="~{fragments/label::m('body', '本文')}"></div>
+                    <div th:replace="~{fragments/label::m('body', '本文 *')}"></div>
                 </div>
                 <div class="col-33">
                     <div th:replace="~{fragments/field::summernote('body', '', 'document.body', '', '8')}"></div>
                 </div>
             </div>
 
-            <div class="row mt-1">
+            <div class="row mt-3">
                 <div class="col-3">
                     <div th:replace="~{fragments/label::m('remark', '備考')}"></div>
                 </div>
@@ -290,16 +284,16 @@
                 </div>
             </div>
 
-            <div class="row mt-5">
+            <div class="row mt-3">
                 <div class="col-3">
-                    <div th:replace="~{fragments/label::m('departmentForCreation', '作成部門')}"></div>
+                    <div th:replace="~{fragments/label::m('departmentForCreation', '作成部門 *')}"></div>
                 </div>
                 <div class="col-13">
                     <div th:replace="~{fragments/field::input-combobox('departmentForCreation', '', 'document.departmentForCreation', '', '@CL_DEPARTMENT.asMap()')}"></div>
                 </div>
 
                 <div class="col-3 offset-1">
-                    <div th:replace="~{fragments/label::m('chargePersonForCreation', '作成担当者')}"></div>
+                    <div th:replace="~{fragments/label::m('chargePersonForCreation', '作成担当者 *')}"></div>
                 </div>
                 <div class="col-6">
                     <div th:replace="~{fragments/field::input-combobox('chargePersonForCreation', '', 'document.chargePersonForCreation', '', '@CL_EMPLOYEE.asMap()')}"></div>
@@ -369,7 +363,7 @@
 
             <div class="row mt-3">
                 <div class="col-3">
-                    <div th:replace="~{fragments/label::m('lastModifiedDate', '最終日時')}"></div>
+                    <div th:replace="~{fragments/label::m('lastModifiedDate', '最終更新日時')}"></div>
                 </div>
                 <div class="col-6">
                     <div th:replace="~{fragments/field::datetime('lastModifiedDate', '', 'document.lastModifiedDate', '')}"></div>
@@ -395,6 +389,15 @@
 <script th:src="@{/plugins/summernote/lang/summernote-ja-JP.min.js}"></script>
 
 <script>
+
+  /**
+   * 明細行の削除
+   */
+  function lineDelete(e) {
+    let table = e.closest('table')
+    let tr = e.closest('tr').remove();
+  }
+
     $(document).ready(function () {
 
         // summernoteの有効化

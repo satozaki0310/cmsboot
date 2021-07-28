@@ -1,8 +1,8 @@
 package jp.co.stnet.cms.base.application.batch.account;
 
 import com.github.dozermapper.core.Mapper;
-import jp.co.stnet.cms.base.application.repository.authentication.AccountRepository;
-import jp.co.stnet.cms.base.application.service.authentication.AccountService;
+import jp.co.stnet.cms.base.application.repository.account.AccountRepository;
+import jp.co.stnet.cms.base.application.service.account.AccountService;
 import jp.co.stnet.cms.base.domain.model.authentication.Account;
 import jp.co.stnet.cms.common.auditing.CustomDateFactory;
 import jp.co.stnet.cms.common.batch.ReaderFactory;
@@ -39,7 +39,7 @@ public class ImportAccountTasklet implements Tasklet {
     private static final Logger log = LoggerFactory.getLogger("JobLogger");
 
     // インポートファイルのカラム定義
-    private final String[] columns = {"username","firstName","lastName","department","email","url","profile","roles","status","statusLabel","imageUuid","apiKey","allowedIp"};
+    private final String[] columns = {"username", "firstName", "lastName", "department", "email", "url", "profile", "roles", "status", "statusLabel", "imageUuid", "apiKey", "allowedIp"};
 
     @Autowired
     AccountService accountService;
@@ -78,7 +78,7 @@ public class ImportAccountTasklet implements Tasklet {
         MDC.put("jobInstanceId", jobInstanceId.toString());
         MDC.put("jobName", jobName);
         MDC.put("jobExecutionId", jobExecutionId.toString());
-        MDC.put("jobName_jobExecutionId", jobName + "_" + jobExecutionId.toString());
+        MDC.put("jobName_jobExecutionId", jobName + "_" + jobExecutionId);
 
 
         // DB操作時の例外発生の有無を記録する

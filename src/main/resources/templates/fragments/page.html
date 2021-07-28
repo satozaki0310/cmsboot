@@ -1,7 +1,7 @@
 <!--/* ... */-->
 
 <!--/* (1), (2) */-->
-<div th:fragment="pagination (page)" th:object="${page}" th:remove="tag">
+<div th:fragment="pagination (page)" th:object="${page}" th:remove="tag" xmlns:th="http://www.thymeleaf.org">
 
     <!--/* (3), (4) */-->
     <ul class="pagination" th:if="*{totalElements} != 0"
@@ -21,7 +21,7 @@
         <!--/* (8) */-->
         <li th:class="${isActive} ? 'active'"
             th:each="i : ${#pageInfo.sequence(page, pageLinkMaxDispNum)}" th:with="isActive=${i} == *{number + 1}">
-            <a th:href="${isActive} ? ${disabledHref} : @{{currentUrl}(currentUrl=${currentUrl},page=${i - 1},size=*{size})}"
+            <a th:href="${isActive} ? ${disabledHref} : @{{currentUrl}(currentUrl=${currentUrl},q='',page=${i - 1},size=*{size})}"
                th:text="${i}"></a>
         </li>
 

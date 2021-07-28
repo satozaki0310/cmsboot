@@ -12,8 +12,8 @@ import jp.co.stnet.cms.common.exception.NoChangeBusinessException;
 import jp.co.stnet.cms.common.exception.OptimisticLockingFailureBusinessException;
 import jp.co.stnet.cms.common.message.MessageKeys;
 import jp.co.stnet.cms.common.util.BeanUtils;
-import jp.co.stnet.cms.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.QueryHints;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -45,10 +45,10 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
     protected final Map<String, Annotation> relationFieldsMap;
 
     @Autowired
-    public Mapper beanMapper;
+    protected Mapper beanMapper;
 
     @PersistenceContext
-    EntityManager entityManager;
+    protected EntityManager entityManager;
 
     protected AbstractNodeService(Class<T> clazz) {
         this.clazz = clazz;
@@ -124,6 +124,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * エンティティの比較(オーバライトして利用する)
+     *
      * @param entity
      * @param currentCopy
      * @return
@@ -213,6 +214,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * JPQLQueryを作成する。
+     *
      * @param input DataTablesInput
      * @param count true: 件数を取得する, false: しない
      * @param clazz エンティティクラス
@@ -289,6 +291,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * SQL(JPQL)文を作成する。
+     *
      * @param input DataTablesInput
      * @param count true: 件数を取得する, false: しない
      * @param clazz エンティティクラス
@@ -303,17 +306,16 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
         sql.append(getSelectFromClause(clazz, count));
 
         // LEFT OUTER JOIN の追加
-        sql.append(getLeftOuterJoinClause(input));
+        sql.append(getLeftOuterJoinClause(input, count));
 
         // WHERE句の追加
         sql.append(getWhereClause(input));
 
         // OrderBY句
         if (!count) {
-            sql.append(" group by c ");
+//            sql.append(" group by c");
             sql.append(getOrderClause(input));
         }
-
 
         return sql.toString();
     }
@@ -329,7 +331,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
         StringBuilder sql = new StringBuilder();
         // SELECT句
         if (!count) {
-            sql.append("SELECT c");
+            sql.append("SELECT distinct c");
         } else {
             sql.append("SELECT count(distinct c)");
         }
@@ -344,13 +346,13 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * 外部結合(LEFT OUTER文)を作成する。
+     *
      * @param input DataTablesInput
      * @return 外部結合文字列
      */
-    protected StringBuilder getLeftOuterJoinClause(DataTablesInput input) {
+    protected StringBuilder getLeftOuterJoinClause(DataTablesInput input, boolean isCount) {
         StringBuilder sql = new StringBuilder();
         // @OneToOne etc, @ElementCollection フィールドのための結合
-
 
         Set<String> relationEntities = new LinkedHashSet<>();
         // 重複除去
@@ -362,8 +364,14 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
         }
 
         for (String relationEntity : relationEntities) {
-            sql.append(" LEFT JOIN c.");
+            if (!isCount) {
+                // パフォーマンス改善のため
+                sql.append(" LEFT JOIN FETCH c.");
+            } else {
+                sql.append(" LEFT JOIN c.");
+            }
             sql.append(relationEntity);
+            sql.append(" " + relationEntity);
         }
 
         for (Column column : input.getColumns()) {
@@ -390,13 +398,11 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
         List<String> orderClauses = new ArrayList<>();
         for (Order order : input.getOrder()) {
             String originalFiledName = input.getColumns().get(order.getColumn()).getData();
-            String convertColumnName = convertColumnName(originalFiledName);
+            String convertColumnName = convertColumnName(orderByFieldName(originalFiledName));
 
             String orderClause;
             if (isCollection(convertColumnName)) {
                 orderClause = convertColumnName + " " + order.getDir();
-            } else if (isRelation(originalFiledName)) {
-                orderClause = "c." + originalFiledName + " " + order.getDir();
             } else {
                 orderClause = "c." + convertColumnName + " " + order.getDir();
             }
@@ -412,7 +418,15 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
     }
 
     /**
+     * Order By 句でフィールド名の変換用
+     */
+    protected String orderByFieldName(String fieldName) {
+        return fieldName;
+    }
+
+    /**
      * Where句を作成する。
+     *
      * @param input DataTablesInput
      * @return Where句文字列
      */
@@ -440,6 +454,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * グローバルフィルターのためのフィールド毎の等号文字列を作成する。
+     *
      * @param column Column
      * @return 等号文字列
      */
@@ -450,24 +465,23 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
             String originalColumnName = column.getData();
             String convertedColumnName = convertColumnName(originalColumnName);
             if (isLocalDate(convertedColumnName)) {
-                sql.append("function('date_format', c.");
+                sql.append("function('to_char', c.");
                 sql.append(convertedColumnName);
-                sql.append(", '%Y/%m/%d') LIKE :globalSearch ESCAPE '~'");
+                sql.append(", 'YYYY/MM/DD') LIKE :globalSearch ESCAPE '~'");
             } else if (isLocalDateTime(convertedColumnName)) {
-                sql.append("function('date_format', c.");
+                sql.append("function('to_char', c.");
                 sql.append(convertedColumnName);
-                sql.append(", '%Y/%m/%d %h:%i:%s') LIKE :globalSearch ESCAPE '~'");
+                sql.append(", 'YYYY/MM/DD HH24:MI:SS') LIKE :globalSearch ESCAPE '~'");
             } else if (isNumber(convertedColumnName)) {
-                sql.append("function('CONVERT', c.");
+                sql.append("function('to_char', c.");
                 sql.append(convertedColumnName);
-                sql.append(", CHAR) LIKE :globalSearch ESCAPE '~'");
+                sql.append(", 'FM999999999') LIKE :globalSearch ESCAPE '~'");
             } else if (isCollection(convertedColumnName)) {
                 sql.append(convertedColumnName);
                 sql.append(" LIKE :globalSearch ESCAPE '~'");
             } else if (isBoolean(convertedColumnName)) {
-                sql.append("function('CONVERT', c.");
-                sql.append(convertedColumnName);
-                sql.append(", CHAR) LIKE :globalSearch ESCAPE '~'");
+                //TODO
+
             } else if (isRelation(originalColumnName)) {
                 sql.append("c." + originalColumnName);
                 sql.append(" LIKE :globalSearch ESCAPE '~'");
@@ -482,6 +496,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * フィールドフィルターのためのフィールド毎の等号文字列を作成する。
+     *
      * @param column Column
      * @return 等号文字列
      */
@@ -514,21 +529,21 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
                 sql.append(replacedColumnName);
                 sql.append(")");
             } else if (isLocalDate(convertedColumnName)) {
-                sql.append("function('date_format', c.");
+                sql.append("function('to_char', c.");
                 sql.append(convertedColumnName);
-                sql.append(", '%Y/%m/%d') LIKE :");
+                sql.append(", 'YYYY/MM/DD') LIKE :");
                 sql.append(replacedColumnName);
                 sql.append(" ESCAPE '~'");
             } else if (isLocalDateTime(convertedColumnName)) {
-                sql.append("function('date_format', c.");
+                sql.append("function('to_char', c.");
                 sql.append(convertedColumnName);
-                sql.append(", '%Y/%m/%d %h:%i:%s') LIKE :");
+                sql.append(", 'YYYY/MM/DD HH24:MI:SS') LIKE :");
                 sql.append(replacedColumnName);
                 sql.append(" ESCAPE '~'");
             } else if (isNumber(convertedColumnName)) {
-                sql.append("function('CONVERT', c.");
+                sql.append("function('to_char', c.");
                 sql.append(convertedColumnName);
-                sql.append(", CHAR) LIKE :");
+                sql.append(", 'FM999999999') LIKE :");
                 sql.append(replacedColumnName);
                 sql.append(" ESCAPE '~'");
             } else if (isCollection(convertedColumnName)) {
@@ -542,11 +557,10 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
                 sql.append(replacedColumnName);
                 sql.append(" ESCAPE '~'");
             } else if (isBoolean(convertedColumnName)) {
-                sql.append("function('FORMAT', c.");
+                sql.append("c.");
                 sql.append(convertedColumnName);
-                sql.append(", 0) LIKE :");
+                sql.append(" = :");
                 sql.append(replacedColumnName);
-                sql.append(" ESCAPE '~'");
             } else {
                 sql.append("c.");
                 sql.append(convertedColumnName);
@@ -560,6 +574,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * フィールドフィルターの設定されている
+     *
      * @param input DataTablesInput
      * @return true:フィールドフィルタを設定あり, false:なし
      */
@@ -574,6 +589,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * 指定されたフィールド名がLocalDate型かどうか
+     *
      * @param fieldName フィールド名
      * @return true:LocalDate型である, false:ない
      */
@@ -583,6 +599,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * 指定されたフィールド名がLocalDateTIme型かどうか
+     *
      * @param fieldName フィールド名
      * @return true:LocalDateTIme型である, false:ない
      */
@@ -592,6 +609,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * 指定されたフィールド名がNumber型かどうか
+     *
      * @param fieldName フィールド名
      * @return true:Number型である, false:ない
      */
@@ -608,6 +626,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * 指定されたフィールド名がCollection型 or List型 かどうか
+     *
      * @param fieldName フィールド名
      * @return true:Collection型である, false:ない
      */
@@ -619,6 +638,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * 指定されたフィールド名がBooleanかどうか
+     *
      * @param fieldName フィールド名
      * @return true:Booleanである, false:ない
      */
@@ -628,6 +648,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * 指定されたフィールド名はEnumかどうか
+     *
      * @param fieldName フィールド名
      * @return true:Enumである, false:ない
      */
@@ -642,6 +663,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * 指定されたフィールド名に@IDが設定されている。
+     *
      * @param fieldName フィールド名
      * @return true:IDである, false:ない
      */
@@ -652,6 +674,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * 指定されたフィールド名に@IDが設定され、Integer型である。
+     *
      * @param fieldName フィールド名
      * @return true:Integer型のIDである, false:ない
      */
@@ -661,6 +684,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * 指定されたフィールド名に@IDが設定され、Long型である。
+     *
      * @param fieldName フィールド名
      * @return true:Long型のIDである, false:ない
      */
@@ -670,6 +694,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * 指定されたフィールド名に@IDが設定され、String型である。
+     *
      * @param fieldName フィールド名
      * @return true:String型のIDである, false:ない
      */
@@ -679,6 +704,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * 指定されたフィールド名がCollectionElementかどうか
+     *
      * @param fieldName フィールド名
      * @return true:CollectionElementである, false:ない
      */
@@ -688,6 +714,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
     /**
      * 指定したフィールドがリレーションかどうか
+     *
      * @param fieldName フィールド名
      * @return true:リレーションである, false:ない
      */
@@ -751,7 +778,7 @@ public abstract class AbstractNodeService<T extends AbstractEntity<ID> & StatusI
 
         String entityName = null;
         if (fieldName != null && fieldName.contains(".")) {
-            entityName = fieldName.substring(0, fieldName.indexOf("."));
+            entityName = fieldName.substring(0, fieldName.indexOf('.'));
         }
 
         if (relationFieldsMap.containsKey(entityName)) {

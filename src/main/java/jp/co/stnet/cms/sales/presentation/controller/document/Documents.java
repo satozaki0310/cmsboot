@@ -1,11 +1,10 @@
 package jp.co.stnet.cms.sales.presentation.controller.document;
 
 import com.github.dozermapper.core.Mapper;
-import jp.co.stnet.cms.base.application.service.authentication.AccountService;
 import jp.co.stnet.cms.base.domain.model.common.Status;
 import jp.co.stnet.cms.common.datatables.OperationsUtil;
-import jp.co.stnet.cms.common.util.StringUtils;
 import jp.co.stnet.cms.sales.domain.model.document.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.terasoluna.gfw.common.codelist.CodeList;
@@ -13,35 +12,28 @@ import org.terasoluna.gfw.common.codelist.CodeList;
 import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static jp.co.stnet.cms.sales.presentation.controller.document.DocumentConstant.BASE_PATH;
+import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
 @Component
 public class Documents {
 
-    @Autowired
-    AccountService accountService;
+    private static final String CSV_DELIMITER = ",";
+    private static final String BRAKE_LINE = "<br>";
 
     @Autowired
     @Named("CL_DOC_STAGE")
-    private CodeList useStageCodeList;
-
-    @Autowired
-    @Named("CL_DOC_TYPE")
-    private CodeList docTypeCodeList;
+    CodeList useStageCodeList;
 
     @Autowired
     @Named("CL_ACCOUNT_FULLNAME")
-    private CodeList accountFullNameCodeList;
+    CodeList accountFullNameCodeList;
 
     @Autowired
-    private Mapper beanMapper;
-
-    private static final String CSV_DELIMITER = ",";
-
-    private static final String BRAKE_LINE = "<br>";
-
+    Mapper beanMapper;
 
     /**
      * DataTables用のリストを取得
@@ -55,7 +47,7 @@ public class Documents {
             DocumentListBean documentListBean = beanMapper.map(document, DocumentListBean.class);
 
             // id
-            documentListBean.setDT_RowId(document.getId().toString());
+            documentListBean.setDT_RowId(Objects.requireNonNull(document.getId()).toString());
 
             // ボタン
             documentListBean.setOperations(getToggleButton(document.getId().toString()));
@@ -99,7 +91,8 @@ public class Documents {
     /**
      * CSVダウンロード用のリストを取得
      *
-     * @return
+     * @param documents 元ネタ
+     * @return ダウンロードするデータのリスト
      */
     public List<DocumentCsvBean> getDocumentCsvDlBean(List<Document> documents) {
         List<DocumentCsvBean> list = new ArrayList<>();
@@ -157,6 +150,69 @@ public class Documents {
         return list;
     }
 
+    /**
+     * ドキュメント検索一覧 - DataTables用のリストを取得
+     *
+     * @return DocumentListBeanのリスト
+     */
+    public List<DocumentListBean> getDocumentListBeansFromDocumentIndex(List<DocumentIndex> documentIndexes) {
+        List<DocumentListBean> list = new ArrayList<>();
+
+        for (DocumentIndex documentIndex : documentIndexes) {
+            DocumentListBean documentListBean = beanMapper.map(documentIndex, DocumentListBean.class);
+
+            // id
+            documentListBean.setDT_RowId(documentIndex.getPk().getId().toString());
+            documentListBean.setId(documentIndex.getPk().getId());
+
+            // ボタン
+            documentListBean.setOperations(getToggleButton(documentIndex.getPk().getId().toString()));
+
+            // タイトル(リンク)
+            documentListBean.setTitle(getTitleLink(documentIndex.getPk().getId(), documentIndex.getTitle()));
+
+            // ステータスラベル
+            documentListBean.setStatusLabel(getStatusLabel(documentIndex.getStatus()));
+
+            // 活用シーン
+            documentListBean.setUseStageLabel(getUseStageLabel(documentIndex.getUseStage(), CSV_DELIMITER));
+
+            // ファイル名
+            if (documentIndex.getFileManaged() != null) {
+                documentListBean.setFilesLabel(getFileDownloadLink(documentIndex));
+            }
+
+            // ファイル名(PDF)
+            if (documentIndex.getPdfManaged() != null) {
+                documentListBean.setPdfFilesLabel(Objects.requireNonNull(documentIndex.getPdfManaged().getOriginalFilename()));
+            }
+
+            // 公開区分のラベル
+            documentListBean.setPublicScopeLabel(getPublicScopeLabel(documentIndex.getPublicScope()));
+
+            // ファイルメモ
+            documentListBean.setFileMemo(documentIndex.getFileMemo());
+
+            // 顧客公開区分のラベル
+            documentListBean.setCustomerPublicLabel(getCustomerPublicLabel(documentIndex.getCustomerPublic()));
+
+            // 最終更新者の氏名
+            documentListBean.setLastModifiedByLabel(getLastModifiedByLabel(documentIndex.getLastModifiedBy()));
+
+            // 不要な情報をクリア
+            documentListBean.setFiles(new ArrayList<>());
+
+            list.add(documentListBean);
+        }
+
+        return list;
+    }
+
+    protected String getFileDownloadLink(DocumentIndex documentIndex) {
+        OperationsUtil op = new OperationsUtil(BASE_PATH);
+        return "<a href=\"" + op.getViewUrl(documentIndex.getPk().getId().toString()) + "/file/files_file/" + documentIndex.getPk().getNo() + "\">" + documentIndex.getFileManaged().getOriginalFilename() + "</a>";
+    }
+
     protected String getTitleLink(Long id, String value) {
         OperationsUtil op = new OperationsUtil(BASE_PATH);
         return "<a href=\"" + op.getViewUrl(id.toString()) + "\">" + value + "</a>";
@@ -171,7 +227,7 @@ public class Documents {
      */
     protected String getPublicScopeLabel(String value) {
         if (value != null && DocPublicScope.getByValue(value) != null) {
-            return DocPublicScope.getByValue(value).getCodeLabel();
+            return Objects.requireNonNull(DocPublicScope.getByValue(value)).getCodeLabel();
         }
         return "";
     }
@@ -186,8 +242,8 @@ public class Documents {
     protected String getMemo(List<File> files, String delimiter) {
         List<String> memo = new ArrayList<>();
         for (File file : files) {
-            if (file.getMemo() != null) {
-                memo.add(file.getMemo());
+            if (file.getFileMemo() != null) {
+                memo.add(escapeHtml4(file.getFileMemo()));
             }
         }
         return String.join(delimiter, memo);
@@ -253,7 +309,7 @@ public class Documents {
      */
     protected String getStatusLabel(String value) {
         if (StringUtils.isNotBlank(value)) {
-            return Status.getByValue(value).getCodeLabel();
+            return Objects.requireNonNull(Status.getByValue(value)).getCodeLabel();
         }
         return null;
     }
@@ -266,7 +322,7 @@ public class Documents {
      */
     protected String getCustomerPublicLabel(String value) {
         if (StringUtils.isNotBlank(value)) {
-            return CustomerPublic.getByValue(value).getCodeLabel();
+            return Objects.requireNonNull(CustomerPublic.getByValue(value)).getCodeLabel();
         }
         return null;
     }
@@ -288,10 +344,12 @@ public class Documents {
      * @return 編集ボタンを表示するHTML
      */
     protected String getToggleButton(String id) {
-        OperationsUtil op = new OperationsUtil(null);
-        StringBuffer link = new StringBuffer();
-        link.append("<a href=\"" + op.getEditUrl(id) + "\" class=\"btn btn-button btn-sm\" style=\"white-space: nowrap\">" + op.getLABEL_EDIT() + "</a>");
-        return link.toString();
+        var op = new OperationsUtil(null);
+        return "<a href=\"" +
+                op.getEditUrl(id) +
+                "\" class=\"btn btn-button btn-sm\" style=\"white-space: nowrap\">" +
+                op.getLABEL_EDIT() +
+                "</a>";
     }
 
 }

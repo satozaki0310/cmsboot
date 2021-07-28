@@ -12,10 +12,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class FileForm implements Serializable {
 
-    // TODO type と fileUuid は両方セットでなければならない入力チェックの追加
-
-    private String type;
-
     private String fileUuid;
 
     private FileManaged fileManaged;
@@ -24,5 +20,5 @@ public class FileForm implements Serializable {
 
     private FileManaged pdfManaged;
 
-    private String memo;
+    private String fileMemo;
 }

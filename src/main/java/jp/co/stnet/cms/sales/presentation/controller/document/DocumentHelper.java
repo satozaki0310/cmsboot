@@ -9,6 +9,7 @@ import jp.co.stnet.cms.sales.domain.model.document.Document;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.validation.groups.Default;
@@ -73,7 +74,6 @@ public class DocumentHelper {
         }
     }
 
-
     /**
      * 画面に応じたボタンの状態を定義
      *
@@ -83,6 +83,8 @@ public class DocumentHelper {
      * @return StateMap
      */
     StateMap getButtonStateMap(@NonNull String operation, Document record, DocumentForm form) {
+
+        LoggedInUser loggedInUser = (LoggedInUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         // 入力チェック
         validate(operation);
@@ -141,20 +143,10 @@ public class DocumentHelper {
 
         // 参照
         else if (Constants.OPERATION.VIEW.equals(operation)) {
-            buttonState.setViewTrue(Constants.BUTTON.GOTOUPDATE);
+            if (authority.hasAuthorityWOException(operation, loggedInUser, record)) {
+                buttonState.setViewTrue(Constants.BUTTON.GOTOUPDATE);
+            }
         }
-
-        return buttonState;
-    }
-
-    StateMap getButtonStateMap(@NonNull String operation, Document record, DocumentForm form, LoggedInUser loggedInUser) {
-        StateMap buttonState = getButtonStateMap(operation, record, form);
-        if (operation.equals(Constants.OPERATION.VIEW)) {
-//            if (!authority.hasAuthorityNotException(operation, loggedInUser, record)) {
-//                buttonState.setViewFalse(Constants.BUTTON.GOTOUPDATE);
-//            }
-        }
-
 
         return buttonState;
     }
@@ -239,6 +231,25 @@ public class DocumentHelper {
     }
 
     /**
+     * ユーザ情報から対応した公開区分を定義する
+     * 99:社員 20:派遣 10:外部委託
+     *
+     * @param loggedInUser ユーザ情報
+     * @return 公開区分
+     */
+    String getPublicScopeNumber(LoggedInUser loggedInUser) {
+        String scope = "";
+        if (loggedInUser.getAuthorities().contains(new SimpleGrantedAuthority("DOC_VIEW_ALL"))) {
+            scope = "99";
+        } else if ((loggedInUser.getAuthorities().contains(new SimpleGrantedAuthority("DOC_VIEW_DISPATCHED_LABOR")))) {
+            scope = "20";
+        } else if ((loggedInUser.getAuthorities().contains(new SimpleGrantedAuthority("DOC_VIEW_OUTSOURCING")))) {
+            scope = "10";
+        }
+        return scope;
+    }
+
+    /**
      * 指定したURLに該当するかチェックする
      * 該当した場合: TRUE
      * 該当しない場合: FALSE
@@ -253,5 +264,17 @@ public class DocumentHelper {
             }
         }
         return false;
+    }
+
+    StateMap getButtonStateMap(@NonNull String operation, Document record, DocumentForm form, LoggedInUser loggedInUser) {
+        StateMap buttonState = getButtonStateMap(operation, record, form);
+        if (operation.equals(Constants.OPERATION.VIEW)) {
+//            if (!authority.hasAuthorityNotException(operation, loggedInUser, record)) {
+//                buttonState.setViewFalse(Constants.BUTTON.GOTOUPDATE);
+//            }
+        }
+
+
+        return buttonState;
     }
 }

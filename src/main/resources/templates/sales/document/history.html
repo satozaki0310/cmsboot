@@ -43,7 +43,6 @@
         <table class="table-sm table-striped nowrap table-bordered table-hover" id="history">
             <thead>
             <tr class="filter">
-                <th class="text-center"></th><!-- リビジョンID -->
                 <th class="text-center"></th><!-- Ver -->
                 <th></th><!-- 変更理由 -->
                 <th class="text-center"></th><!-- 最終更新者 -->
@@ -51,8 +50,7 @@
 
             </tr>
             <tr class="title">
-                <th class="text-center">RID</th>
-                <th class="text-center">ver</th>
+                <th class="text-center">連番</th>
                 <th class="text-center">変更理由</th>
                 <th class="text-center">更新者</th>
                 <th class="text-center">更新日</th>
@@ -103,11 +101,6 @@ var pagechange = false;
           // リビジョンID、Version、変更理由、最終更新者、最終更新日
           'columns': [
             {
-              data: 'ridLabel',
-              className:'text-center',
-              width: '40px',
-            },
-            {
               data: 'version',
               render: $.fn.dataTable.render.text(),
               className : 'text-center',
@@ -133,7 +126,7 @@ var pagechange = false;
 
           // 初期ソート
           'order': [
-            [1, 'desc']
+            [0, 'desc']
           ],
 
           'buttons': ['colvis', 'stateClear'],

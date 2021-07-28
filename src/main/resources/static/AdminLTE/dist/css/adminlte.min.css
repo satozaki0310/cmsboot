@@ -52166,6 +52166,7 @@ a.text-muted:hover {
 .form-control__view {
   box-shadow: unset;
   background-color: unset;
+  color: #212529;
   min-height: calc(1.52475rem + 2px);
   height: -webkit-fit-content;
   height: -moz-fit-content;
@@ -52205,6 +52206,14 @@ fieldset legend {
 .input-group-append .btn-button, .input-group-append .dt-buttons .btn-secondary, .dt-buttons .input-group-append .btn-secondary {
   padding-top: 0;
   padding-bottom: 0;
+}
+
+.note-editor.note-frame.card {
+  margin-bottom: unset;
+}
+
+.is-invalid .note-editor.note-airframe, .is-invalid .note-editor.note-frame {
+  border-color: #dc3545;
 }
 
 /**

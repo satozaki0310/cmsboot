@@ -2,7 +2,6 @@ package jp.co.stnet.cms.base.application.service.accesscounter;
 
 import jp.co.stnet.cms.base.application.repository.accesscounter.AccessCounterRepository;
 import jp.co.stnet.cms.base.application.service.AbstractNodeService;
-import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import jp.co.stnet.cms.base.domain.model.common.AccessCounter;
 import jp.co.stnet.cms.base.domain.model.common.Status;
 import lombok.extern.slf4j.Slf4j;
@@ -22,15 +21,8 @@ public class AccessCounterServiceImpl extends AbstractNodeService<AccessCounter,
     AccessCounterRepository accessCounterRepository;
 
     @Override
-    @Transactional(readOnly = true)
     protected JpaRepository<AccessCounter, Long> getRepository() {
         return accessCounterRepository;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Boolean hasAuthority(String operation, LoggedInUser loggedInUser) {
-        return true;
     }
 
     @Override
@@ -51,4 +43,5 @@ public class AccessCounterServiceImpl extends AbstractNodeService<AccessCounter,
         accessCounterRepository.save(accessCounter);
         return accessCounter.getCount();
     }
+
 }

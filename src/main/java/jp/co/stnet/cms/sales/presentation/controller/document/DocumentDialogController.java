@@ -23,13 +23,13 @@ public class DocumentDialogController {
     VariableService variableService;
 
     /**
-     * Variable?????aTablesOutput(JSON)?????B
+     * Variableの一覧をDataTablesOutput(JSON)で返す。
      */
     @ResponseBody
     @GetMapping("variableDialog/{type}/json")
     public DataTablesOutput<Variable> variableDialogJson(@PathVariable("type") String type, @AuthenticationPrincipal LoggedInUser loggedInUser) {
 
-        // TODO ???`?F?b?N
+        // TODO 権限チェック
 
         DataTablesOutput<Variable> output = new DataTablesOutput<>();
         output.setData(variableService.findAllByType(type));
@@ -41,7 +41,7 @@ public class DocumentDialogController {
     @GetMapping("docCategoryDialog")
     public String docCategoryDialog(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser) {
 
-        // TODO ???`?F?b?N
+        // TODO 権限チェック
 
         return TEMPLATE_DOC_CATEGORY_DIALOG;
     }
@@ -49,7 +49,7 @@ public class DocumentDialogController {
     @GetMapping("docServiceDialog")
     public String docServiceDialog(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser) {
 
-        // TODO ???`?F?b?N
+        // TODO 権限チェック
 
         return TEMPLATE_DOC_SERVICE_DIALOG;
     }

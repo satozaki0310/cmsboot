@@ -36,6 +36,7 @@ public class DocumentForm implements Serializable {
     /**
      * 本文
      */
+    @NotNull
     private String body;
 
     /**
@@ -125,11 +126,13 @@ public class DocumentForm implements Serializable {
     /**
      * サービス-事業領域
      */
+    @NotNull
     private String docService1;
 
     /**
      * サービス-サービス種別
      */
+    @NotNull
     private String docService2;
 
     /**

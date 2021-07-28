@@ -1,6 +1,6 @@
 package jp.co.stnet.cms.base.presentation.controller.admin.account;
 
-import jp.co.stnet.cms.base.application.service.authentication.AccountService;
+import jp.co.stnet.cms.base.application.service.account.AccountService;
 import jp.co.stnet.cms.base.domain.model.authentication.Account;
 import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +19,8 @@ import static jp.co.stnet.cms.base.presentation.controller.admin.account.AdminAc
 @RequestMapping(BASE_PATH)
 public class AdminActiveAccountListController {
 
-    private final String BASE_PATH = "admin/account";
-    private final String JSP_ACTIVE_LIST = BASE_PATH + "/activeList";
+    private static final String BASE_PATH = "admin/account";
+    private static final String JSP_ACTIVE_LIST = BASE_PATH + "/activeList";
 
     @Autowired
     AccountService accountService;
@@ -38,7 +38,7 @@ public class AdminActiveAccountListController {
 
         List<String> ids = new ArrayList<>();
 
-        for (Object principal: principals) {
+        for (Object principal : principals) {
             if (principal instanceof LoggedInUser) {
                 ids.add(((LoggedInUser) principal).getUsername());
             }

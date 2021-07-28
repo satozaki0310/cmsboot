@@ -8,7 +8,8 @@ import org.terasoluna.gfw.common.codepoints.catalog.*;
 
 /**
  * コードポイント集合体・半角英数字記号(JIS第１，２水準、改行は含まない)
- * @See TERASOLUNA開発ガイドの「文字列操作」
+ * <p>
+ * See TERASOLUNA開発ガイドの「文字列操作」
  */
 public class FullHalfJIS2 extends CodePoints {
 

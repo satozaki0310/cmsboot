@@ -5,11 +5,11 @@ import jp.co.stnet.cms.sales.domain.model.document.DocumentAccess;
 public interface DocumentAccessService {
 
     /**
-     * ƒhƒLƒ…ƒƒ“ƒgQÆ‰æ–Ê‚Ö‚ÌƒAƒNƒZƒX‚ğ‹L˜^
+     * ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆå‚ç…§ç”»é¢ã¸ã®ã‚¢ã‚¯ã‚»ã‚¹ã‚’è¨˜éŒ²
      *
-     * @param documentId ƒhƒLƒ…ƒƒ“ƒg‚ÌID
-     * @param username   ƒ†[ƒU–¼
-     * @return •Û‘¶‚µ‚½ƒGƒ“ƒeƒBƒeƒB
+     * @param documentId ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆã®ID
+     * @param username   ãƒ¦ãƒ¼ã‚¶å
+     * @return ä¿å­˜ã—ãŸã‚¨ãƒ³ãƒ†ã‚£ãƒ†ã‚£
      */
     DocumentAccess save(Long documentId, String username);
 

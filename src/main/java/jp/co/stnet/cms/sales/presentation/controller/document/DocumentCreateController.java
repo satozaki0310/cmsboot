@@ -1,7 +1,7 @@
 package jp.co.stnet.cms.sales.presentation.controller.document;
 
 import com.github.dozermapper.core.Mapper;
-import jp.co.stnet.cms.base.application.service.filemanage.FileManagedSharedService;
+import jp.co.stnet.cms.base.application.service.filemanage.FileManagedService;
 import jp.co.stnet.cms.base.application.service.variable.VariableService;
 import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import jp.co.stnet.cms.base.domain.model.common.Status;
@@ -12,6 +12,7 @@ import jp.co.stnet.cms.common.constant.Constants;
 import jp.co.stnet.cms.common.datatables.OperationsUtil;
 import jp.co.stnet.cms.common.message.MessageKeys;
 import jp.co.stnet.cms.sales.application.service.document.DocumentService;
+import jp.co.stnet.cms.sales.domain.model.document.CustomerPublic;
 import jp.co.stnet.cms.sales.domain.model.document.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -50,7 +51,7 @@ public class DocumentCreateController {
     DocumentService documentService;
 
     @Autowired
-    FileManagedSharedService fileManagedSharedService;
+    FileManagedService fileManagedService;
 
     @Autowired
     VariableService variableService;
@@ -63,6 +64,7 @@ public class DocumentCreateController {
         DocumentForm form = new DocumentForm();
         form.getFiles().add(new FileForm());
         form.setSaveRevision(true);
+        form.setCustomerPublic(CustomerPublic.CLOSE.getValue());
         form.setReasonForChange("新規作成");
         return form;
     }
@@ -84,9 +86,11 @@ public class DocumentCreateController {
             beanMapper.map(source, form);
             form.setId(null);
             form.setVersion(null);
+            form.setFiles(new ArrayList<>());
+            form.setTitle(source.getTitle() + " のコピー");
         }
 
-        setFileManaged(form.getFiles(), fileManagedSharedService);
+        setFileManaged(form.getFiles(), fileManagedService);
         addFilesItem(form);
         form.getFiles().add(new FileForm());
 
@@ -136,6 +140,9 @@ public class DocumentCreateController {
         return "redirect:" + op.getEditUrl(document.getId().toString());
     }
 
+    /**
+     * 行追加
+     */
     @PostMapping(value = "create", params = "addlineitem")
     @TransactionTokenCheck
     public String createAddLineItem(DocumentForm form,
@@ -147,35 +154,42 @@ public class DocumentCreateController {
 
         addFilesItem(form);
         return createForm(form, model, loggedInUser, null);
-
     }
 
-
+    /**
+     * 区分２の選択肢取得(区分１に依存するもの）
+     */
     @ResponseBody
     @GetMapping(value = "doc_category2/json", params = "selected_value")
-    public List<SelectItem> docCategory2Json(@RequestParam(value = "selected_value", required = false) String selected_value) {
+    public List<SelectItem> docCategory2Json(@RequestParam(value = "selected_value", required = false) String selectedValue) {
         List<SelectItem> list = new ArrayList<>();
-        for (Variable variable : variableService.findAllByTypeAndValueX(VariableType.DOC_CATEGORY2.name(), 2, selected_value)) {
+        for (Variable variable : variableService.findAllByTypeAndValueX(VariableType.DOC_CATEGORY2.name(), 2, selectedValue)) {
             list.add(new SelectItem(variable.getCode(), variable.getValue1()));
         }
         return list;
     }
 
+    /**
+     * サービス種別の選択肢取得(事業領域に依存するもの)
+     */
     @ResponseBody
     @GetMapping(value = "doc_service2/json", params = "selected_value")
-    public List<SelectItem> docService2Json(@RequestParam(value = "selected_value", required = false) String selected_value) {
+    public List<SelectItem> docService2Json(@RequestParam(value = "selected_value", required = false) String selectedValue) {
         List<SelectItem> list = new ArrayList<>();
-        for (Variable variable : variableService.findAllByTypeAndValueX(VariableType.DOC_SERVICE2.name(), 2, selected_value)) {
+        for (Variable variable : variableService.findAllByTypeAndValueX(VariableType.DOC_SERVICE2.name(), 2, selectedValue)) {
             list.add(new SelectItem(variable.getCode(), variable.getValue1()));
         }
         return list;
     }
 
+    /**
+     * サービスの選択肢取得(サービス種別に依存するもの)
+     */
     @ResponseBody
     @GetMapping(value = "doc_service3/json", params = "selected_value")
-    public List<SelectItem> docService3Json(@RequestParam(value = "selected_value", required = false) String selected_value) {
+    public List<SelectItem> docService3Json(@RequestParam(value = "selected_value", required = false) String selectedValue) {
         List<SelectItem> list = new ArrayList<>();
-        for (Variable variable : variableService.findAllByTypeAndValueX(VariableType.DOC_SERVICE3.name(), 2, selected_value)) {
+        for (Variable variable : variableService.findAllByTypeAndValueX(VariableType.DOC_SERVICE3.name(), 2, selectedValue)) {
             list.add(new SelectItem(variable.getCode(), variable.getValue1()));
         }
         return list;
