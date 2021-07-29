@@ -1,7 +1,6 @@
 package jp.co.stnet.cms.sales.application.service.document;
 
 import jp.co.stnet.cms.base.domain.model.variable.Variable;
-import jp.co.stnet.cms.common.util.StringUtils;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentFullSearchForm;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentIndex;
 import org.apache.lucene.analysis.Analyzer;
@@ -83,35 +82,73 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
         }
 
         List<String> finalTokens = tokens;
-        System.out.println(StringUtils.join(finalTokens, "|"));
         SearchResult<DocumentIndex> result = searchSession.search(DocumentIndex.class)
                 .where(
                         f -> {
-                            if (finalTokens == null) {
+                            BooleanPredicateClausesStep<?> b1 = f.bool();
+                            if (finalTokens == null & form.getPeriod() == null) {
                                 return f.matchAll();
+                            } else if (finalTokens != null) {
+                                for (String s : finalTokens) {
+                                    BooleanPredicateClausesStep<?> b3 = f.bool();
+                                    b3 = b3.should(f.match().field("content")
+                                            .matching(s))
+                                            .should(f.wildcard().field("title")
+                                                    .matching("*" + s + "*"));
+                                    b1.must(b3);
+                                }
+
+                                if (form.getPeriodDate() != null) {
+                                    BooleanPredicateClausesStep<?> b2 = f.bool();
+                                    b2 = b2.must(f.range().field("lastModifiedDate")
+                                            .atLeast(form.getPeriodDate()))
+                                            .must(f.match().field("customerPublic")
+                                                    .matching(form.getPublicScope()));
+                                    b1.must(b2);
+                                }
+                                if (form.getFacetsDoc1() != null) {
+                                    BooleanPredicateClausesStep<?> facets = f.bool();
+                                    for (String s : form.getFacetsDoc1()) {
+                                        facets = facets.should(f.match().field("docCategoryVariable1.value1")
+                                                .matching(s));
+                                    }
+                                    b1.should(facets);
+                                }
+                                if (form.getFacetsDoc2() != null) {
+                                    BooleanPredicateClausesStep<?> facets = f.bool();
+                                    for (String s : form.getFacetsDoc2()) {
+                                        facets = facets.should(f.match().field("docCategoryVariable2.value1")
+                                                .matching(s));
+                                    }
+                                    b1.must(facets);
+                                }
+                            } else {
+                                if (form.getPeriodDate() != null) {
+                                    BooleanPredicateClausesStep<?> b2 = f.bool();
+                                    b2 = b2.must(f.range().field("lastModifiedDate")
+                                            .atLeast(form.getPeriodDate()))
+                                            .must(f.match().field("customerPublic")
+                                                    .matching(form.getPublicScope()));
+                                    b1.must(b2);
+                                }
+                                if (form.getFacetsDoc1() != null) {
+                                    BooleanPredicateClausesStep<?> facets = f.bool();
+                                    for (String s : form.getFacetsDoc1()) {
+                                        facets = facets.should(f.match().field("docCategoryVariable1.value1")
+                                                .matching(s));
+                                    }
+                                    b1.should(facets);
+                                }
+                                if (form.getFacetsDoc2() != null) {
+                                    BooleanPredicateClausesStep<?> facets = f.bool();
+                                    for (String s : form.getFacetsDoc2()) {
+                                        facets = facets.must(f.match().field("docCategoryVariable2.value1")
+                                                .matching(s));
+                                    }
+                                    b1.should(facets);
+                                }
                             }
-                            BooleanPredicateClausesStep<?> b = f.bool();
-                            b = b.should(f.match().field("content")
-                                    .matching(StringUtils.join(finalTokens, " + ")))
-                                    .should(f.match().field("title")
-                                            .matching("(" + StringUtils.join(finalTokens, "|") + ")"))
-                                    .should(f.match().field("docCategoryVariable1.value1")
-                                            .matching(StringUtils.join(finalTokens, "|")))
-                                    .should(f.match().field("docCategoryVariable2.value1")
-                                            .matching(StringUtils.join(finalTokens, "|")))
-                                    .should(f.wildcard().field("docServiceVariable1.value1")
-                                            .matching("*" + StringUtils.join(finalTokens, " | ") + "*"))
-                                    .should(f.wildcard().field("docServiceVariable2.value1")
-                                            .matching("*" + StringUtils.join(finalTokens, " | ") + "*"))
-                                    .should(f.wildcard().field("docServiceVariable3.value1")
-                                            .matching("*" + StringUtils.join(finalTokens, " | ") + "*"));
-                            if (form.getPeriodDate() != null) {
-                                b = b.must(f.range().field("lastModifiedDate")
-                                        .atLeast(form.getPeriodDate()))
-                                        .must(f.match().field("customerPublic")
-                                                .matching(form.getPublicScope()));
-                            }
-                            return b;
+                            return b1;
                         }
                 )
                 .aggregation(countsByDocCategory1, f -> f.terms()

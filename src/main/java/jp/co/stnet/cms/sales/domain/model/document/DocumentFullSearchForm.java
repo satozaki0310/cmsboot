@@ -2,7 +2,6 @@ package jp.co.stnet.cms.sales.domain.model.document;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -21,7 +20,7 @@ public class DocumentFullSearchForm {
     /**
      * 期間指定をLocalDateTimeに変換したもの
      */
-    private LocalDateTime periodDate;
+    private String periodDate;
 
     /**
      * ソート順

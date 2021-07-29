@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static jp.co.stnet.cms.sales.presentation.controller.document.DocumentConstant.BASE_PATH;
@@ -85,20 +86,21 @@ public class DocumentFullSearchController {
     public String searchFacets(Model model, @Validated DocumentFullSearchForm form, BindingResult bindingResult,
                                @PageableDefault(size = 5) Pageable pageable, @AuthenticationPrincipal LoggedInUser loggedInUser) {
 
-        // 全件検索に切り替え
-//        if (form.getQ() == null) {
-//            model.addAttribute(ResultMessages.info().add("e.sl.fw.5001"));
-//            return search(model, loggedInUser);
-//        }
 
         if (form.getPeriod() != null) {
             LocalDateTime now = LocalDateTime.now();
+            LocalDateTime period = null;
             if (form.getPeriod().equals("year")) {
-                form.setPeriodDate(now.minusYears(1));
+                period = now.minusYears(1);
             } else if (form.getPeriod().equals("month")) {
-                form.setPeriodDate(now.minusMonths(1));
+                period = now.minusMonths(1);
             } else if (form.getPeriod().equals("week")) {
-                form.setPeriodDate(now.minusWeeks(1));
+                period = now.minusWeeks(1);
+            } else {
+                period = null;
+            }
+            if (period != null) {
+                form.setPeriodDate(period.format(DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss")));
             } else {
                 form.setPeriodDate(null);
             }
@@ -146,7 +148,9 @@ public class DocumentFullSearchController {
                 variableCategoryBeanList.add(new VariableBean(v1.getCode(), v1.getValue1(), "1", countsByDocCategory1.get(v1.getCode())));
                 for (Variable v2 : variableCategoryList2) {
                     if (Objects.equals(v2.getValue2(), v1.getCode())) {
-                        variableCategoryBeanList.add(new VariableBean(v2.getCode(), v2.getValue1(), "2", countsByDocCategory2.get(v2.getCode())));
+                        if (countsByDocCategory2.get(v2.getCode()) != null) {
+                            variableCategoryBeanList.add(new VariableBean(v2.getCode(), v2.getValue1(), "2", countsByDocCategory2.get(v2.getCode())));
+                        }
                     }
                 }
             }
@@ -196,6 +200,14 @@ public class DocumentFullSearchController {
         return BASE_PATH + "/search";
     }
 
+    /**
+     * @param model
+     * @param form
+     * @param bindingResult
+     * @param pageable
+     * @param loggedInUser
+     * @return
+     */
     @GetMapping(value = "search", params = {"q", "period", "sort"})
     public String searchForm(Model model, @Validated DocumentFullSearchForm form, BindingResult bindingResult,
                              @PageableDefault(size = 5) Pageable pageable, @AuthenticationPrincipal LoggedInUser loggedInUser) {

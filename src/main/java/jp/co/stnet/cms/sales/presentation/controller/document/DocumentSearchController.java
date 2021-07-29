@@ -32,7 +32,7 @@ public class DocumentSearchController {
     Documents documents;
 
     /**
-     * ä¸€è¦§ç”»é¢ã®è¡¨ç¤º
+     * ˆê——‰æ–Ê‚Ì•\¦
      */
     @GetMapping(value = "searchlist")
     public String searchList(Model model, @AuthenticationPrincipal LoggedInUser loggedInUser) {
@@ -41,9 +41,9 @@ public class DocumentSearchController {
     }
 
     /**
-     * DataTablesç”¨ã®JSONã®ä½œæˆ
+     * DataTables—p‚ÌJSON‚Ìì¬
      *
-     * @param input DataTablesã‹ã‚‰è¦æ±‚
+     * @param input DataTables‚©‚ç—v‹
      * @return JSON
      */
     @ResponseBody

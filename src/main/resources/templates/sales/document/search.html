@@ -177,25 +177,28 @@ em {
                             <div class="ml-4">
                                 <h6>区分</h6>
                                 <hr>
-                                <tr th:each="variableList: ${variableCategoryBeanList}">
-                                    <div class="form-check">
-                                        <block th:if="${variableList.level == '1'}">
-                                            <input class="form-check-input" name="facetsDoc1"
-                                                   th:text="${variableList.codeName}"
-                                                   th:value="${variableList.codeName}" type="checkbox">
-                                            <label class="form-check-label badge badge-pill badge-secondary"
-                                                   th:text="${variableList.counts}"></label>
-                                        </block>
-                                        <div class="ml-2">
-                                            <block th:if="${variableList.level == '2'}">
-                                                <input class="form-check-input" name="facetsDoc2"
+                                <block th:if="${form != null}">
+                                    <tr th:each="variableList: ${variableCategoryBeanList}">
+                                        <div class="form-check">
+                                            <block th:if="${variableList.level == '1'}">
+                                                <input class="form-check-input" name="facetsDoc1"
                                                        th:text="${variableList.codeName}"
-                                                       th:value="${variableList.codeName}" type="checkbox">
+                                                       th:value="${variableList.codeName}"
+                                                       type="checkbox">
                                                 <label class="form-check-label badge badge-pill badge-secondary"
                                                        th:text="${variableList.counts}"></label>
                                             </block>
+                                            <div class="ml-2">
+                                                <block th:if="${variableList.level == '2'}">
+                                                    <input class="form-check-input" name="facetsDoc2"
+                                                           th:text="${variableList.codeName}"
+                                                           th:value="${variableList.codeName}" type="checkbox">
+                                                    <label class="form-check-label badge badge-pill badge-secondary"
+                                                           th:text="${variableList.counts}"></label>
+                                                </block>
+                                            </div>
                                         </div>
-                                    </div>
+                                </block>
                                 </tr>
                             </div>
                         </div>
@@ -280,39 +283,7 @@ em {
                             <hr>
                             <br>
                         </tr>
-                        <!--                        <div class="mb-4">-->
-                        <!--                            <h4>-->
-                        <!--                                <a href="1/latest">ピカラ(Pikara)</a><br>-->
-                        <!--                                <a href="1/latest" style="font-size: 12pt;">ノートンセキュリティについて.pptx</a>-->
-
-                        <!--                                <span class="h6">-->
-                        <!--                                        <a href="search">-->
-                        <!--                                            <i class="fas fa-file-download ml-2"></i>-->
-                        <!--                                        </a>-->
-                        <!--                                             <a href="search">-->
-                        <!--                                            <i class="fas fa-file-powerpoint ml-2"></i>-->
-                        <!--                                        </a>-->
-                        <!--                                    </span>-->
-                        <!--                            </h4>-->
-                        <!--                        </div>-->
-
-                        <!--                        <p>本ドキュメントは<font color="red">ピカラ</font>の営業マニュアルとして</p>-->
-
-                        <!--                        &lt;!&ndash;                            <span><b>ファイル内容</b></span>&ndash;&gt;-->
-                        <!--                        <p>「ノートンセキュリティオンライン」について、<font color="red">ピカラ</font>ではPCやセキュリティ対策として</p>-->
-                        <!--                        <h5>-->
-                        <!--                            <p>-->
-                        <!--                                <span class="badge badge-pill badge-secondary">営業マニュアル</span>-->
-                        <!--                                <span class="badge badge-pill badge-secondary">販売マニュアル</span>-->
-                        <!--                                <span class="badge badge-pill badge-secondary">通信</span>-->
-                        <!--                                <span class="badge badge-pill badge-secondary">インターネット(STIA)</span>-->
-                        <!--                            </p>-->
-                        <!--                        </h5>-->
-                        <!--                        <hr>-->
-                        <!--                        <br>-->
                     </block>
-
-
                 </div>
             </div>
         </form>

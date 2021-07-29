@@ -114,10 +114,10 @@ public class DocumentSearchServiceImpl implements DocumentSearchService {
     }
 
     /**
-     * DataTablesのフィールド名とエンティティのフィールド名の変換
+     * DataTables�̃t�B�[���h���ƃG���e�B�e�B�̃t�B�[���h���̕ϊ�
      *
-     * @param fieldName 変換前のフィールド名
-     * @return 変換後のフォールド名
+     * @param fieldName �ϊ��O�̃t�B�[���h��
+     * @return �ϊ���̃t�H�[���h��
      */
     protected String convertColumnName(String fieldName) {
 

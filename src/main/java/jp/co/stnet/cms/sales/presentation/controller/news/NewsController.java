@@ -17,6 +17,7 @@ public class NewsController {
     NewsService newsService;
 
     /**
+     *
      * お知らせから検索されたデータをお知らせ詳細に表示する
      *
      * @param model
