@@ -4,7 +4,6 @@ import com.github.dozermapper.core.Mapper;
 import com.github.dozermapper.core.MappingException;
 import jp.co.stnet.cms.base.domain.model.authentication.LoggedInUser;
 import jp.co.stnet.cms.common.constant.Constants;
-import jp.co.stnet.cms.common.datatables.OperationsUtil;
 import jp.co.stnet.cms.sales.application.service.document.DocumentRevisionService;
 import jp.co.stnet.cms.sales.domain.model.document.Document;
 import jp.co.stnet.cms.sales.domain.model.document.DocumentRevision;
@@ -69,7 +68,7 @@ public class DocumentSpecifiedController {
 
         DocumentRevision documentRevision;
         Document documentRecord = null;
-        OperationsUtil op = new OperationsUtil(BASE_PATH);
+        DocumentOperationUtil op = new DocumentOperationUtil(BASE_PATH);
 
         // 指定した公開区分でドキュメントを検索　閲覧可能なものがない場合null
         if (version.equals("latest")) {

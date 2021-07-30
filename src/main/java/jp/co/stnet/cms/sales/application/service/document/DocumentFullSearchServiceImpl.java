@@ -85,44 +85,77 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
         SearchResult<DocumentIndex> result = searchSession.search(DocumentIndex.class)
                 .where(
                         f -> {
+                            boolean hasSearch = false;
                             BooleanPredicateClausesStep<?> b1 = f.bool();
-                            if (finalTokens == null & form.getPeriod() == null) {
-                                return f.matchAll();
-                            } else if (finalTokens != null) {
+
+                            if (finalTokens != null) {
                                 for (String s : finalTokens) {
-                                    BooleanPredicateClausesStep<?> b3 = f.bool();
-                                    b3 = b3.should(f.match().field("content")
+                                    BooleanPredicateClausesStep<?> facets = f.bool();
+                                    facets = facets.should(f.match().field("content")
                                             .matching(s))
                                             .should(f.wildcard().field("title")
                                                     .matching("*" + s + "*"));
-                                    b1.must(b3);
+                                    b1.must(facets);
                                 }
-
-                                if (form.getPeriodDate() != null) {
-                                    BooleanPredicateClausesStep<?> b2 = f.bool();
-                                    b2 = b2.must(f.range().field("lastModifiedDate")
-                                            .atLeast(form.getPeriodDate()))
-                                            .must(f.match().field("customerPublic")
-                                                    .matching(form.getPublicScope()));
-                                    b1.must(b2);
-                                }
-                                if (form.getFacetsDoc1() != null) {
+                            }
+                            if (form.getFacetsDoc1() != null) {
+                                if (form.getFacetsDoc1().size() != 0) {
                                     BooleanPredicateClausesStep<?> facets = f.bool();
                                     for (String s : form.getFacetsDoc1()) {
                                         facets = facets.should(f.match().field("docCategoryVariable1.value1")
                                                 .matching(s));
                                     }
                                     b1.should(facets);
+                                    hasSearch = true;
+                                } else {
+                                    if (form.getFacetsDoc2() != null) {
+                                        if (form.getFacetsDoc2().size() != 0) {
+                                            BooleanPredicateClausesStep<?> facets = f.bool();
+                                            for (String s : form.getFacetsDoc2()) {
+                                                facets = facets.should(f.match().field("docCategoryVariable2.value1")
+                                                        .matching(s));
+                                            }
+                                            b1.must(facets);
+                                            hasSearch = true;
+                                        }
+                                    }
                                 }
-                                if (form.getFacetsDoc2() != null) {
+                            }
+
+                            if (form.getFacetsService1() != null) {
+                                if (form.getFacetsService1().size() != 0) {
                                     BooleanPredicateClausesStep<?> facets = f.bool();
-                                    for (String s : form.getFacetsDoc2()) {
-                                        facets = facets.should(f.match().field("docCategoryVariable2.value1")
+                                    for (String s : form.getFacetsService1()) {
+                                        facets = facets.should(f.match().field("docServiceVariable1.value1")
                                                 .matching(s));
                                     }
                                     b1.must(facets);
+                                    hasSearch = true;
+                                } else {
+                                    if (form.getFacetsService2() != null) {
+                                        if (form.getFacetsService2().size() != 0) {
+                                            BooleanPredicateClausesStep<?> facets = f.bool();
+                                            for (String s : form.getFacetsService2()) {
+                                                facets = facets.should(f.match().field("docServiceVariable2.value1")
+                                                        .matching(s));
+                                            }
+                                            b1.must(facets);
+                                            hasSearch = true;
+                                        } else {
+                                            if (form.getFacetsService3() != null) {
+                                                if (form.getFacetsService3().size() != 0) {
+                                                    BooleanPredicateClausesStep<?> facets = f.bool();
+                                                    for (String s : form.getFacetsService3()) {
+                                                        facets = facets.should(f.match().field("docServiceVariable3.value1")
+                                                                .matching(s));
+                                                    }
+                                                    b1.must(facets);
+                                                    hasSearch = true;
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
-                            } else {
                                 if (form.getPeriodDate() != null) {
                                     BooleanPredicateClausesStep<?> b2 = f.bool();
                                     b2 = b2.must(f.range().field("lastModifiedDate")
@@ -131,24 +164,12 @@ public class DocumentFullSearchServiceImpl implements DocumentFullSearchService 
                                                     .matching(form.getPublicScope()));
                                     b1.must(b2);
                                 }
-                                if (form.getFacetsDoc1() != null) {
-                                    BooleanPredicateClausesStep<?> facets = f.bool();
-                                    for (String s : form.getFacetsDoc1()) {
-                                        facets = facets.should(f.match().field("docCategoryVariable1.value1")
-                                                .matching(s));
-                                    }
-                                    b1.should(facets);
-                                }
-                                if (form.getFacetsDoc2() != null) {
-                                    BooleanPredicateClausesStep<?> facets = f.bool();
-                                    for (String s : form.getFacetsDoc2()) {
-                                        facets = facets.must(f.match().field("docCategoryVariable2.value1")
-                                                .matching(s));
-                                    }
-                                    b1.should(facets);
-                                }
                             }
-                            return b1;
+                            if (hasSearch == true) {
+                                return b1;
+                            } else {
+                                return f.matchAll();
+                            }
                         }
                 )
                 .aggregation(countsByDocCategory1, f -> f.terms()

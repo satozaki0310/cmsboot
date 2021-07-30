@@ -87,6 +87,7 @@ public class DocumentFullSearchController {
                                @PageableDefault(size = 5) Pageable pageable, @AuthenticationPrincipal LoggedInUser loggedInUser) {
 
 
+
         if (form.getPeriod() != null) {
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime period = null;
@@ -116,9 +117,11 @@ public class DocumentFullSearchController {
         for (DocumentIndex d : result.hits()) {
             DocumentIndexSearchRow i = beanMapper.map(d, DocumentIndexSearchRow.class);
             if (form.getQ() != null) {
-                i.setContentHighlight(documentFullSearchService.highlight(d.getContent(), form.getQ(), "content"));
-                if (i.getContentHighlight().equals("")) {
-                    i.setContentHighlight(null);
+                if (d.getContent() != null) {
+                    i.setContentHighlight(documentFullSearchService.highlight(d.getContent(), form.getQ(), "content"));
+                    if (i.getContentHighlight().equals("")) {
+                        i.setContentHighlight(null);
+                    }
                 }
                 if (d.getBodyPlain() != null) {
                     i.setBodyHighlight(documentFullSearchService.highlight(d.getBodyPlain(), form.getQ(), "bodyPlane"));
@@ -173,10 +176,14 @@ public class DocumentFullSearchController {
                 variableServiceBeanList.add(new VariableBean(v1.getCode(), v1.getValue1(), "1", countsByDocService1.get(v1.getCode())));
                 for (Variable v2 : variableServiceList2) {
                     if (Objects.equals(v2.getValue2(), v1.getCode())) {
-                        variableServiceBeanList.add(new VariableBean(v2.getCode(), v2.getValue1(), "2", countsByDocService2.get(v2.getCode())));
+                        if (countsByDocService2.get(v2.getCode()) != null) {
+                            variableServiceBeanList.add(new VariableBean(v2.getCode(), v2.getValue1(), "2", countsByDocService2.get(v2.getCode())));
+                        }
                         for (Variable v3 : variableServiceList3) {
                             if (Objects.equals(v3.getValue2(), v2.getCode())) {
-                                variableServiceBeanList.add(new VariableBean(v3.getCode(), v3.getValue1(), "3", countsByDocService3.get(v3.getCode())));
+                                if (countsByDocService3.get(v3.getCode()) != null) {
+                                    variableServiceBeanList.add(new VariableBean(v3.getCode(), v3.getValue1(), "3", countsByDocService3.get(v3.getCode())));
+                                }
                             }
                         }
                     }
@@ -188,6 +195,7 @@ public class DocumentFullSearchController {
         Page<DocumentIndexSearchRow> page = new PageImpl<>(hits, pageable, result.total().hitCount());
 
         // Modelに格納
+        model.addAttribute("op", new DocumentOperationUtil(BASE_PATH));
         model.addAttribute("page", page);
         model.addAttribute("form", form);
         model.addAttribute("result", result);

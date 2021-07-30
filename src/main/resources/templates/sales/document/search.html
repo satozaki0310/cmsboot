@@ -179,20 +179,24 @@ em {
                                 <hr>
                                 <block th:if="${form != null}">
                                     <tr th:each="variableList: ${variableCategoryBeanList}">
-                                        <div class="form-check">
+                                        <div class="form-check" th:object="${form}">
                                             <block th:if="${variableList.level == '1'}">
-                                                <input class="form-check-input" name="facetsDoc1"
-                                                       th:text="${variableList.codeName}"
+                                                <!-- th:fieldの値とth:valueの値が一致すればcheckedが付与される-->
+                                                <input class="form-check-input"
+                                                       th:field="*{facetsDoc1}"
                                                        th:value="${variableList.codeName}"
+                                                       th:text="${variableList.codeName}"
                                                        type="checkbox">
                                                 <label class="form-check-label badge badge-pill badge-secondary"
                                                        th:text="${variableList.counts}"></label>
                                             </block>
                                             <div class="ml-2">
                                                 <block th:if="${variableList.level == '2'}">
-                                                    <input class="form-check-input" name="facetsDoc2"
+                                                    <input class="form-check-input"
+                                                           th:field="*{facetsDoc2}"
                                                            th:text="${variableList.codeName}"
-                                                           th:value="${variableList.codeName}" type="checkbox">
+                                                           th:value="${variableList.codeName}"
+                                                           type="checkbox">
                                                     <label class="form-check-label badge badge-pill badge-secondary"
                                                            th:text="${variableList.counts}"></label>
                                                 </block>
@@ -209,9 +213,10 @@ em {
                                 <h6>サービス</h6>
                                 <hr>
                                 <tr th:each="variableList: ${variableServiceBeanList}">
-                                    <div class="form-check">
+                                    <div class="form-check" th:object="${form}">
                                         <block th:if="${variableList.level == '1'}">
-                                            <input class="form-check-input" name="facetsService1"
+                                            <input class="form-check-input"
+                                                   th:field="*{facetsService1}"
                                                    th:text="${variableList.codeName}"
                                                    th:value="${variableList.codeName}" type="checkbox">
                                             <label class="form-check-label badge badge-pill badge-secondary"
@@ -219,7 +224,8 @@ em {
                                         </block>
                                         <div class="ml-2">
                                             <block th:if="${variableList.level == '2'}">
-                                                <input class="form-check-input" name="facetsService2"
+                                                <input class="form-check-input"
+                                                       th:field="*{facetsService2}"
                                                        th:text="${variableList.codeName}"
                                                        th:value="${variableList.codeName}" type="checkbox">
                                                 <label class="form-check-label badge badge-pill badge-secondary"
@@ -228,7 +234,8 @@ em {
                                         </div>
                                         <div class="ml-3">
                                             <block th:if="${variableList.level == '3'}">
-                                                <input class="form-check-input" name="facetsService3"
+                                                <input class="form-check-input"
+                                                       th:field="*{facetsService3}"
                                                        th:text="${variableList.codeName}"
                                                        th:value="${variableList.codeName}" type="checkbox">
                                                 <label class="form-check-label badge badge-pill badge-secondary"
@@ -248,6 +255,13 @@ em {
                                 <div class="mb-4">
                                     <h4>
                                         <a th:href="${item.pk.id + '/latest'}" th:text="${item.title}"></a>
+                                        <block th:if="${item.fileManaged}">
+                                            <a class="link-attached"
+                                               target="_blank"
+                                               th:href="|${op.getDownloadFileUrl(item.pk.id, status.index, 'files_file', 'latest')}|">
+                                                [[${item.fileManaged.originalFilename}]]</a>
+                                        </block>
+
                                         <!--                            <span class="h6"><a-->
                                         <!--                                    href="${pageContext.request.contextPath}/person/${item.attachedFile01Uuid}/download"><i-->
                                         <!--                                    class="fas fa-file-download ml-2"></i></a></span>-->
@@ -261,9 +275,6 @@ em {
                                 <block th:if="${item.contentHighlight != null}">
                                     <p class="" th:utext="${item.contentHighlight}"></p>
                                 </block>
-                                <!--                                <block th:if="${item.contentHighlight == null}">-->
-                                <!--                                    <p class="" th:utext="${item.content}"></p>-->
-                                <!--                                </block>-->
                                 <p class="" th:utext="${item.bodyHighlight}"></p>
                                 <h5>
                                     <p>

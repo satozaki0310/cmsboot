@@ -58,4 +58,14 @@ public interface DocumentRevisionRepository extends NodeRevRepository<DocumentRe
      */
     DocumentRevision findByIdAndVersionAndPublicScopeIn(Long id, Long version, Set<String> publicScope);
 
+    /**
+     * 指定したidとVerのファイルを取得する
+     * 公開範囲指定なし
+     *
+     * @param id      ドキュメントID
+     * @param version ドキュメントVer
+     * @return DocumentRevision型の検索結果
+     */
+    DocumentRevision findByIdAndVersion(Long id, Long version);
+
 }

@@ -98,11 +98,10 @@ var pagechange = false;
           // scrollX: true,
 
           // 一覧に表示する項目とJSONの項目にマッピング
-          // リビジョンID、Version、変更理由、最終更新者、最終更新日
+          // Version、変更理由、最終更新者、最終更新日
           'columns': [
             {
-              data: 'version',
-              render: $.fn.dataTable.render.text(),
+              data: 'verLabel',
               className : 'text-center',
               width: '40px',
             },

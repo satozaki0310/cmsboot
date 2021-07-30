@@ -26,6 +26,11 @@ public class DocumentRevisionServiceImpl implements DocumentRevisionService {
         return documentRevisionRepository.findTopByIdAndPublicScopeInOrderByVersionDesc(id, publicScope);
     }
 
+    @Override
+    public DocumentRevision findById(Long id) {
+        return documentRevisionRepository.findByIdLatestRev(id);
+    }
+
     /**
      * @param id          ドキュメントID
      * @param version     ドキュメントVer
@@ -35,6 +40,11 @@ public class DocumentRevisionServiceImpl implements DocumentRevisionService {
     @Override
     public DocumentRevision versionSpecification(Long id, Long version, Set<String> publicScope) {
         return documentRevisionRepository.findByIdAndVersionAndPublicScopeIn(id, version, publicScope);
+    }
+
+    @Override
+    public DocumentRevision findByIdAndVersion(Long id, Long version) {
+        return documentRevisionRepository.findByIdAndVersion(id, version);
     }
 
 }
